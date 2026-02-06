@@ -1,0 +1,401 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// ENUM
+//
+enum Peran {
+  ADMIN
+  USER
+}
+
+enum JenisKelamin {
+  LAKI_LAKI
+  PEREMPUAN
+}
+
+enum StatusPesanan {
+  MENUNGGU_PEMBAYARAN
+  DIPROSES
+  DIKIRIM
+  SELESAI
+  DIBATALKAN
+}
+
+enum StatusPembayaran {
+  MENUNGGU
+  BERHASIL
+  GAGAL
+  KADALUARSA
+  DIBATALKAN
+}
+
+enum MetodePembayaran {
+  VA
+  EWALLET
+  COD
+}
+
+//
+// PENGGUNA
+//
+model Pengguna {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  peran    Peran  @default(USER)
+
+  profil    ProfilPengguna?
+  keranjang Keranjang[]
+  pesanan   Pesanan[]
+  alamat    AlamatPengguna[]
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+}
+
+model ProfilPengguna {
+  id         Int @id @default(autoincrement())
+  penggunaId Int @unique
+
+  namaDepan    String
+  namaBelakang String
+  nomorTelepon String
+  jenisKelamin JenisKelamin
+  newsletter   Boolean      @default(false)
+
+  pengguna Pengguna @relation(fields: [penggunaId], references: [id])
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+}
+
+model AlamatPengguna {
+  id         Int @id @default(autoincrement())
+  penggunaId Int
+
+  label        String // Rumah, Kantor
+  namaPenerima String
+  noTelp       String
+
+  provinsi  String
+  kota      String
+  kecamatan String
+  kelurahan String
+  kodePos   String
+  alamat    String
+
+  latitude  Float? // lokasi
+  longitude Float?
+  mapsUrl   String? // link Google Maps
+
+  isUtama Boolean @default(false)
+
+  // ✅ WAJIB: relation balik ke Pengguna
+  pengguna Pengguna @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([penggunaId])
+}
+
+//
+// KATEGORI & PRODUK
+//
+model Kategori {
+  id     Int     @id @default(autoincrement())
+  nama   String  @unique
+  logo   String?
+  header Boolean @default(false)
+  body   Boolean @default(true)
+
+  produk Produk[]
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+}
+
+model Produk {
+  id        Int     @id @default(autoincrement())
+  nama      String
+  deskripsi String?
+  urlproduk String?
+
+  merek        String?
+  harga        Int
+  hargaAsli    Int?
+  diskonPersen Int?
+  gratisOngkir Boolean @default(false)
+
+  aktif     Boolean @default(true)
+  flashsale Boolean @default(false)
+  terlaris  Boolean @default(false)
+  untukmu   Boolean @default(false)
+
+  ratingRata   Float?
+  jumlahRating Int    @default(0)
+  terjual      Int    @default(0)
+
+  stokProduk  Int     @default(0)
+  gambarUtama String?
+
+  kategoriId Int
+  kategori   Kategori @relation(fields: [kategoriId], references: [id])
+
+  itemKeranjang ItemKeranjang[]
+  itemPesanan   ItemPesanan[]
+
+  galeri        ProdukGambar[]
+  atributProduk AtributProduk[]
+  varianProduk  VarianProduk[]
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([kategoriId])
+}
+
+model ProdukGambar {
+  id       Int     @id @default(autoincrement())
+  produkId Int
+  url      String
+  urutan   Int     @default(0)
+  alt      String?
+
+  produk Produk @relation(fields: [produkId], references: [id])
+
+  @@index([produkId])
+}
+
+//
+// ATRIBUT & VARIAN PRODUK
+//
+model AtributProduk {
+  id       Int    @id @default(autoincrement())
+  produkId Int
+  nama     String
+  urutan   Int    @default(0)
+
+  produk Produk               @relation(fields: [produkId], references: [id])
+  nilai  NilaiAtributProduk[]
+
+  @@unique([produkId, nama])
+  @@index([produkId])
+}
+
+model NilaiAtributProduk {
+  id        Int    @id @default(autoincrement())
+  atributId Int
+  nilai     String
+  urutan    Int    @default(0)
+
+  atribut   AtributProduk         @relation(fields: [atributId], references: [id])
+  mapVarian VarianProdukAtribut[]
+
+  @@unique([atributId, nilai])
+  @@index([atributId])
+}
+
+model VarianProduk {
+  id       Int @id @default(autoincrement())
+  produkId Int
+
+  sku   String? @unique
+  stok  Int     @default(0)
+  harga Int?
+
+  produk  Produk                @relation(fields: [produkId], references: [id])
+  atribut VarianProdukAtribut[]
+
+  itemKeranjang ItemKeranjang[]
+  itemPesanan   ItemPesanan[]
+
+  @@index([produkId])
+}
+
+model VarianProdukAtribut {
+  id       Int @id @default(autoincrement())
+  varianId Int
+  nilaiId  Int
+
+  varian VarianProduk       @relation(fields: [varianId], references: [id])
+  nilai  NilaiAtributProduk @relation(fields: [nilaiId], references: [id])
+
+  @@unique([varianId, nilaiId])
+  @@index([varianId])
+  @@index([nilaiId])
+}
+
+//
+// KERANJANG
+//
+model Keranjang {
+  id         Int @id @default(autoincrement())
+  penggunaId Int
+
+  pengguna Pengguna        @relation(fields: [penggunaId], references: [id])
+  aktif    Boolean         @default(true)
+  item     ItemKeranjang[]
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([penggunaId])
+}
+
+model ItemKeranjang {
+  id          Int  @id @default(autoincrement())
+  keranjangId Int
+  produkId    Int
+  varianId    Int?
+  jumlah      Int  @default(1)
+
+  keranjang Keranjang     @relation(fields: [keranjangId], references: [id])
+  produk    Produk        @relation(fields: [produkId], references: [id])
+  varian    VarianProduk? @relation(fields: [varianId], references: [id])
+
+  @@unique([keranjangId, produkId, varianId])
+  @@index([keranjangId])
+  @@index([produkId])
+  @@index([varianId])
+}
+
+//
+// MASTER KURIR & LAYANAN (dipakai checkout)
+//
+model Kurir {
+  id    Int     @id @default(autoincrement())
+  kode  String  @unique // contoh: "JNE", "SICEPAT"
+  nama  String // contoh: "JNE", "SiCepat"
+  logo  String?
+  aktif Boolean @default(true)
+
+  layanan LayananPengiriman[]
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+}
+
+model LayananPengiriman {
+  id      Int   @id @default(autoincrement())
+  kurirId Int
+  kurir   Kurir @relation(fields: [kurirId], references: [id])
+
+  kode         String // contoh: "REG", "EXPRESS", "YES"
+  nama         String // contoh: "JNE Regular"
+  estimasiHari String // contoh: "1-2", "3-5"
+  harga        Int
+  gratis       Boolean @default(false)
+  aktif        Boolean @default(true)
+
+  pengiriman Pengiriman[]
+
+  @@unique([kurirId, kode])
+  @@index([kurirId])
+}
+
+//
+// PESANAN (Checkout-ready)
+//
+model Pesanan {
+  id         Int      @id @default(autoincrement())
+  penggunaId Int
+  pengguna   Pengguna @relation(fields: [penggunaId], references: [id])
+
+  // ringkasan harga
+  subtotal   Int
+  ongkir     Int @default(0)
+  diskon     Int @default(0)
+  totalAkhir Int
+
+  status StatusPesanan @default(MENUNGGU_PEMBAYARAN)
+
+  // snapshot alamat pengiriman (biar histori aman walau alamat user diubah)
+  namaPenerima String
+  noTelp       String
+  alamat       String
+  kelurahan    String
+  kecamatan    String
+  kota         String
+  provinsi     String
+  kodePos      String
+
+  // relasi
+  item       ItemPesanan[]
+  pengiriman Pengiriman?
+  pembayaran Pembayaran?
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([penggunaId])
+  @@index([status])
+}
+
+model ItemPesanan {
+  id        Int  @id @default(autoincrement())
+  pesananId Int
+  produkId  Int
+  varianId  Int?
+  jumlah    Int
+  harga     Int
+
+  pesanan Pesanan       @relation(fields: [pesananId], references: [id])
+  produk  Produk        @relation(fields: [produkId], references: [id])
+  varian  VarianProduk? @relation(fields: [varianId], references: [id])
+
+  @@index([pesananId])
+  @@index([produkId])
+  @@index([varianId])
+}
+
+model Pengiriman {
+  id        Int @id @default(autoincrement())
+  pesananId Int @unique
+  layananId Int
+
+  pesanan Pesanan           @relation(fields: [pesananId], references: [id])
+  layanan LayananPengiriman @relation(fields: [layananId], references: [id])
+
+  biaya Int
+  resi  String?
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([layananId])
+}
+
+model Pembayaran {
+  id        Int     @id @default(autoincrement())
+  pesananId Int     @unique
+  pesanan   Pesanan @relation(fields: [pesananId], references: [id])
+
+  metode   MetodePembayaran
+  provider String? // contoh: "BNI_VA", "BCA_VA", "OVO", "DANA", dll
+  status   StatusPembayaran @default(MENUNGGU)
+
+  amount    Int
+  fee       Int       @default(0)
+  vaNumber  String?
+  refId     String?   @unique
+  expiredAt DateTime?
+  paidAt    DateTime?
+
+  rawResponse Json?
+
+  dibuatPada DateTime @default(now())
+
+  @@index([status])
+  @@index([metode])
+  @@index([provider])
+}

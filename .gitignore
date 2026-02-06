@@ -1,0 +1,14 @@
+# File arsip besar
+*.rar
+*.zip
+*.7z
+
+# Node modules / dependency folder
+node_modules/
+
+# Cache / temporary files
+*.log
+.DS_Store
+
+# Build / dist folder
+/dist/

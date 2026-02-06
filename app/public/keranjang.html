@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang Belanja - Ashanum</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background: #f5f5f5;
+        }
+        /* Cart Container */
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .cart-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+        }
+
+        /* Cart Items */
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .select-all {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .select-all input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .select-all label {
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .cart-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: auto 120px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .cart-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .cart-item.selected {
+            border: 2px solid #667eea;
+            background: #f8f9ff;
+        }
+
+        .item-checkbox {
+            display: flex;
+            align-items: center;
+        }
+
+        .item-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .item-image {
+            width: 120px;
+            height: 120px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            border: 1px solid #eee;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-variants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .item-variant {
+            font-size: 13px;
+            color: #666;
+            background: #f9f9f9;
+            padding: 4px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .item-variant-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .item-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff4081;
+            margin-top: 5px;
+        }
+
+        .item-original-price {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e5e5e5;
+            border-radius: 6px;
+            overflow: hidden;
+            width: 100px;
+        }
+
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .quantity-input {
+            width: 50px;
+            height: 35px;
+            border: none;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            color: #ff4081;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100px;
+        }
+
+        .remove-btn:hover {
+            background: #fff5f8;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .summary-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f5f5f5;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .discount-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .discount-badge i {
+            font-size: 18px;
+        }
+
+        .summary-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4081;
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-checkout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-checkout:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-continue {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-continue:hover {
+            background: #f8f9ff;
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .empty-cart i {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .empty-cart h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .empty-cart p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .cart-content {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .breadcrumb {
+                font-size: 12px;
+                padding: 0 15px;
+                margin: 15px auto;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .back-button {
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+
+            .back-button i {
+                font-size: 12px;
+            }
+
+            .breadcrumb-links {
+                font-size: 12px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .cart-item {
+                grid-template-columns: auto 70px 1fr;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .item-checkbox {
+                grid-row: 1;
+            }
+
+            .item-image {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+
+            .item-details {
+                min-width: 0; /* Memungkinkan flex child untuk shrink */
+            }
+
+            .item-name {
+                font-size: 14px;
+                word-wrap: break-word;
+            }
+
+            .item-variant {
+                font-size: 12px;
+                padding: 3px 8px;
+            }
+
+            .item-price {
+                font-size: 15px;
+            }
+
+            .item-original-price {
+                font-size: 12px;
+            }
+
+            .item-actions {
+                grid-column: 1 / -1;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 5px;
+                width: 100%;
+            }
+
+            .quantity-control {
+                flex-shrink: 0;
+                width: 100px;
+            }
+
+            .quantity-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            .quantity-input {
+                width: 45px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            .remove-btn {
+                font-size: 13px;
+                padding: 6px 10px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                width: 100px;
+            }
+
+            .summary-card {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cart-container {
+                padding: 0 15px;
+            }
+
+            .cart-item {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .item-checkbox input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+            }
+
+            .item-image {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+
+            .item-name {
+                font-size: 13px;
+            }
+
+            .item-variant {
+                font-size: 11px;
+                padding: 2px 6px;
+            }
+
+            .item-price {
+                font-size: 14px;
+            }
+
+            .item-original-price {
+                font-size: 11px;
+            }
+
+            .quantity-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .quantity-input {
+                width: 40px;
+                height: 28px;
+                font-size: 13px;
+            }
+
+            .remove-btn {
+                font-size: 12px;
+                padding: 5px 8px;
+            }
+
+            .remove-btn i {
+                font-size: 11px;
+            }
+
+            .summary-title {
+                font-size: 18px;
+            }
+
+            .total-amount {
+                font-size: 20px;
+            }
+
+            .btn-checkout {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .btn-continue {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->    
+    <div id="header-container"></div>
+
+    <!-- Cart Container -->
+    <div class="cart-container">
+        <h1 class="page-title">&nbsp;</h1>
+        <h1 class="page-title">Keranjang Belanja (<span id="totalItemsCount">0</span> Item)</h1>
+
+        <div class="cart-content">
+            <!-- Cart Items -->
+            <div class="cart-items">
+                <div class="select-all">
+                    <input type="checkbox" id="selectAll">
+                    <label for="selectAll">Pilih Semua</label>
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="summary-card">
+                <h2 class="summary-title">Ringkasan Belanja</h2>
+                
+                <div class="summary-row">
+                    <span class="summary-label">Total Harga (<span id="selectedCount">0</span> Barang)</span>
+                    <span class="summary-value" id="subtotal">Rp 0</span>
+                </div>
+
+                <div class="summary-row">
+                    <span class="summary-label">Diskon Produk</span>
+                    <span class="summary-value" style="color: #ff4081;" id="discount">-Rp 0</span>
+                </div>
+
+                <div class="discount-badge">
+                    <i class="fas fa-shipping-fast"></i>
+                    <span>Gratis Ongkir untuk pesanan ini!</span>
+                </div>
+
+                <div class="summary-total">
+                    <span class="total-label">Total Bayar</span>
+                    <span class="total-amount" id="total">Rp 0</span>
+                </div>
+
+                <button class="btn-checkout" onclick="goToCheckout()" id="checkoutBtn" disabled>
+                    <i class="fas fa-lock"></i>
+                    Lanjutkan ke Pembayaran (<span id="checkoutCount">0</span>)
+                </button>
+
+                <button class="btn-continue" onclick="continueShopping()">
+                    <i class="fas fa-arrow-left"></i>
+                    Lanjutkan Belanja
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Scripts -->
+    <script src="assets/js/alert.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/helpers.js"></script>
+    
+    <script>
+    // Wait for header to load before initializing
+    window.addEventListener('headerLoaded', function() {
+        console.log('Header loaded, initializing cart page...');
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // ===== DOM TARGETS =====
+        const cartItemsEl = document.querySelector(".cart-items");
+        const subtotalEl = document.getElementById("subtotal");
+        const discountEl = document.getElementById("discount");
+        const totalEl = document.getElementById("total");
+        const selectedCountEl = document.getElementById("selectedCount");
+        const checkoutCountEl = document.getElementById("checkoutCount");
+        const checkoutBtn = document.getElementById("checkoutBtn");
+        const pageTitle = document.querySelector(".page-title");
+        const totalItemsCountEl = document.getElementById("totalItemsCount");
+
+        // ===== STATE =====
+        let keranjangData = null;
+        const selectedMap = new Map(); // itemId -> boolean
+
+        // ===== RENDER =====
+        function renderKeranjang(keranjang) {
+            keranjangData = keranjang;
+            const items = keranjang?.item || [];
+
+            if (totalItemsCountEl) totalItemsCountEl.textContent = items.length;
+
+            // Reset cart items keeping select all
+            const selectAllHTML = `
+                <div class="select-all">
+                    <input type="checkbox" id="selectAll">
+                    <label for="selectAll">Pilih Semua</label>
+                </div>
+            `;
+            cartItemsEl.innerHTML = selectAllHTML;
+
+            const selectAllEl = cartItemsEl.querySelector("#selectAll");
+            selectAllEl.addEventListener("change", () => toggleSelectAll(selectAllEl.checked));
+
+            if (!items.length) {
+                cartItemsEl.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="empty-cart">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h3>Keranjang Belanja Kosong</h3>
+                        <p>Yuk, mulai belanja sekarang!</p>
+                        <button class="btn-checkout" onclick="window.location.href='/'">
+                            <i class="fas fa-shopping-cart"></i>
+                            Mulai Belanja
+                        </button>
+                    </div>`
+                );
+                selectedMap.clear();
+                updateSummary();
+                return;
+            }
+
+            // default: item baru otomatis selected = true
+            items.forEach((it) => {
+                if (!selectedMap.has(it.id)) selectedMap.set(it.id, true);
+            });
+
+            // hapus selection untuk item yang sudah hilang
+            for (const id of Array.from(selectedMap.keys())) {
+                if (!items.some((x) => x.id === id)) selectedMap.delete(id);
+            }
+
+            items.forEach((it) => {
+                const nama = escapeHtml(it.produk?.nama || "Produk");
+                const qty = Number(it.jumlah || 1);
+                const hargaFinal = calcHargaFinal(it);
+                const hargaAsli = calcHargaAsli(it);
+                const diskon = calcDiscountPerItem(it);
+
+                const gambar = it.produk?.gambarUtama ? toAbsoluteUrl(it.produk.gambarUtama) : "";
+                const variantAttrs = getVariantAttributesFromDb(it.varian);
+
+                let variantHtml = "";
+                if (variantAttrs.length) {
+                    variantHtml = `<div class="item-variants">` + variantAttrs.map(attr => `
+                        <div class="item-variant">
+                            <span class="item-variant-label">${escapeHtml(attr.label)}:</span> ${escapeHtml(attr.value)}
+                        </div>
+                    `).join("") + `</div>`;
+                }
+
+                const checked = selectedMap.get(it.id) ? "checked" : "";
+
+                cartItemsEl.insertAdjacentHTML("beforeend", `
+                    <div class="cart-item" data-item-id="${it.id}">
+                        <div class="item-checkbox">
+                            <input type="checkbox" class="item-check" ${checked} data-item-id="${it.id}">
+                        </div>
+
+                        <div class="item-image" style="overflow:hidden;">
+                            ${gambar ? `<img src="${gambar}" alt="${nama}" style="width:100%;height:100%;object-fit:cover;">` : `📦`}
+                        </div>
+
+                        <div class="item-details">
+                            <div class="item-name">${nama}</div>
+                            ${variantHtml}
+                            <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;">
+                                <span class="item-price">${rupiah(hargaFinal)}</span>
+                                ${hargaAsli && hargaAsli > hargaFinal ? `<span class="item-original-price">${rupiah(hargaAsli)}</span>` : ""}
+                                ${diskon > 0 ? `<span style="color:#ff4081;font-size:13px;">Hemat ${rupiah(diskon)}</span>` : ""}
+                            </div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn" data-action="minus" data-item-id="${it.id}">-</button>
+                                <input type="number" class="quantity-input" value="${qty}" min="1" max="99" readonly>
+                                <button class="quantity-btn" data-action="plus" data-item-id="${it.id}">+</button>
+                            </div>
+                            <button class="remove-btn" data-action="remove" data-item-id="${it.id}">
+                                <i class="far fa-trash-alt"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                `);
+            });
+
+            // bind checkbox item
+            cartItemsEl.querySelectorAll(".item-check").forEach((cb) => {
+                cb.addEventListener("change", () => {
+                    const itemId = Number(cb.getAttribute("data-item-id"));
+                    selectedMap.set(itemId, cb.checked);
+                    syncSelectAllCheckbox();
+                    updateSummary();
+                });
+            });
+
+            // bind actions qty + remove
+            cartItemsEl.querySelectorAll("button[data-action]").forEach((btn) => {
+                btn.addEventListener("click", async () => {
+                    const action = btn.getAttribute("data-action");
+                    const itemId = Number(btn.getAttribute("data-item-id"));
+                    if (!itemId) return;
+
+                    if (action === "remove") {
+                        if (!confirm("Hapus item ini dari keranjang?")) return;
+                        
+                        try {
+                            await apiAuth(`/api/keranjang/item/${itemId}`, { method: "DELETE" });
+                            showAlert("Item berhasil dihapus dari keranjang", "success");
+                            await loadKeranjang();
+                            
+                            // Refresh header badge
+                            if (window.refreshHeader) {
+                                window.refreshHeader();
+                            }
+                        } catch (err) {
+                            showAlert(err.message || "Gagal menghapus item", "error");
+                        }
+                        return;
+                    }
+
+                    const item = (keranjangData?.item || []).find((x) => x.id === itemId);
+                    if (!item) return;
+
+                    let newQty = Number(item.jumlah || 1);
+                    if (action === "minus") newQty = Math.max(1, newQty - 1);
+                    if (action === "plus") newQty = Math.min(99, newQty + 1);
+
+                    try {
+                        await apiAuth(`/api/keranjang/item/${itemId}`, {
+                            method: "PATCH",
+                            body: JSON.stringify({ jumlah: newQty }),
+                        });
+                        await loadKeranjang();
+                    } catch (err) {
+                        showAlert(err.message || "Gagal mengubah jumlah", "error");
+                    }
+                });
+            });
+
+            syncSelectAllCheckbox();
+            updateSummary();
+        }
+
+        function syncSelectAllCheckbox() {
+            const items = keranjangData?.item || [];
+            const selectAllEl = cartItemsEl.querySelector("#selectAll");
+            if (!selectAllEl) return;
+
+            if (!items.length) {
+                selectAllEl.checked = false;
+                selectAllEl.indeterminate = false;
+                return;
+            }
+
+            const total = items.length;
+            const checkedCount = items.filter((it) => selectedMap.get(it.id)).length;
+
+            selectAllEl.checked = checkedCount === total;
+            selectAllEl.indeterminate = checkedCount > 0 && checkedCount < total;
+        }
+
+        function toggleSelectAll(checked) {
+            const items = keranjangData?.item || [];
+            items.forEach((it) => selectedMap.set(it.id, checked));
+            renderKeranjang(keranjangData);
+        }
+
+        function updateSummary() {
+            const items = keranjangData?.item || [];
+
+            let selectedCount = 0;
+            let subtotalFinal = 0;
+            let discountInfo = 0;
+
+            items.forEach((it) => {
+                if (!selectedMap.get(it.id)) return;
+                selectedCount += 1;
+
+                const qty = Number(it.jumlah || 1);
+                const hargaFinal = calcHargaFinal(it);
+                const disc = calcDiscountPerItem(it);
+
+                subtotalFinal += hargaFinal * qty;
+                discountInfo += disc * qty;
+            });
+
+            const total = subtotalFinal;
+
+            selectedCountEl.textContent = String(selectedCount);
+            checkoutCountEl.textContent = String(selectedCount);
+
+            subtotalEl.textContent = rupiah(subtotalFinal);
+            discountEl.textContent = discountInfo > 0 ? `-${rupiah(discountInfo)}` : `-Rp 0`;
+            totalEl.textContent = rupiah(total);
+
+            checkoutBtn.disabled = selectedCount === 0;
+        }
+
+        // ===== GO TO CHECKOUT =====
+        window.goToCheckout = function() {
+            const items = keranjangData?.item || [];
+            const selectedIds = items
+                .filter((it) => selectedMap.get(it.id))
+                .map((it) => it.id);
+
+            if (!selectedIds.length) {
+                showAlert("Pilih minimal 1 item untuk checkout", "warning");
+                return;
+            }
+
+            sessionStorage.setItem("checkout_selected_item_ids", JSON.stringify(selectedIds));
+            window.location.href = "/checkout.html";
+        };
+
+        window.continueShopping = function() {
+            window.location.href = "/";
+        };
+
+        // ===== HELPER FUNCTIONS =====
+        function calcHargaFinal(it) {
+            return Number(it.varian?.harga ?? it.produk?.harga ?? 0);
+        }
+
+        function calcHargaAsli(it) {
+            return Number(it.varian?.hargaAsli ?? it.produk?.hargaAsli ?? 0);
+        }
+
+        function calcDiscountPerItem(it) {
+            const final = calcHargaFinal(it);
+            const asli = calcHargaAsli(it);
+            if (!asli || asli <= final) return 0;
+            return asli - final;
+        }
+
+        function getVariantAttributesFromDb(varian) {
+            const out = [];
+            const maps = varian?.atribut || [];
+            for (const m of maps) {
+                const label = m?.nilai?.atribut?.nama;
+                const value = m?.nilai?.nilai;
+                if (label && value) out.push({ label, value });
+            }
+            return out;
+        }
+
+        // ===== LOAD =====
+        async function loadKeranjang() {
+            try {
+                const data = await apiAuth("/api/keranjang", { method: "GET" });
+                renderKeranjang(data);
+            } catch (err) {
+                if (String(err.message) === "NO_LOGIN") return;
+                console.error(err);
+                showAlert(err.message || "Gagal memuat keranjang", "error");
+            }
+        }
+
+        loadKeranjang();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Produk - Ashanum Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .image-upload-preview {
+            width: 100%;
+            max-width: 200px;
+            height: 200px;
+            border: 2px dashed var(--gray-300);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .image-upload-preview:hover {
+            border-color: var(--primary);
+        }
+        
+        .image-upload-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-upload-preview .placeholder {
+            text-align: center;
+            color: var(--gray-400);
+        }
+        
+        .image-upload-preview .placeholder i {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .gallery-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--danger);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .attribute-section {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .attribute-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .value-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .value-tag {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--gray-300);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+        
+        .value-tag button {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0;
+            font-size: 14px;
+        }
+        
+        .variant-section {
+            background: var(--gray-50);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--gray-200);
+        }
+        
+        .variant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">Ashanum</h2>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <div class="nav-section">Master Data</div>
+                
+                <a href="kategori.html" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Kategori</span>
+                </a>
+                
+                <a href="produk.html" class="nav-item active">
+                    <i class="fas fa-box"></i>
+                    <span>Produk</span>
+                </a>
+                
+                <div class="nav-section">Transaksi</div>
+                
+                <a href="pesanan.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Pesanan</span>
+                </a>
+                
+                <a href="pembayaran.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pembayaran</span>
+                </a>
+                
+                <div class="nav-section">Pengguna</div>
+                
+                <a href="pengguna.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Kelola Pengguna</span>
+                </a>
+                
+                <div style="padding: 20px; border-top: 1px solid var(--gray-200); margin-top: 20px;">
+                    <a href="#logout" class="nav-item" style="color: #ef4444;" onclick="event.preventDefault(); Auth.logout();">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <div class="topbar-right">
+                    <div class="topbar-item">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">5</span>
+                    </div>
+                    
+                    <div class="topbar-item user-menu">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 class="page-title" id="pageTitle">Tambah Produk</h1>
+                        <p class="page-subtitle">Lengkapi informasi produk dengan detail</p>
+                    </div>
+                    <a href="produk.html" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i>
+                        Kembali
+                    </a>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Form -->
+                <form id="productForm">
+                    <input type="hidden" id="productId">
+                    
+                    <!-- Basic Information -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Informasi Dasar</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="nama" class="required">Nama Produk</label>
+                                    <input type="text" id="nama" required placeholder="Contoh: Samsung Galaxy S23 Ultra">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="kategoriId" class="required">Kategori</label>
+                                    <select id="kategoriId" required>
+                                        <option value="">Pilih Kategori</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="merek">Brand/Merek</label>
+                                    <input type="text" id="merek" placeholder="Contoh: Samsung, Nike, dll">
+                                </div>
+
+                                <div class="form-group full-width">
+                                    <label for="deskripsi">Deskripsi Produk</label>
+                                    <textarea id="deskripsi" rows="4" placeholder="Deskripsikan produk Anda..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Harga & Stok</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="harga" class="required">Harga Jual (Rp)</label>
+                                    <input type="number" id="harga" required min="0" placeholder="100000">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="hargaAsli">Harga Coret (Rp)</label>
+                                    <input type="number" id="hargaAsli" min="0" placeholder="150000">
+                                    <small style="color: var(--gray-500);">Isi jika ada diskon</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="diskonPersen">Diskon (%)</label>
+                                    <input type="number" id="diskonPersen" min="0" max="100" placeholder="20">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="stokProduk">Stok Produk</label>
+                                    <input type="number" id="stokProduk" min="0" value="0" placeholder="100">
+                                    <small style="color: var(--gray-500);">Kosongkan jika pakai varian</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="gratisOngkir" checked>
+                                        <label for="gratisOngkir">Gratis Ongkir</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="aktif" checked>
+                                        <label for="aktif">Produk Aktif</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="flashsale">
+                                        <label for="flashsale">Flash Sale</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="terlaris" >
+                                        <label for="terlaris">Terlaris</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="untukmu" checked>
+                                        <label for="untukmu">Untukmu</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gallery -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Galeri Gambar</h3>
+                        </div>
+                        <div class="card-body">
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 10px;">Gambar Utama</label>
+                                <div class="image-upload-preview" onclick="document.getElementById('mainImageUpload').click()">
+                                    <div class="placeholder" id="mainImagePlaceholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <div>Upload Gambar Utama</div>
+                                    </div>
+                                    <img id="mainImagePreview" style="display: none;">
+                                </div>
+                                <input type="file" id="mainImageUpload" accept="image/*" style="display: none;" onchange="handleMainImageUpload(event)">
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 10px;">Gambar Tambahan</label>
+                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('galleryUpload').click()">
+                                    <i class="fas fa-images"></i>
+                                    Upload Gambar
+                                </button>
+                                <input type="file" id="galleryUpload" accept="image/*" multiple style="display: none;" onchange="handleGalleryUpload(event)">
+                                
+                                <div class="gallery-grid" id="galleryContainer" style="margin-top: 15px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attributes -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Atribut Produk</h3>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addAttribute()">
+                                <i class="fas fa-plus"></i>
+                                Tambah Atribut
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: var(--gray-600); margin-bottom: 15px;">
+                                Atribut digunakan untuk varian produk (contoh: Warna, Ukuran, Kapasitas)
+                            </p>
+                            <div id="attributesContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- Variants -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Varian Produk</h3>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="generateVariantsAuto()">
+                                Generate Otomatis
+                                </button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addVariant()">
+                                <i class="fas fa-plus"></i>
+                                Tambah Varian
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: var(--gray-600); margin-bottom: 15px;">
+                                Kombinasikan atribut untuk membuat varian produk dengan harga dan stok berbeda
+                            </p>
+                            <div id="variantsContainer"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                <a href="produk.html" class="btn btn-secondary">
+                                    <i class="fas fa-times"></i>
+                                    Batal
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Simpan Produk
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/helpers.js"></script>
+    <script src="assets/js/produk-form.js"></script>
+</body>
+</html>

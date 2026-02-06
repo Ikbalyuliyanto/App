@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profil Saya - ZAWAWIYA</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body{ margin:0; font-family: Arial, sans-serif; background:#f5f5f5; color:#222; }
+    .page{ max-width: 1100px; margin: 0 auto; padding: 18px 14px 50px; }
+    .title{ display:flex; align-items:center; gap:10px; margin: 16px 0 14px; }
+    .title h1{ margin:0; font-size: 22px; }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid #eee;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.04);
+      overflow:hidden;
+    }
+    .card-head{
+      padding: 14px 14px;
+      border-bottom:1px solid #f0f0f0;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap:10px;
+    }
+    .card-head strong{ font-size:14px; }
+    .card-body{ padding: 14px; }
+
+    .profile-badge{ display:flex; gap:12px; align-items:center; }
+    .avatar{
+      width: 46px; height: 46px; border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:800;
+      flex: 0 0 auto;
+    }
+    .meta .name{ font-weight:800; }
+    .meta .sub{ font-size:12px; color:#666; margin-top:2px; }
+
+    .menu a{
+      display:flex; align-items:center; gap:10px;
+      text-decoration:none; color:#333;
+      padding: 12px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+    .menu a:hover{ background:#f7f7f7; }
+    .menu .danger{ color:#dc2626; }
+
+    .tabs{ display:flex; gap:8px; padding: 10px 14px; border-bottom:1px solid #f0f0f0; }
+    .tab-btn{
+      border:1px solid #eee;
+      background:#fff;
+      padding: 9px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      font-weight: 800;
+      font-size: 13px;
+      color:#333;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .tab-btn.active{
+      border-color:#ff4081;
+      color:#ff4081;
+      background:#fff5f8;
+    }
+    .tab-pane{ display:none; padding: 14px; }
+    .tab-pane.active{ display:block; }
+
+    .form{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field{ display:flex; flex-direction:column; gap:6px; }
+    .field label{ font-size: 12px; color:#555; font-weight: 800; }
+    .field input, .field select, .field textarea{
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus{ border-color:#ff4081; }
+    .field textarea{ resize: vertical; min-height: 92px; }
+    .full{ grid-column: 1 / -1; }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .btn{
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 14px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      white-space: nowrap;
+    }
+    .btn-primary{ background:#ff4081; color:#fff; }
+    .btn-primary:hover{ filter: brightness(.95); }
+    .btn-secondary{ background:#fff; border:1px solid #ddd; color:#333; }
+    .btn-secondary:hover{ background:#f6f6f6; }
+
+    .hint{ color:#777; font-size: 12px; margin-top: 10px; }
+
+    .addr-top{
+      display:flex; align-items:center; justify-content: space-between; gap:10px; flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .addr-list{ display:grid; gap: 10px; }
+    .addr-card{
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 12px;
+      background:#fff;
+    }
+    .addr-head{
+      display:flex; justify-content: space-between; align-items:flex-start; gap:10px; flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .addr-title{
+      display:flex; gap:8px; align-items:center; flex-wrap: wrap;
+    }
+    .pill{
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background:#f3f4f6;
+      color:#374151;
+    }
+    .pill.primary{ background:#fff5f8; color:#ff4081; border:1px solid #ffd1e1; }
+    .addr-name{ font-weight: 900; }
+    .addr-sub{ font-size:12px; color:#666; margin-top:2px; }
+    .addr-actions{ display:flex; gap:8px; flex-wrap: wrap; }
+    .addr-actions .mini{
+      padding: 8px 10px;
+      font-size: 12px;
+      border-radius: 10px;
+      font-weight: 900;
+      border:1px solid #ddd;
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .addr-actions .mini:hover{ background:#f7f7f7; }
+    .addr-actions .mini.danger{ border-color:#fecaca; color:#dc2626; }
+    .addr-actions .mini.primary{ border-color:#ffd1e1; color:#ff4081; background:#fff5f8; }
+
+    .modal-overlay{
+      position: fixed; inset:0; background: rgba(0,0,0,.45);
+      display:none; align-items:center; justify-content:center;
+      z-index: 100000;
+      padding: 16px;
+    }
+    .modal-overlay.active{ display:flex; }
+    .modal{
+      width: min(720px, 100%);
+      background:#fff;
+      border-radius: 14px;
+      border:1px solid #eee;
+      box-shadow: 0 25px 60px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    .modal-head{
+      padding: 14px;
+      border-bottom:1px solid #f0f0f0;
+      display:flex; justify-content: space-between; align-items:center;
+      gap:10px;
+    }
+    .modal-head strong{ font-size: 14px; }
+    .modal-close{
+      border:0; background:transparent; cursor:pointer;
+      font-size: 20px; padding:6px 10px; border-radius: 10px;
+    }
+    .modal-close:hover{ background:#f6f6f6; }
+    .modal-body{ padding: 14px; }
+
+    .row2{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){
+      .layout{ grid-template-columns: 1fr; }
+      .form{ grid-template-columns: 1fr; }
+      .row2{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="header-container"></div>
+
+  <div class="page">
+    <div class="title">
+      <i class="far fa-user"></i>
+      <h1>Profil Saya</h1>
+    </div>
+
+    <div class="layout">
+      <!-- LEFT -->
+      <div class="card">
+        <div class="card-head"><strong>Akun</strong></div>
+        <div class="card-body">
+          <div class="profile-badge">
+            <div class="avatar" id="avatarBox">U</div>
+            <div class="meta">
+              <div class="name" id="nameBox">User</div>
+              <div class="sub" id="emailBox">-</div>
+            </div>
+          </div>
+
+          <div class="hint">Kelola data profil & alamat pengiriman Anda.</div>
+
+          <div class="menu" style="margin-top:12px;">
+            <a href="/pesanan.html"><i class="fas fa-box"></i> Pesanan Saya</a>
+            <a href="#" id="btnLogout" class="danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="card">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-profil">
+            <i class="far fa-id-card"></i> Profil
+          </button>
+          <button class="tab-btn" data-tab="tab-alamat">
+            <i class="fas fa-map-marker-alt"></i> Alamat
+          </button>
+        </div>
+
+        <!-- TAB PROFIL -->
+        <div class="tab-pane active" id="tab-profil">
+          <div class="card-head" style="padding:0 0 10px 0; border:none;">
+            <strong>Data Profil</strong>
+            <span style="font-size:12px;color:#777;" id="statusText"></span>
+          </div>
+
+          <form id="profileForm">
+            <div class="form">
+              <div class="field">
+                <label>Nama Depan</label>
+                <input type="text" id="namaDepan" placeholder="Nama depan">
+              </div>
+              <div class="field">
+                <label>Nama Belakang</label>
+                <input type="text" id="namaBelakang" placeholder="Nama belakang">
+              </div>
+
+              <div class="field">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="email@contoh.com" disabled>
+              </div>
+              <div class="field">
+                <label>No. HP</label>
+                <input type="tel" id="nomorTelepon" placeholder="08xxxxxxxxxx">
+              </div>
+
+              <div class="field">
+                <label>Jenis Kelamin</label>
+                <select id="jenisKelamin">
+                  <option value="">- Pilih -</option>
+                  <option value="LAKI_LAKI">Laki-laki</option>
+                  <option value="PEREMPUAN">Perempuan</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Newsletter</label>
+                <select id="newsletter">
+                  <option value="false">Tidak</option>
+                  <option value="true">Ya</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" id="btnReload">
+                <i class="fas fa-rotate"></i> Muat Ulang
+              </button>
+              <button type="submit" class="btn btn-primary" id="btnSave">
+                <i class="fas fa-save"></i> Simpan Profil
+              </button>
+            </div>
+          </form>
+
+          <div class="hint">
+            * Endpoint profil kamu harus ada (GET/PUT /api/pengguna/me). Kalau belum ada, bilang route yang kamu pakai ya.
+          </div>
+        </div>
+
+        <!-- TAB ALAMAT -->
+        <div class="tab-pane" id="tab-alamat">
+          <div class="addr-top">
+            <div>
+              <div style="font-weight:900">Alamat Pengiriman</div>
+              <div style="font-size:12px;color:#777;margin-top:4px">Simpan beberapa alamat dan pilih satu sebagai utama.</div>
+            </div>
+            <button class="btn btn-primary" id="btnAddAlamat" type="button">
+              <i class="fas fa-plus"></i> Tambah Alamat
+            </button>
+          </div>
+
+          <div class="addr-list" id="alamatList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Alamat -->
+  <div class="modal-overlay" id="alamatModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head">
+        <strong id="alamatModalTitle">Tambah Alamat</strong>
+        <button class="modal-close" id="alamatModalClose" aria-label="Tutup">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="alamatForm">
+          <input type="hidden" id="alamatId">
+
+          <div class="row2">
+            <div class="field">
+              <label>Label</label>
+              <input id="label" placeholder="Rumah / Kantor">
+            </div>
+            <div class="field">
+              <label>Nama Penerima</label>
+              <input id="namaPenerima" placeholder="Nama penerima">
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>No. Telp</label>
+              <input id="noTelp" placeholder="08xxxxxxxxxx">
+            </div>
+            <div class="field">
+              <label>Kode Pos</label>
+              <input id="kodePos" placeholder="12345">
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Provinsi</label>
+              <input id="provinsi" placeholder="Provinsi">
+            </div>
+            <div class="field">
+              <label>Kota</label>
+              <input id="kota" placeholder="Kota/Kab">
+            </div>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Kecamatan</label>
+              <input id="kecamatan" placeholder="Kecamatan">
+            </div>
+            <div class="field">
+              <label>Kelurahan</label>
+              <input id="kelurahan" placeholder="Kelurahan">
+            </div>
+          </div>
+
+          <div class="field full">
+            <label>Alamat Lengkap</label>
+            <textarea id="alamat" placeholder="Nama jalan, nomor rumah, patokan..."></textarea>
+          </div>
+
+          <div class="row2">
+            <div class="field">
+              <label>Maps URL (opsional)</label>
+              <input id="mapsUrl" placeholder="https://maps.google.com/...">
+            </div>
+            <div class="field">
+              <label>Jadikan Utama</label>
+              <select id="isUtama">
+                <option value="false">Tidak</option>
+                <option value="true">Ya</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary" id="btnAlamatCancel">
+              Batal
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnAlamatSave">
+              <i class="fas fa-save"></i> Simpan Alamat
+            </button>
+          </div>
+
+          <div class="hint">* Latitude/Longitude bisa ditambahkan kalau nanti ada picker map.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="assets/js/alert.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <!-- kalau confirm kamu ada di file lain, load juga -->
+  <!-- <script src="assets/js/confirm.js"></script> -->
+
+ <script>
+  // ===== helpers =====
+
+
+  function initials(name) {
+    const s = String(name || "").trim();
+    if (!s) return "U";
+    const parts = s.split(/\s+/).slice(0,2);
+    return parts.map(p => p[0]?.toUpperCase()).join("") || "U";
+  }
+
+  // ===== Tabs =====
+  function setupTabs() {
+    const btns = document.querySelectorAll(".tab-btn");
+    const panes = document.querySelectorAll(".tab-pane");
+    btns.forEach(b => {
+      b.addEventListener("click", () => {
+        btns.forEach(x => x.classList.remove("active"));
+        panes.forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        document.getElementById(b.dataset.tab)?.classList.add("active");
+
+        // ✅ load alamat ketika tab alamat dibuka
+        if (b.dataset.tab === "tab-alamat") loadAlamat();
+      });
+    });
+  }
+
+  // ===== PROFIL =====
+  async function loadProfile() {
+    if (!requireLogin()) return;
+    document.getElementById("statusText").textContent = "Memuat...";
+
+    try {
+      const me = await apiAuth("/api/pengguna/me", { method: "GET" });
+
+      const profil = me?.profil || {};
+      const namaDepan = profil?.namaDepan || "";
+      const namaBelakang = profil?.namaBelakang || "";
+      const namaLengkap = [namaDepan, namaBelakang].filter(Boolean).join(" ") || "User";
+
+      document.getElementById("avatarBox").textContent = initials(namaLengkap);
+      document.getElementById("nameBox").textContent = namaLengkap;
+      document.getElementById("emailBox").textContent = me?.email || "-";
+
+      document.getElementById("namaDepan").value = namaDepan;
+      document.getElementById("namaBelakang").value = namaBelakang;
+      document.getElementById("email").value = me?.email || "";
+
+      document.getElementById("nomorTelepon").value = profil?.nomorTelepon || "";
+      document.getElementById("jenisKelamin").value = profil?.jenisKelamin || "";
+      document.getElementById("newsletter").value = String(!!profil?.newsletter);
+
+      const storage = localStorage.getItem("token") ? localStorage : (sessionStorage.getItem("token") ? sessionStorage : null);
+      if (storage) storage.setItem("userNama", namaLengkap);
+      if (typeof window.refreshHeader === "function") window.refreshHeader();
+
+      document.getElementById("statusText").textContent = "Siap";
+    } catch (err) {
+      console.error(err);
+      document.getElementById("statusText").textContent = "Gagal memuat";
+      if (typeof showAlert === "function") showAlert(err.message || "Gagal memuat profil.", "error");
+    }
+  }
+
+  async function saveProfile() {
+    const payload = {
+      namaDepan: document.getElementById("namaDepan").value.trim(),
+      namaBelakang: document.getElementById("namaBelakang").value.trim(),
+      nomorTelepon: document.getElementById("nomorTelepon").value.trim(),
+      jenisKelamin: document.getElementById("jenisKelamin").value || null,
+      newsletter: document.getElementById("newsletter").value === "true",
+    };
+
+    const btn = document.getElementById("btnSave");
+    btn.disabled = true;
+    document.getElementById("statusText").textContent = "Menyimpan...";
+
+    try {
+      await apiAuth("/api/pengguna/me", {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+
+      if (typeof showAlert === "function") showAlert("Profil berhasil diperbarui.", "success");
+      await loadProfile();
+    } catch (err) {
+      console.error(err);
+      if (typeof showAlert === "function") showAlert(err.message || "Gagal menyimpan profil.", "error");
+      document.getElementById("statusText").textContent = "Gagal menyimpan";
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ===== ALAMAT (✅ FIX: pakai /api/pengguna/alamat) =====
+  let alamatCache = [];
+
+  function openAlamatModal(mode = "add", data = null) {
+    const modal = document.getElementById("alamatModal");
+    modal.classList.add("active");
+
+    document.getElementById("alamatModalTitle").textContent = mode === "edit" ? "Edit Alamat" : "Tambah Alamat";
+    document.getElementById("alamatId").value = data?.id || "";
+
+    document.getElementById("label").value = data?.label || "";
+    document.getElementById("namaPenerima").value = data?.namaPenerima || "";
+    document.getElementById("noTelp").value = data?.noTelp || "";
+    document.getElementById("provinsi").value = data?.provinsi || "";
+    document.getElementById("kota").value = data?.kota || "";
+    document.getElementById("kecamatan").value = data?.kecamatan || "";
+    document.getElementById("kelurahan").value = data?.kelurahan || "";
+    document.getElementById("kodePos").value = data?.kodePos || "";
+    document.getElementById("alamat").value = data?.alamat || "";
+    document.getElementById("mapsUrl").value = data?.mapsUrl || "";
+    document.getElementById("isUtama").value = String(!!data?.isUtama);
+  }
+
+  function closeAlamatModal() {
+    document.getElementById("alamatModal").classList.remove("active");
+  }
+
+  async function loadAlamat() {
+    if (!requireLogin()) return;
+    try {
+      const res = await apiAuth("/api/pengguna/alamat", { method: "GET" }); // ✅ FIX
+      alamatCache = Array.isArray(res) ? res : [];
+      renderAlamatList(alamatCache);
+    } catch (err) {
+      console.error(err);
+      if (typeof showAlert === "function") showAlert(err.message || "Gagal memuat alamat.", "error");
+    }
+  }
+
+  function renderAlamatList(items) {
+    const list = document.getElementById("alamatList");
+    list.innerHTML = "";
+
+    if (!items.length) {
+      list.innerHTML = `
+        <div class="addr-card" style="text-align:center;color:#777;padding:20px;">
+          <i class="fas fa-map-marker-alt" style="font-size:40px;opacity:.25;margin-bottom:10px;"></i>
+          <div style="font-weight:900">Belum ada alamat</div>
+          <div style="font-size:12px;margin-top:6px;">Klik "Tambah Alamat" untuk menambahkan.</div>
+        </div>
+      `;
+      return;
+    }
+
+    items.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "addr-card";
+
+      div.innerHTML = `
+        <div class="addr-head">
+          <div>
+            <div class="addr-title">
+              <span class="addr-name">${escapeHtml(a.namaPenerima || "-")}</span>
+              <span class="pill">${escapeHtml(a.label || "Alamat")}</span>
+              ${a.isUtama ? `<span class="pill primary">UTAMA</span>` : ""}
+            </div>
+            <div class="addr-sub">
+              ${escapeHtml(a.noTelp || "-")} • ${escapeHtml(a.kelurahan || "")} ${escapeHtml(a.kecamatan || "")}
+            </div>
+            <div class="addr-sub" style="margin-top:6px;">
+              ${escapeHtml(a.alamat || "")},
+              ${escapeHtml(a.kota || "")},
+              ${escapeHtml(a.provinsi || "")}
+              ${a.kodePos ? `(${escapeHtml(a.kodePos)})` : ""}
+            </div>
+            ${a.mapsUrl ? `<div class="addr-sub" style="margin-top:6px;"><a href="${a.mapsUrl}" target="_blank" rel="noopener">Lihat di Maps</a></div>` : ""}
+          </div>
+
+          <div class="addr-actions">
+            ${!a.isUtama ? `<button class="mini primary" data-act="utama" data-id="${a.id}"><i class="fas fa-star"></i> Jadikan Utama</button>` : ""}
+            <button class="mini" data-act="edit" data-id="${a.id}"><i class="fas fa-pen"></i> Edit</button>
+            <button class="mini danger" data-act="delete" data-id="${a.id}"><i class="fas fa-trash"></i> Hapus</button>
+          </div>
+        </div>
+      `;
+
+      list.appendChild(div);
+    });
+
+    list.querySelectorAll("button[data-act]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const act = btn.getAttribute("data-act");
+        const id = Number(btn.getAttribute("data-id"));
+        const a = alamatCache.find(x => x.id === id);
+
+        if (act === "edit") return openAlamatModal("edit", a);
+
+        if (act === "utama") {
+          await apiAuth(`/api/pengguna/alamat/${id}`, {  // ✅ FIX
+            method: "PATCH",
+            body: JSON.stringify({ ...a, isUtama: true }),
+          });
+          if (typeof showAlert === "function") showAlert("Alamat utama diperbarui.", "success");
+          return loadAlamat();
+        }
+
+        if (act === "delete") {
+          let ok = true;
+          if (typeof window.showConfirm === "function") {
+            ok = await showConfirm({
+              title: "Hapus Alamat",
+              message: "Yakin ingin menghapus alamat ini?",
+              confirmText: "Hapus",
+              cancelText: "Batal",
+              type: "danger",
+            });
+          }
+          if (!ok) return;
+
+          await apiAuth(`/api/pengguna/alamat/${id}`, { method: "DELETE" }); // ✅ FIX
+          if (typeof showAlert === "function") showAlert("Alamat berhasil dihapus.", "success");
+          await loadAlamat();
+        }
+      });
+    });
+  }
+
+  async function saveAlamatFromModal(e) {
+    e.preventDefault();
+
+    const id = document.getElementById("alamatId").value;
+    const payload = {
+      label: document.getElementById("label").value.trim(),
+      namaPenerima: document.getElementById("namaPenerima").value.trim(),
+      noTelp: document.getElementById("noTelp").value.trim(),
+      provinsi: document.getElementById("provinsi").value.trim(),
+      kota: document.getElementById("kota").value.trim(),
+      kecamatan: document.getElementById("kecamatan").value.trim(),
+      kelurahan: document.getElementById("kelurahan").value.trim(),
+      kodePos: document.getElementById("kodePos").value.trim(),
+      alamat: document.getElementById("alamat").value.trim(),
+      mapsUrl: document.getElementById("mapsUrl").value.trim() || null,
+      isUtama: document.getElementById("isUtama").value === "true",
+    };
+
+    if (
+      !payload.label || !payload.namaPenerima || !payload.noTelp ||
+      !payload.provinsi || !payload.kota || !payload.kecamatan || !payload.kelurahan || !payload.kodePos || !payload.alamat
+    ) {
+      if (typeof showAlert === "function") showAlert("Field alamat belum lengkap.", "warning");
+      return;
+    }
+
+    const btn = document.getElementById("btnAlamatSave");
+    btn.disabled = true;
+
+    try {
+      if (!id) {
+        await apiAuth("/api/pengguna/alamat", { method: "POST", body: JSON.stringify(payload) }); // ✅ FIX
+        if (typeof showAlert === "function") showAlert("Alamat berhasil ditambahkan.", "success");
+      } else {
+        await apiAuth(`/api/pengguna/alamat/${id}`, { method: "PATCH", body: JSON.stringify(payload) }); // ✅ FIX
+        if (typeof showAlert === "function") showAlert("Alamat berhasil diperbarui.", "success");
+      }
+
+      closeAlamatModal();
+      await loadAlamat();
+    } catch (err) {
+      console.error(err);
+      if (typeof showAlert === "function") showAlert(err.message || "Gagal menyimpan alamat.", "error");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ===== Logout =====
+  async function doLogout() {
+    let ok = true;
+    if (typeof window.showConfirm === "function") {
+      ok = await showConfirm({
+        title: "Keluar",
+        message: "Apakah Anda yakin ingin keluar?",
+        confirmText: "Keluar",
+        cancelText: "Batal",
+        type: "danger",
+      });
+    }
+    if (!ok) return;
+
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    localStorage.removeItem("userNama");
+    sessionStorage.removeItem("userNama");
+
+    if (typeof showAlert === "function") showAlert("Berhasil logout", "success");
+    if (typeof window.refreshHeader === "function") window.refreshHeader();
+
+    setTimeout(() => window.location.href = "/login.html", 650);
+  }
+
+  // ===== init =====
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof window.includeHeaderFooter === "function") window.includeHeaderFooter();
+    setupTabs();
+
+    document.getElementById("btnReload").addEventListener("click", loadProfile);
+    document.getElementById("profileForm").addEventListener("submit", (e) => { e.preventDefault(); saveProfile(); });
+
+    document.getElementById("btnLogout").addEventListener("click", (e) => { e.preventDefault(); doLogout(); });
+
+    document.getElementById("btnAddAlamat").addEventListener("click", () => openAlamatModal("add"));
+    document.getElementById("alamatModalClose").addEventListener("click", closeAlamatModal);
+    document.getElementById("btnAlamatCancel").addEventListener("click", closeAlamatModal);
+    document.getElementById("alamatForm").addEventListener("submit", saveAlamatFromModal);
+    document.getElementById("alamatModal").addEventListener("click", (e) => { if (e.target.id === "alamatModal") closeAlamatModal(); });
+
+    loadProfile();
+  });
+</script>
+
+</body>
+</html>

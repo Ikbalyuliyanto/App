@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status Pesanan - Ashanum</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      background: #f5f5f5;
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: all 0.3s;
+      background: white;
+      border: 1px solid #ddd;
+    }
+
+    .back-button:hover {
+      background: #f5f5f5;
+      color: #ff4081;
+    }
+
+    .back-button i {
+      font-size: 14px;
+    }
+
+    .breadcrumb-links {
+      font-size: 14px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .breadcrumb a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: #ff4081;
+    }
+
+    .breadcrumb span {
+      margin: 0;
+    }
+
+    /* Container */
+    .order-container {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+
+    /* Status Header Card */
+    .status-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 25px;
+      color: white;
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    }
+
+    .status-header.success {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    }
+
+    .status-header.cancelled {
+      background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+    }
+
+    .status-header.completed {
+      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    }
+
+    .status-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .status-info h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .status-subtitle {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .status-icon {
+      font-size: 64px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .order-meta {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .meta-label {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .meta-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Grid Layout */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 25px;
+    }
+
+    /* Section */
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f5f5f5;
+    }
+
+    .section-title i {
+      color: #667eea;
+      font-size: 20px;
+    }
+
+    /* Timeline Tracking */
+    .tracking-timeline {
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 30px;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -29px;
+      top: 8px;
+      bottom: -22px;
+      width: 2px;
+      background: #e5e5e5;
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-item.active::before {
+      background: #667eea;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -40px;
+      top: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #e5e5e5;
+      border: 3px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .timeline-item.active .timeline-dot {
+      background: #667eea;
+      animation: dotPulse 2s infinite;
+    }
+
+    .timeline-item.completed .timeline-dot {
+      background: #4caf50;
+    }
+
+    .timeline-dot i {
+      font-size: 10px;
+      color: white;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+      50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+    }
+
+    .timeline-content {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .timeline-item.active .timeline-content {
+      background: #f8f9ff;
+      border: 2px solid #667eea;
+    }
+
+    .timeline-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .timeline-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .timeline-time {
+      font-size: 13px;
+      color: #999;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Shipping Info */
+    .shipping-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .shipping-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .shipping-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .shipping-info h3 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .shipping-info p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .tracking-number {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 12px 15px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tracking-number span {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .copy-btn-small {
+      background: rgba(255, 255, 255, 0.3);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .copy-btn-small:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Address Card */
+    .address-card {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 15px;
+    }
+
+    .address-card h4 {
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .address-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* Product Items */
+    .product-item {
+      display: flex;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .product-item:last-child {
+      border-bottom: none;
+    }
+
+    .product-image {
+      width: 70px;
+      height: 70px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      border: 1px solid #eee;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .product-variant {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .product-price {
+      font-size: 15px;
+      font-weight: bold;
+      color: #ff4081;
+    }
+
+    .product-quantity {
+      font-size: 13px;
+      color: #666;
+      margin-left: 10px;
+    }
+
+    /* Summary */
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+
+    .summary-label {
+      color: #666;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .summary-divider {
+      border-top: 2px solid #f5f5f5;
+      margin: 15px 0;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      font-size: 18px;
+    }
+
+    .summary-total .summary-label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .summary-total .summary-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ff4081;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #f8f9ff;
+    }
+
+    .btn-danger {
+      background: white;
+      color: #f44336;
+      border: 2px solid #f44336;
+    }
+
+    .btn-danger:hover {
+      background: #ffebee;
+    }
+
+    /* Help Box */
+    .help-box {
+      background: #f8f9ff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .help-box h4 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .help-box p {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .help-btn {
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #333;
+      margin: 0 5px;
+    }
+
+    .help-btn:hover {
+      border-color: #667eea;
+      color: #667eea;
+      background: #f8f9ff;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-top {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .status-icon {
+        font-size: 48px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .breadcrumb {
+        font-size: 12px;
+        padding: 0 15px;
+        margin: 15px auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .back-button {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .back-button i {
+        font-size: 12px;
+      }
+
+      .breadcrumb-links {
+        font-size: 12px;
+      }
+
+      .status-header {
+        padding: 20px;
+      }
+
+      .status-info h1 {
+        font-size: 24px;
+      }
+
+      .section {
+        padding: 20px;
+      }
+
+      .order-container {
+        padding: 0 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div id="header-container"></div>
+
+  <!-- Order Container -->
+  <div class="order-container">
+    <!-- Status Header -->
+    <div class="status-header" id="statusHeader">
+      <div class="status-top">
+        <div class="status-info">
+          <h1 id="statusTitle">-</h1>
+          <p class="status-subtitle" id="statusSubtitle">-</p>
+        </div>
+        <div class="status-icon" id="statusIcon">📦</div>
+      </div>
+
+      <div class="order-meta">
+        <div class="meta-item">
+          <span class="meta-label">Nomor Pesanan</span>
+          <span class="meta-value" id="orderNumber">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Tanggal Pesanan</span>
+          <span class="meta-value" id="orderDate">-</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Total Pembayaran</span>
+          <span class="meta-value" id="orderTotal">Rp 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+      <!-- Left Side -->
+      <div>
+        <!-- Tracking Timeline -->
+        <div class="section">
+          <h2 class="section-title">
+            <i class="fas fa-clipboard-list"></i>
+            Status Pesanan
+          </h2>
+
+          <div class="tracking-timeline" id="trackingTimeline"></div>
+        </div>
+
+        <!-- Product List -->
+        <div class="section">
+          <h2 class="section-title">
+            <i class="fas fa-shopping-bag"></i>
+            Produk yang Dibeli
+          </h2>
+
+          <div id="productList"></div>
+        </div>
+      </div>
+
+      <!-- Right Side -->
+      <div>
+        <!-- Shipping Info -->
+        <div id="shippingCard" style="display:none;">
+          <div class="shipping-card">
+            <div class="shipping-header">
+              <div class="shipping-icon">🚚</div>
+              <div class="shipping-info">
+                <h3 id="shippingCourier">-</h3>
+                <p id="shippingEstimate">-</p>
+              </div>
+            </div>
+
+            <div class="tracking-number">
+              <div>
+                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Nomor Resi</div>
+                <span id="trackingNumber">-</span>
+              </div>
+              <button class="copy-btn-small" onclick="copyTrackingNumber()">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <div class="section">
+          <h2 class="section-title">
+            <i class="fas fa-map-marker-alt"></i>
+            Alamat Pengiriman
+          </h2>
+
+          <div class="address-card">
+            <h4 id="receiverName">-</h4>
+            <p id="receiverPhone">-</p>
+            <p id="addressFull" style="margin-top: 10px;">-</p>
+          </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="section">
+          <h2 class="section-title">
+            <i class="fas fa-receipt"></i>
+            Rincian Pembayaran
+          </h2>
+
+          <div class="summary-row">
+            <span class="summary-label">Subtotal Produk</span>
+            <span class="summary-value" id="subtotalValue">Rp 0</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Diskon Produk</span>
+            <span class="summary-value" style="color: #ff4081;" id="discountValue">-Rp 0</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Ongkos Kirim</span>
+            <span class="summary-value" id="shippingValue">Rp 0</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Voucher Diskon</span>
+            <span class="summary-value" style="color: #4caf50;" id="voucherValue">-Rp 0</span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-total">
+            <span class="summary-label">Total Pembayaran</span>
+            <span class="summary-value" id="totalValue">Rp 0</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons" id="actionButtons"></div>
+
+        <!-- Help Box -->
+        <div class="help-box">
+          <h4>Butuh Bantuan?</h4>
+          <p>Hubungi customer service kami</p>
+          <button class="help-btn" onclick="contactWhatsApp()">
+            <i class="fab fa-whatsapp" style="color: #25d366;"></i>
+            WhatsApp
+          </button>
+          <button class="help-btn" onclick="contactEmail()">
+            <i class="fas fa-envelope" style="color: #667eea;"></i>
+            Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <script src="assets/js/alert.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  
+  <script>
+  // Wait for header to load before initializing
+  window.addEventListener('headerLoaded', function() {
+    console.log('Header loaded, initializing order detail page...');
+  });
+
+  function getVariantAttributesFromDb(varian) {
+    const out = [];
+    const maps = varian?.atribut || [];
+    for (const m of maps) {
+      const label = m?.nilai?.atribut?.nama;
+      const value = m?.nilai?.nilai;
+      if (label && value) out.push({ label, value });
+    }
+    return out;
+  }
+
+  // ===== STATUS CONFIG =====
+  const statusConfig = {
+    MENUNGGU_PEMBAYARAN: {
+      title: "Menunggu Pembayaran",
+      subtitle: "Silakan selesaikan pembayaran Anda",
+      icon: "⏳",
+      class: "",
+    },
+    DIPROSES: {
+      title: "Pesanan Sedang Diproses",
+      subtitle: "Pesanan Anda sedang dipersiapkan",
+      icon: "📦",
+      class: "",
+    },
+    DIKIRIM: {
+      title: "Pesanan Sedang Dikirim",
+      subtitle: "Paket Anda dalam perjalanan",
+      icon: "🚚",
+      class: "",
+    },
+    SELESAI: {
+      title: "Pesanan Selesai",
+      subtitle: "Terima kasih atas pesanan Anda",
+      icon: "🎉",
+      class: "completed",
+    },
+    DIBATALKAN: {
+      title: "Pesanan Dibatalkan",
+      subtitle: "Pesanan Anda telah dibatalkan",
+      icon: "❌",
+      class: "cancelled",
+    },
+  };
+
+  // ===== TIMELINE STEPS =====
+  const timelineSteps = [
+    { key: "MENUNGGU_PEMBAYARAN", title: "Menunggu Pembayaran", desc: "Pesanan menunggu pembayaran", icon: "clock" },
+    { key: "DIPROSES", title: "Pesanan Diproses", desc: "Penjual mempersiapkan pesanan", icon: "box" },
+    { key: "DIKIRIM", title: "Pesanan Dikirim", desc: "Paket dalam perjalanan", icon: "truck" },
+    { key: "SELESAI", title: "Pesanan Selesai", desc: "Pesanan diterima", icon: "check-double" },
+  ];
+
+  function statusRank(status) {
+    const order = ["MENUNGGU_PEMBAYARAN", "DIPROSES", "DIKIRIM", "SELESAI"];
+    const i = order.indexOf(status);
+    return i === -1 ? 0 : i;
+  }
+
+  // ===== RENDER =====
+  function renderStatusHeader(pesanan) {
+    const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
+    const config = statusConfig[status] || statusConfig.MENUNGGU_PEMBAYARAN;
+
+    const headerEl = document.getElementById("statusHeader");
+    headerEl.className = "status-header";
+    if (config.class) headerEl.className = "status-header " + config.class;
+
+    document.getElementById("statusTitle").textContent = config.title;
+    document.getElementById("statusSubtitle").textContent = config.subtitle;
+    document.getElementById("statusIcon").textContent = config.icon;
+
+    document.getElementById("orderNumber").textContent = pesanan.id;
+    document.getElementById("orderDate").textContent = formatDate(pesanan.dibuatPada || pesanan.createdAt);
+    document.getElementById("orderTotal").textContent = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
+  }
+
+  function getTimestampForStep(pesanan, stepKey) {
+    if (stepKey === "MENUNGGU_PEMBAYARAN") return formatDate(pesanan.dibuatPada || pesanan.createdAt);
+
+    if (stepKey === "DIPROSES") {
+      const paidAt = pesanan.pembayaran?.paidAt;
+      return paidAt ? formatDate(paidAt) : null;
+    }
+
+    if (stepKey === "DIKIRIM") {
+      const shippedAt = pesanan.pengiriman?.diubahPada || pesanan.pengiriman?.dibuatPada;
+      return shippedAt ? formatDate(shippedAt) : null;
+    }
+
+    if (stepKey === "SELESAI") return null;
+
+    return null;
+  }
+
+  function renderTimeline(pesanan) {
+    const container = document.getElementById("trackingTimeline");
+    const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
+
+    if (status === "DIBATALKAN") {
+      container.innerHTML = `
+        <div class="timeline-item active">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">Pesanan Dibatalkan</div>
+            <div class="timeline-desc">Pesanan tidak dilanjutkan.</div>
+            <div class="timeline-time">
+              <i class="far fa-clock"></i>
+              ${formatDate(pesanan.diubahPada || pesanan.updatedAt || pesanan.dibuatPada)}
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const currentIndex = statusRank(status);
+
+    container.innerHTML = timelineSteps
+      .map((step, index) => {
+        let itemClass = "";
+        if (index < currentIndex) itemClass = "completed";
+        else if (index === currentIndex) itemClass = "active";
+
+        const timestamp = getTimestampForStep(pesanan, step.key);
+
+        return `
+          <div class="timeline-item ${itemClass}">
+            <div class="timeline-dot">
+              ${itemClass === "completed" ? '<i class="fas fa-check"></i>' : ""}
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-title">${step.title}</div>
+              <div class="timeline-desc">${step.desc}</div>
+              ${
+                timestamp
+                  ? `
+                <div class="timeline-time">
+                  <i class="far fa-clock"></i>
+                  ${timestamp}
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function renderShippingInfo(pesanan) {
+    const shippingCard = document.getElementById("shippingCard");
+    const ship = pesanan.pengiriman;
+
+    if (!ship || !(pesanan.status === "DIKIRIM" || pesanan.status === "SELESAI")) {
+      shippingCard.style.display = "none";
+      return;
+    }
+
+    shippingCard.style.display = "block";
+
+    const layanan = ship?.layanan;
+    const kurir = layanan?.kurir;
+
+    document.getElementById("shippingCourier").textContent = layanan
+      ? `${layanan.nama}${kurir ? ` (${kurir.nama || kurir.kode})` : ""}`
+      : "Kurir";
+
+    document.getElementById("shippingEstimate").textContent = layanan
+      ? `Estimasi tiba ${layanan.estimasiHari} hari`
+      : "Sedang dikirim";
+
+    document.getElementById("trackingNumber").textContent = ship?.resi || "Belum tersedia";
+  }
+
+  function renderProducts(items) {
+    const container = document.getElementById("productList");
+
+    if (!items || !items.length) {
+      container.innerHTML = '<p style="color:#777;padding:15px 0;">Tidak ada produk</p>';
+      return;
+    }
+
+    container.innerHTML = items
+      .map((it) => {
+        const nama = escapeHtml(it.produk?.nama || "Produk");
+        const qty = Number(it.jumlah || 1);
+        const harga = Number(it.harga ?? it.varian?.harga ?? it.produk?.harga ?? 0);
+
+        const attrs = getVariantAttributesFromDb(it.varian);
+        const variantText = attrs.length
+          ? attrs.map((a) => `${escapeHtml(a.label)}: ${escapeHtml(a.value)}`).join(" | ")
+          : "";
+
+        const gambar = it.produk?.gambarUtama ? toAbsoluteUrl(it.produk.gambarUtama) : "";
+
+        return `
+          <div class="product-item">
+            <div class="product-image">
+              ${gambar ? `<img src="${gambar}" alt="${nama}">` : "📦"}
+            </div>
+            <div class="product-info">
+              <div class="product-name">${nama}</div>
+              ${variantText ? `<div class="product-variant">${variantText}</div>` : ""}
+              <div>
+                <span class="product-price">${rupiah(harga)}</span>
+                <span class="product-quantity">x${qty}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function renderAddress(pesanan) {
+    document.getElementById("receiverName").textContent = pesanan.namaPenerima || "-";
+    document.getElementById("receiverPhone").textContent = pesanan.noTelp || "-";
+
+    const addrHtml = [
+      escapeHtml(pesanan.alamat || ""),
+      `Kelurahan ${escapeHtml(pesanan.kelurahan || "-")}, Kecamatan ${escapeHtml(pesanan.kecamatan || "-")}`,
+      `${escapeHtml(pesanan.kota || "-")}, ${escapeHtml(pesanan.provinsi || "-")} ${escapeHtml(pesanan.kodePos || "")}`,
+    ]
+      .filter(Boolean)
+      .join("<br>");
+
+    document.getElementById("addressFull").innerHTML = addrHtml || "-";
+  }
+
+  function renderSummary(pesanan) {
+    document.getElementById("subtotalValue").textContent = rupiah(pesanan.subtotal ?? 0);
+    document.getElementById("discountValue").textContent = "Rp 0";
+
+    document.getElementById("shippingValue").textContent = (pesanan.ongkir ?? 0) > 0 ? rupiah(pesanan.ongkir) : "GRATIS";
+
+    const voucher = Number(pesanan.diskon ?? 0);
+    document.getElementById("voucherValue").textContent = voucher > 0 ? "-" + rupiah(voucher) : "Rp 0";
+
+    document.getElementById("totalValue").textContent = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
+  }
+
+  let currentPesanan = null;
+
+  function renderActionButtons(pesanan) {
+    const container = document.getElementById("actionButtons");
+    const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
+    let buttons = "";
+
+    if (status === "MENUNGGU_PEMBAYARAN") {
+      buttons = `
+        <button class="btn btn-primary" onclick="goToPayment()">
+          <i class="fas fa-credit-card"></i>
+          Bayar Sekarang
+        </button>
+        <button class="btn btn-danger" onclick="cancelOrder()">Batalkan Pesanan</button>
+      `;
+    } else if (status === "DIKIRIM") {
+      buttons = `
+        <button class="btn btn-primary" onclick="trackShipment()">
+          <i class="fas fa-truck"></i>
+          Lacak Paket
+        </button>
+        <button class="btn btn-secondary" onclick="confirmReceived()">
+          <i class="fas fa-check"></i>
+          Pesanan Diterima
+        </button>
+      `;
+    } else if (status === "SELESAI") {
+      buttons = `
+        <button class="btn btn-secondary" onclick="buyAgain()">
+          <i class="fas fa-redo"></i>
+          Beli Lagi
+        </button>
+      `;
+    } else {
+      buttons = "";
+    }
+
+    container.innerHTML = buttons;
+  }
+
+  // ===== ACTION FUNCTIONS =====
+  window.copyTrackingNumber = function () {
+    const resi = document.getElementById("trackingNumber").textContent;
+    if (!resi || resi === "Belum tersedia" || resi === "-") {
+      return showAlert("Resi belum tersedia", "warning");
+    }
+
+    navigator.clipboard
+      .writeText(resi)
+      .then(() => showAlert("Nomor resi berhasil disalin!", "success"))
+      .catch(() => showAlert("Gagal menyalin nomor resi", "error"));
+  };
+
+  function getOrderIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("orderId") || urlParams.get("pesananId");
+  }
+
+  window.goToPayment = function () {
+    const orderId = getOrderIdFromUrl();
+    window.location.href = `/pembayaran.html?orderId=${encodeURIComponent(orderId)}`;
+  };
+
+  window.trackShipment = function () {
+    const resi = document.getElementById("trackingNumber").textContent;
+    if (!resi || resi === "Belum tersedia" || resi === "-") {
+      return showAlert("Resi belum tersedia", "warning");
+    }
+
+    showAlert(`Tracking (stub): buka tracking kurir untuk resi: ${resi}`, "info", { timeout: 4000 });
+  };
+
+  window.confirmReceived = async function () {
+    const orderId = getOrderIdFromUrl();
+    if (!orderId) return showAlert("Order ID tidak ditemukan", "error");
+
+    if (!confirm("Konfirmasi bahwa Anda sudah menerima pesanan?")) return;
+
+    try {
+      showAlert("✅ (Stub) Konfirmasi diterima. Buat endpoint PATCH /api/pesanan/:id/terima untuk update status ke SELESAI.", "info", {
+        timeout: 5000,
+      });
+    } catch (err) {
+      showAlert(err.message || "Gagal konfirmasi penerimaan", "error");
+    }
+  };
+
+  window.buyAgain = function () {
+    showAlert("Stub: Beli lagi (bisa implement: masukkan item pesanan ke keranjang).", "info", { timeout: 4000 });
+  };
+
+  window.contactWhatsApp = function () {
+    const orderId = getOrderIdFromUrl() || "-";
+    const message = `Halo, saya butuh bantuan terkait pesanan Order ID: ${orderId}`;
+    window.open(`https://wa.me/628123456789?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  window.contactEmail = function () {
+    const orderId = getOrderIdFromUrl() || "-";
+    window.location.href = `mailto:support@Ashanum.com?subject=Bantuan Pesanan - ${encodeURIComponent(orderId)}`;
+  };
+
+  // ===== LOAD DATA =====
+  async function loadOrderStatus() {
+    const orderId = getOrderIdFromUrl();
+    if (!orderId) {
+      showAlert("Order ID tidak ditemukan", "error", { timeout: 3500 });
+      window.location.href = "/";
+      return;
+    }
+
+    try {
+      const pesanan = await apiAuth(`/api/pesanan/${encodeURIComponent(orderId)}`, { method: "GET" });
+
+      currentPesanan = pesanan;
+
+      renderStatusHeader(pesanan);
+      renderTimeline(pesanan);
+      renderShippingInfo(pesanan);
+      renderProducts(pesanan.item || []);
+      renderAddress(pesanan);
+      renderSummary(pesanan);
+      renderActionButtons(pesanan);
+    } catch (err) {
+      if (String(err.message) === "NO_LOGIN") return;
+      console.error(err);
+      showAlert(err.message || "Gagal memuat status pesanan", "error", { timeout: 4000 });
+    }
+  }
+  
+  window.cancelOrder = async function () {
+    const ok = await showConfirm({
+      title: "Batalkan Pesanan",
+      message: "Yakin ingin membatalkan pesanan ini?",
+      confirmText: "Ya, Batalkan",
+      cancelText: "Tidak",
+      type: "danger",
+    });
+
+    if (!ok) return;
+
+    const orderId = getOrderIdFromUrl();
+
+    try {
+      await apiAuth(`/api/pesanan/${orderId}/batalkan`, {
+        method: "PATCH",
+      });
+
+      showAlert("Pesanan berhasil dibatalkan", "success");
+      location.reload();
+    } catch (err) {
+      showAlert(err.message || "Gagal membatalkan pesanan", "error");
+    }
+  };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (typeof showAlert !== "function") {
+      window.showAlert = (msg) => alert(msg);
+    }
+
+    loadOrderStatus();
+  });
+</script>
+
+</body>
+</html>

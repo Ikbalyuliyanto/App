@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesanan Saya - Ashanum</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+    }
+
+    /* Container */
+    .order-container {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      color: white;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .page-header p {
+      font-size: 16px;
+      opacity: 0.95;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      background: white;
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 25px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .filter-tab {
+      padding: 12px 24px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+      color: #666;
+    }
+
+    .filter-tab:hover {
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .filter-tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* Order Card */
+    .order-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .order-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+      border-color: #667eea;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f5f5f5;
+      margin-bottom: 16px;
+    }
+
+    .order-meta {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .order-id {
+      font-size: 14px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .order-id strong {
+      color: #333;
+      font-family: 'Courier New', monospace;
+    }
+
+    .order-date {
+      font-size: 13px;
+      color: #999;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.menunggu {
+      background: linear-gradient(135deg, #ffd54f 0%, #ffb300 100%);
+      color: #663c00;
+    }
+
+    .status-badge.diproses {
+      background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%);
+      color: white;
+    }
+
+    .status-badge.dikirim {
+      background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+      color: white;
+    }
+
+    .status-badge.selesai {
+      background: linear-gradient(135deg, #9575cd 0%, #512da8 100%);
+      color: white;
+    }
+
+    .status-badge.dibatalkan {
+      background: linear-gradient(135deg, #e57373 0%, #c62828 100%);
+      color: white;
+    }
+
+    /* Product Items */
+    .products-section {
+      margin-bottom: 20px;
+    }
+
+    .product-item {
+      display: flex;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .product-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .product-image {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      border: 2px solid #eee;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .product-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .product-item:hover .product-image::after {
+      opacity: 1;
+    }
+
+    .product-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .product-name {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .product-variant {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 8px;
+    }
+
+    .product-bottom {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .product-price {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ff4081;
+    }
+
+    .product-quantity {
+      font-size: 13px;
+      color: #666;
+      background: #f5f5f5;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Order Info Grid */
+    .order-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #f9f9f9;
+      border-radius: 12px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    /* Order Footer */
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 2px solid #f5f5f5;
+    }
+
+    .total-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .total-label {
+      font-size: 13px;
+      color: #666;
+      font-weight: 600;
+    }
+
+    .total-amount {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ff4081 0%, #f50057 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .btn-secondary:hover {
+      background: #f8f9ff;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    /* Empty State */
+    .empty-state {
+      background: white;
+      border-radius: 16px;
+      padding: 60px 30px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .empty-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    .empty-state h3 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .empty-state .btn {
+      margin: 0 auto;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .breadcrumb {
+        font-size: 12px;
+        padding: 0 15px;
+        margin: 15px auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .back-button {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      .back-button i {
+        font-size: 12px;
+      }
+
+      .breadcrumb-links {
+        font-size: 12px;
+      }
+
+      .page-header {
+        padding: 20px;
+      }
+
+      .page-header h1 {
+        font-size: 24px;
+      }
+
+      .order-card {
+        padding: 16px;
+      }
+
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .order-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .total-section {
+        text-align: center;
+      }
+
+      .action-buttons {
+        justify-content: center;
+      }
+
+      .filter-tabs {
+        padding: 6px;
+      }
+
+      .filter-tab {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      .product-image {
+        width: 70px;
+        height: 70px;
+      }
+
+      .total-amount {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div id="header-container"></div>
+
+  <!-- Orders Container -->
+  <div class="order-container">
+    <div class="page-header">
+      <h1><i class="fas fa-shopping-cart"></i> Pesanan Saya</h1>
+      <p>Kelola dan lacak semua pesanan Anda dengan mudah</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="All">
+        <i class="fas fa-th"></i> Semua
+      </button>
+      <button class="filter-tab" data-filter="MENUNGGU_PEMBAYARAN">
+        <i class="fas fa-clock"></i> Belum Bayar
+      </button>
+      <button class="filter-tab" data-filter="DIPROSES">
+        <i class="fas fa-box"></i> Diproses
+      </button>
+      <button class="filter-tab" data-filter="DIKIRIM">
+        <i class="fas fa-truck"></i> Dikirim
+      </button>
+      <button class="filter-tab" data-filter="SELESAI">
+        <i class="fas fa-check-circle"></i> Selesai
+      </button>
+      <button class="filter-tab" data-filter="DIBATALKAN">
+        <i class="fas fa-times-circle"></i> Dibatalkan
+      </button>
+    </div>
+
+    <div id="ordersList">
+      <div class="loading">
+        <div class="loading-spinner"></div>
+        <p>Memuat pesanan Anda...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer-container"></div>
+
+  <script src="assets/js/alert.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  
+  <script>
+  // Wait for header to load before initializing
+  window.addEventListener('headerLoaded', function() {
+    console.log('Header loaded, initializing orders page...');
+  });
+
+  let allOrders = [];
+  let currentFilter = "All";
+
+  function statusLabel(status) {
+    const s = String(status || "").toUpperCase();
+
+    if (s === "MENUNGGU_PEMBAYARAN") return { text: "Belum Bayar", icon: "⏳", class: "menunggu" };
+    if (s === "DIPROSES") return { text: "Diproses", icon: "📦", class: "diproses" };
+    if (s === "DIKIRIM") return { text: "Dikirim", icon: "🚚", class: "dikirim" };
+    if (s === "SELESAI") return { text: "Selesai", icon: "✅", class: "selesai" };
+    if (s === "DIBATALKAN") return { text: "Dibatalkan", icon: "❌", class: "dibatalkan" };
+
+    return { text: s || "-", icon: "📄", class: "menunggu" };
+  }
+
+  function paymentLabel(pembayaran) {
+    const st = String(pembayaran?.status || "MENUNGGU").toUpperCase();
+    const metode = pembayaran?.metode || "";
+
+    if (st === "BERHASIL") return `<span style="color:#4caf50;">✓ ${escapeHtml(metode)}</span>`;
+    if (st === "GAGAL") return `<span style="color:#f44336;">✗ ${escapeHtml(metode)} (Gagal)</span>`;
+    if (st === "KADALUARSA") return `<span style="color:#ff9800;">⚠ ${escapeHtml(metode)} (Kadaluarsa)</span>`;
+    if (st === "DIBATALKAN") return `<span style="color:#f44336;">✗ ${escapeHtml(metode)} (Dibatalkan)</span>`;
+
+    return `<span style="color:#ff9800;">⏳ Menunggu Pembayaran</span>`;
+  }
+
+  function shipLabel(pengiriman) {
+    const layanan = pengiriman?.layanan;
+    const kurir = layanan?.kurir;
+    if (!layanan) return "-";
+    const k = kurir ? (kurir.nama || kurir.kode || "") : "";
+    return `${escapeHtml(layanan.nama)}${k ? ` (${escapeHtml(k)})` : ""} • ${escapeHtml(layanan.estimasiHari || "-")} hari`;
+  }
+
+  function getVariantAttributesFromDb(varian) {
+    const out = [];
+    const maps = varian?.atribut || [];
+    for (const m of maps) {
+      const label = m?.nilai?.atribut?.nama;
+      const value = m?.nilai?.nilai;
+      if (label && value) out.push(`${label}: ${value}`);
+    }
+    return out;
+  }
+
+  function getProductImage(item) {
+    const p = item?.produk;
+    if (!p) return null;
+    if (p.gambarUtama) return toAbsoluteUrl(p.gambarUtama);
+    return null;
+  }
+
+  // ===== RENDER =====
+  function renderOrders(list) {
+    const el = document.getElementById("ordersList");
+    if (!el) return;
+
+    if (!list || !list.length) {
+      el.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🛍️</div>
+          <h3>Belum ada pesanan${currentFilter !== "All" ? " dengan status ini" : ""}</h3>
+          <p>Yuk mulai berbelanja dan buat pesanan pertama Anda!</p>
+          <a href="/" class="btn btn-primary">
+            <i class="fas fa-shopping-bag"></i> Mulai Belanja
+          </a>
+        </div>
+      `;
+      return;
+    }
+
+    el.innerHTML = list.map((o) => {
+      const st = statusLabel(o.status);
+      const pay = paymentLabel(o.pembayaran);
+      const ship = shipLabel(o.pengiriman);
+
+      const items = o.item || [];
+      const itemCount = items.length;
+
+      return `
+        <div class="order-card">
+          <div class="order-header">
+            <div class="order-meta">
+              <div class="order-id">
+                <i class="fas fa-receipt"></i> Order ID: <strong>#${escapeHtml(o.id)}</strong>
+              </div>
+              <div class="order-date">
+                <i class="far fa-calendar-alt"></i> ${formatDate(o.dibuatPada)}
+              </div>
+            </div>
+            <span class="status-badge ${st.class}">
+              ${st.icon} ${st.text}
+            </span>
+          </div>
+
+          <div class="products-section">
+            ${items.slice(0, 3).map((it) => {
+              const imgSrc = getProductImage(it);
+              const produk = it.produk || {};
+              const nama = escapeHtml(produk.nama || "Produk");
+              const qty = Number(it.jumlah || 1);
+              const harga = Number(it.harga ?? it.varian?.harga ?? produk.harga ?? 0);
+
+              const attrs = getVariantAttributesFromDb(it.varian);
+              const variantText = attrs.length ? escapeHtml(attrs.join(" | ")) : "";
+
+              return `
+                <div class="product-item">
+                  <div class="product-image">
+                    ${imgSrc
+                      ? `<img src="${imgSrc}" alt="${nama}" onerror="this.parentElement.innerHTML='📦'">`
+                      : "📦"}
+                  </div>
+                  <div class="product-info">
+                    <div class="product-name">${nama}</div>
+                    ${variantText ? `<div class="product-variant">${variantText}</div>` : ""}
+                    <div class="product-bottom">
+                      <div class="product-price">${rupiah(harga)}</div>
+                      <div class="product-quantity">x${qty}</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join("")}
+
+            ${itemCount > 3 ? `
+              <div style="text-align:center;padding:12px;color:#666;font-size:13px;font-weight:600;">
+                <i class="fas fa-plus-circle"></i> +${itemCount - 3} produk lainnya
+              </div>
+            ` : ""}
+          </div>
+
+          <div class="order-info-grid">
+            <div class="info-item">
+              <div class="info-label">Pembayaran</div>
+              <div class="info-value">${pay}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Pengiriman</div>
+              <div class="info-value">${ship}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Total Item</div>
+              <div class="info-value">${itemCount} produk</div>
+            </div>
+          </div>
+
+          <div class="order-footer">
+            <div class="total-section">
+              <div class="total-label">Total Pembayaran</div>
+              <div class="total-amount">${rupiah(o.totalAkhir ?? o.total ?? 0)}</div>
+            </div>
+
+            <div class="action-buttons">
+              <a class="btn btn-primary" href="/pesanan-detail.html?orderId=${encodeURIComponent(o.id)}">
+                <i class="fas fa-eye"></i> Lihat Detail
+              </a>
+
+              ${String(o.status || "").toUpperCase() === "MENUNGGU_PEMBAYARAN" ? `
+                <a class="btn btn-success" href="/pembayaran.html?orderId=${encodeURIComponent(o.id)}">
+                  <i class="fas fa-credit-card"></i> Bayar Sekarang
+                </a>
+              ` : ""}
+
+              ${String(o.status || "").toUpperCase() === "DIKIRIM" ? `
+                <a class="btn btn-secondary" href="/pesanan-detail.html?orderId=${encodeURIComponent(o.id)}#tracking">
+                  <i class="fas fa-map-marker-alt"></i> Lacak Paket
+                </a>
+              ` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function filterOrders(filter) {
+    currentFilter = filter;
+
+    document.querySelectorAll(".filter-tab").forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.filter === filter);
+    });
+
+    let filtered = allOrders;
+    if (filter !== "All") {
+      filtered = allOrders.filter((o) => String(o.status || "").toUpperCase() === filter);
+    }
+
+    renderOrders(filtered);
+  }
+
+  // ===== LOAD =====
+  async function loadOrders() {
+    try {
+      const list = await apiAuth("/api/pesanan", { method: "GET" });
+      allOrders = list || [];
+      filterOrders(currentFilter);
+    } catch (err) {
+      if (String(err.message) === "NO_LOGIN") return;
+
+      console.error(err);
+
+      if (typeof showAlert === "function") {
+        showAlert(err.message || "Terjadi kesalahan saat memuat data", "error", { timeout: 3500 });
+      } else {
+        alert(err.message || "Terjadi kesalahan saat memuat data");
+      }
+
+      const el = document.getElementById("ordersList");
+      if (el) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <h3>Gagal Memuat Pesanan</h3>
+            <p>${escapeHtml(err.message || "Terjadi kesalahan saat memuat data")}</p>
+            <button class="btn btn-primary" onclick="loadOrders()">
+              <i class="fas fa-redo"></i> Coba Lagi
+            </button>
+          </div>
+        `;
+      }
+    }
+  }
+
+  window.loadOrders = loadOrders;
+
+  // ===== INIT =====
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".filter-tab").forEach((tab) => {
+      tab.addEventListener("click", () => filterOrders(tab.dataset.filter));
+    });
+
+    loadOrders();
+  });
+</script>
+
+</body>
+</html>

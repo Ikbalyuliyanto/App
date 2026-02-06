@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Ashanum</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">Ashanum</h2>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <div class="nav-section">Master Data</div>
+                
+                <a href="kategori.html" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Kategori</span>
+                </a>
+                
+                <a href="produk.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Produk</span>
+                </a>
+                
+                <div class="nav-section">Transaksi</div>
+                
+                <a href="pesanan.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Pesanan</span>
+                </a>
+                
+                <a href="pembayaran.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pembayaran</span>
+                </a>
+                
+                <div class="nav-section">Pengguna</div>
+                
+                <a href="pengguna.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Kelola Pengguna</span>
+                </a>
+                
+                <div class="nav-section">Laporan</div>
+                
+                <a href="laporan.html" class="nav-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Laporan Penjualan</span>
+                </a>
+                
+                <div style="padding: 20px; border-top: 1px solid var(--gray-200); margin-top: 20px;">
+                    <a href="#logout" class="nav-item" style="color: #ef4444;" onclick="event.preventDefault(); Auth.logout();">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                
+                <div class="topbar-right">
+                    <div class="topbar-item">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">5</span>
+                    </div>
+                    
+                    <div class="topbar-item user-menu">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard</h1>
+                    <p class="page-subtitle">Selamat datang di panel admin Ashanum</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalProduk">0</div>
+                            <div class="stat-label">Total Produk</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalPesanan">0</div>
+                            <div class="stat-label">Total Pesanan</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalPengguna">0</div>
+                            <div class="stat-label">Total Pengguna</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="totalPendapatan">Rp 0</div>
+                            <div class="stat-label">Total Pendapatan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Pesanan Terbaru</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Pengguna</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Tanggal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentOrders">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Memuat data...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Produk Terlaris</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Produk</th>
+                                            <th>Terjual</th>
+                                            <th>Stok</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topProducts">
+                                        <tr>
+                                            <td colspan="3" class="text-center">Memuat data...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/helpers.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

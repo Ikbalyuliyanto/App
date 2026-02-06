@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Pengguna - Ashanum Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="admin-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-logo">Ashanum</h2>
+        <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-times"></i></button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+        <div class="nav-section">Master Data</div>
+        <a href="kategori.html" class="nav-item"><i class="fas fa-tags"></i><span>Kategori</span></a>
+        <a href="produk.html" class="nav-item"><i class="fas fa-box"></i><span>Produk</span></a>
+
+        <div class="nav-section">Transaksi</div>
+        <a href="pesanan.html" class="nav-item"><i class="fas fa-shopping-cart"></i><span>Pesanan</span></a>
+        <a href="pembayaran.html" class="nav-item"><i class="fas fa-credit-card"></i><span>Pembayaran</span></a>
+
+        <div class="nav-section">Pengguna</div>
+        <a href="pengguna.html" class="nav-item active"><i class="fas fa-users"></i><span>Kelola Pengguna</span></a>
+      </nav>
+    </aside>
+
+    <div class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <div class="topbar-right">
+          <div class="topbar-item"><i class="fas fa-bell"></i><span class="badge">5</span></div>
+          <div class="topbar-item user-menu">
+            <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
+            <span>Admin</span><i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h1 class="page-title">Kelola Pengguna</h1>
+            <p class="page-subtitle">Manajemen pengguna dan admin</p>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" id="btnRefresh"><i class="fas fa-rotate"></i> Refresh</button>
+            <button class="btn btn-primary" id="btnAdd"><i class="fas fa-plus"></i> Tambah Pengguna</button>
+          </div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="filter-section">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cari Pengguna</label>
+              <input type="text" id="searchInput" placeholder="Nama atau email...">
+            </div>
+            <div class="form-group">
+              <label>Filter Peran</label>
+              <select id="filterPeran">
+                <option value="">Semua Peran</option>
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" id="btnApply"><i class="fas fa-search"></i> Cari</button>
+            <button class="btn btn-secondary" id="btnReset"><i class="fas fa-redo"></i> Reset</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 class="card-title">Daftar Pengguna</h3>
+            <small id="totalInfo" style="color:#6b7280;">-</small>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Peran</th>
+                    <th>Terdaftar</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody">
+                  <tr>
+                    <td colspan="6">
+                      <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Memuat data...</p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FORM -->
+  <div class="modal" id="formModal" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Tambah Pengguna</h3>
+        <button class="modal-close" id="btnCloseModal" type="button">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="userForm">
+          <input type="hidden" id="userId">
+
+          <div class="form-group">
+            <label class="required">Nama Lengkap</label>
+            <input type="text" id="nama" required>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Email</label>
+            <input type="email" id="email" required>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Password</label>
+            <input type="password" id="password" placeholder="Isi untuk membuat / ganti password">
+            <small id="passwordHelp">Minimal 6 karakter</small>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Peran</label>
+            <select id="peran" required>
+              <option value="USER">User</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="btnCancelModal" type="button">Batal</button>
+        <button class="btn btn-primary" id="btnSave" type="button"><i class="fas fa-save"></i> Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/pengguna.js"></script>
+</body>
+</html>

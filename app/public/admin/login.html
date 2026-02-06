@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Ashanum</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 600px;
+        }
+
+        .login-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-left::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            top: -50%;
+            left: -50%;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 30px); }
+        }
+
+        .login-left-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-logo {
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-subtitle {
+            font-size: 20px;
+            line-height: 1.6;
+            opacity: 0.95;
+            margin-bottom: 40px;
+        }
+
+        .login-features {
+            list-style: none;
+        }
+
+        .login-features li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .login-features li i {
+            font-size: 20px;
+            width: 24px;
+        }
+
+        .login-right {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-header {
+            margin-bottom: 40px;
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .login-description {
+            font-size: 15px;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px 16px 14px 45px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: 400;
+            font-size: 14px;
+            color: #4b5563;
+            cursor: pointer;
+        }
+
+        .forgot-password {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .forgot-password:hover {
+            color: #764ba2;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-login .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        .btn-login.loading .spinner {
+            display: block;
+        }
+
+        .btn-login.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #9ca3af;
+            font-size: 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .alert {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert i {
+            font-size: 18px;
+        }
+
+        .demo-credentials {
+            background: #f3f4f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .demo-credentials strong {
+            color: #1f2937;
+        }
+
+        .demo-credentials p {
+            margin: 5px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                padding: 40px 30px;
+            }
+
+            .login-title {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .login-right {
+                padding: 30px 20px;
+            }
+
+            .login-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left Panel -->
+        <div class="login-left">
+            <div class="login-left-content">
+                <div class="login-logo">Ashanum</div>
+                <p class="login-subtitle">
+                    Panel Admin Modern untuk Mengelola E-Commerce Anda
+                </p>
+                <ul class="login-features">
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Dashboard Statistik Real-time</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Manajemen Produk & Kategori</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Tracking Pesanan & Pembayaran</span>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Laporan Penjualan Lengkap</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Right Panel - Login Form -->
+        <div class="login-right">
+            <div class="login-header">
+                <h1 class="login-title">Selamat Datang</h1>
+                <p class="login-description">Masuk ke panel admin untuk mengelola toko Anda</p>
+            </div>
+
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope input-icon"></i>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            placeholder="admin@Ashanum.com" 
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock input-icon"></i>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Masukkan password" 
+                            required
+                            autocomplete="current-password"
+                        >
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="remember">
+                        <label for="remember">Ingat saya</label>
+                    </div>
+                    <a href="#" class="forgot-password">Lupa password?</a>
+                </div>
+
+                <button type="submit" class="btn-login" id="btnLogin">
+                    <span class="btn-text">Masuk</span>
+                    <div class="spinner"></div>
+                </button>
+
+                <!-- Demo Credentials -->
+                <div class="demo-credentials">
+                    <strong>🔐 Demo Login:</strong>
+                    <p>Email: <code>admin@Ashanum.com</code></p>
+                    <p>Password: <code>admin123</code></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = `${location.protocol}//${location.hostname}:4000`;
+
+
+        // Show Alert
+        function showAlert(message, type = 'error') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Handle Form Submit
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+            const btnLogin = document.getElementById('btnLogin');
+            
+            // Validation
+            if (!email || !password) {
+                showAlert('Email dan password harus diisi', 'error');
+                return;
+            }
+            
+            // Show loading
+            btnLogin.classList.add('loading');
+            btnLogin.disabled = true;
+            
+            try {
+                // Call login API
+                const response = await fetch(`${API_BASE}/api/admin/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Check if user is admin
+                    if (data.pengguna?.peran !== 'ADMIN') {
+                        showAlert('Akses ditolak. Hanya admin yang dapat login.', 'error');
+                        btnLogin.classList.remove('loading');
+                        btnLogin.disabled = false;
+                        return;
+                    }
+                    
+                    // Save token and user data
+                    if (remember) {
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.pengguna));
+                    } else {
+                        sessionStorage.setItem('token', data.token);
+                        sessionStorage.setItem('user', JSON.stringify(data.pengguna));
+                    }
+                    
+                    showAlert('Login berhasil! Mengalihkan...', 'success');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showAlert(data.message || 'Email atau password salah', 'error');
+                    btnLogin.classList.remove('loading');
+                    btnLogin.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Demo mode - if API not available
+                if (email === 'admin@Ashanum.com' && password === 'admin123') {
+                    const demoUser = {
+                        id: 1,
+                        nama: 'Admin Demo',
+                        email: 'admin@Ashanum.com',
+                        peran: 'ADMIN'
+                    };
+                    
+                    const demoToken = 'demo_token_' + Date.now();
+                    
+                    if (remember) {
+                        localStorage.setItem('token', demoToken);
+                        localStorage.setItem('user', JSON.stringify(demoUser));
+                    } else {
+                        sessionStorage.setItem('token', demoToken);
+                        sessionStorage.setItem('user', JSON.stringify(demoUser));
+                    }
+                    
+                    showAlert('Login berhasil (Demo Mode)! Mengalihkan...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } else {
+                    showAlert('Koneksi ke server gagal. Gunakan kredensial demo atau periksa backend API.', 'error');
+                    btnLogin.classList.remove('loading');
+                    btnLogin.disabled = false;
+                }
+            }
+        });
+
+        // Auto-fill demo credentials on demo button click (optional)
+        document.querySelector('.demo-credentials').addEventListener('click', (e) => {
+            if (e.target.tagName === 'CODE') {
+                const text = e.target.textContent;
+                if (text.includes('@')) {
+                    document.getElementById('email').value = text;
+                } else {
+                    document.getElementById('password').value = text;
+                }
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            if (token) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

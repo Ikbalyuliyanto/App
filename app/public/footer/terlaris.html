@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Produk Terlaris - Ashanum</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; color: #333; background: #f5f5f5; }
+
+    .page-container {
+      max-width: 1200px;
+      margin: 20px auto 40px;
+      padding: 0 20px;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 40px 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .page-header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid #eee;
+      position: relative;
+    }
+
+    .product-card:hover {
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transform: translateY(-5px);
+    }
+
+    .rank-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      color: #333;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 18px;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 280px;
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      position: relative;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .discount-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff4081;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .product-info {
+      padding: 15px;
+    }
+
+    .product-name {
+      font-size: 14px;
+      margin-bottom: 10px;
+      height: 40px;
+      overflow: hidden;
+    }
+
+    .price-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .current-price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #ff4081;
+    }
+
+    .original-price {
+      font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .product-sold {
+      font-size: 13px;
+      color: #f5576c;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    @media (max-width: 1024px) {
+      .product-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .page-header h1 { font-size: 28px; flex-direction: column; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="header-container"></div>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h1><i class="fas fa-fire"></i> PRODUK TERLARIS</h1>
+      <p style="font-size: 16px;">Produk favorit yang paling banyak dibeli pelanggan kami</p>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="../assets/js/alert.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/helpers.js"></script>
+  
+  <script>
+    fetch('../header.html').then(r => r.text()).then(h => {
+      document.getElementById('header-container').innerHTML = h;
+    });
+
+    fetch('../footer.html').then(r => r.text()).then(h => {
+      document.getElementById('footer-container').innerHTML = h;
+    });
+
+    async function loadProducts() {
+      try {
+        const products = await apiRequest("/api/produk");
+        let terlaris = (products || [])
+          .filter(p => p.aktif && p.terlaris)
+          .sort((a, b) => (b.terjual || 0) - (a.terjual || 0));
+        
+        renderProducts(terlaris);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderProducts(products) {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      if (!products.length) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Belum ada produk terlaris</p>';
+        return;
+      }
+
+      products.forEach((p, index) => {
+        const imageHtml = p.gambarUtama
+          ? `<img src="${imgUrl(p.gambarUtama)}" alt="${p.nama}">`
+          : `🔥`;
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="rank-badge">#${index + 1}</div>
+          <div class="product-image">
+            ${imageHtml}
+            ${p.diskonPersen ? `<span class="discount-badge">-${p.diskonPersen}%</span>` : ''}
+          </div>
+          <div class="product-info">
+            <div class="product-name">${escapeHtml(p.nama)}</div>
+            <div class="price-container">
+              <span class="current-price">Rp ${rupiah(p.harga)}</span>
+              ${p.hargaAsli ? `<span class="original-price">Rp ${rupiah(p.hargaAsli)}</span>` : ''}
+            </div>
+            <div class="product-sold">
+              <i class="fas fa-fire"></i> Terjual ${rupiah(p.terjual || 0)}
+            </div>
+          </div>
+        `;
+
+        card.onclick = () => window.location.href = `produk.html?id=${p.id}`;
+        grid.appendChild(card);
+      });
+    }
+
+    function rupiah(n) {
+      return Number(n || 0).toLocaleString("id-ID");
+    }
+
+    function escapeHtml(str) {
+      return String(str || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    function imgUrl(u) {
+      if (!u) return "";
+      if (u.startsWith("http")) return u;
+      return `${window.API_BASE}${u}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
+</body>
+</html>

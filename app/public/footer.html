@@ -1,0 +1,414 @@
+<!-- footer.html -->
+<style>
+  /* ===== FOOTER ===== */
+  .footer {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 50px 0 0;
+    margin-top: 60px;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid rgba(236, 240, 241, 0.1);
+  }
+
+  .footer-section h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+  }
+
+  .footer-logo {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #f39c12;
+    margin-bottom: 15px;
+    display: block;
+  }
+
+  .footer-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #bdc3c7;
+    margin-bottom: 20px;
+  }
+
+  .footer-social {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .social-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(236, 240, 241, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 18px;
+    transition: all 0.3s;
+  }
+
+  .social-icon:hover {
+    background: #f39c12;
+    color: #2c3e50;
+    transform: translateY(-3px);
+  }
+
+  .footer-links {
+    list-style: none;
+  }
+
+  .footer-links li {
+    margin-bottom: 12px;
+  }
+
+  .footer-links a {
+    color: #bdc3c7;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-links a:hover {
+    color: #f39c12;
+    padding-left: 5px;
+  }
+
+  .footer-links a i {
+    font-size: 12px;
+  }
+
+  .footer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: #bdc3c7;
+  }
+
+  .contact-item i {
+    width: 20px;
+    color: #f39c12;
+    margin-top: 2px;
+  }
+
+  .footer-bottom {
+    padding: 25px 0;
+    text-align: center;
+  }
+
+  .footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .footer-copyright {
+    font-size: 14px;
+    color: #95a5a6;
+  }
+
+  .footer-payment {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .footer-payment span {
+    font-size: 13px;
+    color: #95a5a6;
+  }
+
+  .payment-icons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .payment-icon {
+    width: 45px;
+    height: 30px;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+
+  /* Newsletter */
+  .footer-newsletter {
+    margin-top: 20px;
+  }
+
+  .newsletter-form {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .newsletter-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid rgba(236, 240, 241, 0.2);
+    border-radius: 6px;
+    background: rgba(236, 240, 241, 0.05);
+    color: #ecf0f1;
+    font-size: 14px;
+  }
+
+  .newsletter-input::placeholder {
+    color: #95a5a6;
+  }
+
+  .newsletter-btn {
+    padding: 10px 20px;
+    background: #f39c12;
+    color: #2c3e50;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .newsletter-btn:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+  }
+
+  /* Responsive */
+  @media (max-width: 968px) {
+    .footer-content {
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .footer {
+      padding: 40px 0 0;
+      margin-top: 40px;
+    }
+
+    .footer-content {
+      grid-template-columns: 1fr;
+      gap: 30px;
+      padding-bottom: 30px;
+    }
+
+    .footer-logo {
+      font-size: 28px;
+      letter-spacing: 4px;
+    }
+
+    .footer-bottom-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .footer-payment {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .footer-container {
+      padding: 0 15px;
+    }
+
+    .footer-logo {
+      font-size: 24px;
+      letter-spacing: 3px;
+    }
+
+    .payment-icons {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .footer-benefits-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .footer-benefits-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
+  }
+</style>
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <!-- Company Info -->
+      <div class="footer-section">
+        <span class="footer-logo">Ashanum</span>
+        <p class="footer-desc">
+          Toko online terpercaya dengan berbagai pilihan produk berkualitas. 
+          Belanja mudah, aman, dan nyaman untuk kebutuhan Anda.
+        </p>
+        
+        <div class="footer-newsletter">
+          <h4 style="font-size: 14px; color: #fff; margin-bottom: 8px;">Newsletter</h4>
+          <div class="newsletter-form">
+            <input type="email" class="newsletter-input" placeholder="Email Anda" id="newsletterEmail">
+            <button class="newsletter-btn" onclick="subscribeNewsletter()">Subscribe</button>
+          </div>
+        </div>
+
+        <div class="footer-social">
+          <a href="#" class="social-icon" aria-label="Facebook">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-icon" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-icon" aria-label="Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="#" class="social-icon" aria-label="YouTube">
+            <i class="fab fa-youtube"></i>
+          </a>
+          <a href="#" class="social-icon" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-section">
+        <h3>Belanja</h3>
+        <ul class="footer-links">
+          <li><a href="/footer/kategori.html"><i class="fas fa-chevron-right"></i> Semua Produk</a></li>
+          <li><a href="/footer/flashsale.html"><i class="fas fa-chevron-right"></i> Flash Sale</a></li>
+          <li><a href="/footer/terlaris.html"><i class="fas fa-chevron-right"></i> Produk Terlaris</a></li>
+          <li><a href="/footer/promo.html"><i class="fas fa-chevron-right"></i> Promo</a></li>
+          <li><a href="/footer/voucher.html"><i class="fas fa-chevron-right"></i> Voucher</a></li>
+        </ul>
+      </div>
+
+      <!-- Customer Service -->
+      <div class="footer-section">
+        <h3>Layanan</h3>
+        <ul class="footer-links">
+          <li><a href="/footer/tentang.html"><i class="fas fa-chevron-right"></i> Tentang Kami</a></li>
+          <li><a href="/footer/bantuan.html"><i class="fas fa-chevron-right"></i> Pusat Bantuan</a></li>
+          <li><a href="/footer/cara-belanja.html"><i class="fas fa-chevron-right"></i> Cara Belanja</a></li>
+          <li><a href="/footer/kebijakan.html"><i class="fas fa-chevron-right"></i> Kebijakan Privasi</a></li>
+          <li><a href="/footer/syarat.html"><i class="fas fa-chevron-right"></i> Syarat & Ketentuan</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-section">
+        <h3>Kontak</h3>
+        <div class="footer-contact">
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Jl. Raya No. 123<br>Jakarta, Indonesia 12345</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone-alt"></i>
+            <span>+62 812-3456-7890</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acdfd9dcdcc3ded8ecd6cddbcddbc5d5cd82cfc3c1">[email&#160;protected]</a></span>
+          </div>
+          <div class="contact-item">
+            <i class="far fa-clock"></i>
+            <span>Senin - Sabtu<br>09:00 - 18:00 WIB</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features/Benefits Section -->
+    <div style="background: rgba(0,0,0,0.1); padding: 30px 0; margin-top: 40px;">
+      <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <div class="footer-benefits-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+          
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: rgba(243, 156, 18, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+              <i class="fas fa-shipping-fast" style="font-size: 28px; color: #f39c12;"></i>
+            </div>
+            <h4 style="color: #fff; font-size: 16px; margin-bottom: 8px; font-weight: 600;">Gratis Ongkir</h4>
+            <p style="color: #bdc3c7; font-size: 13px; line-height: 1.6;">Gratis ongkir ke seluruh wilayah Indonesia</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: rgba(243, 156, 18, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+              <i class="fas fa-undo" style="font-size: 28px; color: #f39c12;"></i>
+            </div>
+            <h4 style="color: #fff; font-size: 16px; margin-bottom: 8px; font-weight: 600;">Refund Mudah & Cepat</h4>
+            <p style="color: #bdc3c7; font-size: 13px; line-height: 1.6;">Proses pengembalian dana yang mudah dan cepat</p>
+          </div>
+
+          <div style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: rgba(243, 156, 18, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+              <i class="fas fa-shield-alt" style="font-size: 28px; color: #f39c12;"></i>
+            </div>
+            <h4 style="color: #fff; font-size: 16px; margin-bottom: 8px; font-weight: 600;">Garansi 100% Uang Kembali</h4>
+            <p style="color: #bdc3c7; font-size: 13px; line-height: 1.6;">Jaminan uang kembali jika produk tidak sesuai</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <div class="footer-copyright">
+          &copy; 2024 Ashanum. All rights reserved.
+        </div>
+        
+        <div class="footer-payment">
+          <span>Metode Pembayaran:</span>
+          <div class="payment-icons">
+            <div class="payment-icon">BCA</div>
+            <div class="payment-icon">BNI</div>
+            <div class="payment-icon">BRI</div>
+            <div class="payment-icon">GOPAY</div>
+            <div class="payment-icon">OVO</div>
+            <div class="payment-icon">DANA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
