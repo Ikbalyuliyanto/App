@@ -576,19 +576,6 @@
                 }
             }
         });
-
-        // Auto-fill demo credentials on demo button click (optional)
-        document.querySelector('.demo-credentials').addEventListener('click', (e) => {
-            if (e.target.tagName === 'CODE') {
-                const text = e.target.textContent;
-                if (text.includes('@')) {
-                    document.getElementById('email').value = text;
-                } else {
-                    document.getElementById('password').value = text;
-                }
-            }
-        });
-
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
