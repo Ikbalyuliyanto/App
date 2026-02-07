@@ -26,7 +26,7 @@ function showAlert(message, type = 'info') {
 
   setTimeout(() => {
     el.remove();
-  }, 4000);
+  }, 9876);
 }
 
 

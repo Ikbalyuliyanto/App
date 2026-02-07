@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // ===== helper url gambar =====
 function fixImgUrl(u) {
   if (u.startsWith("http://") || u.startsWith("https://")) return u;
-  // kalau /uploads/kaos.jpg -> http://localhost:4000/uploads/kaos.jpg
+  // kalau /uploads/kaos.jpg -> http://localhost:9876/uploads/kaos.jpg
   return `${window.API_BASE}${u}`;
 }
 // ===== helper rupiah =====

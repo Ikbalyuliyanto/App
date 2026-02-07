@@ -52,7 +52,7 @@ async function apiAdmin(path, options = {}) {
     throw new Error("NO_LOGIN");
   }
 
-  const API_BASE = window.API_BASE || `${location.protocol}//${location.hostname}:4000`;
+  const API_BASE = window.API_BASE || `${location.protocol}//${location.hostname}:9876`;
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {

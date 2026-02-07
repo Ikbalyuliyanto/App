@@ -75,5 +75,8 @@ app.use("/api/admin/pembayaran", authJWT, adminOnly, adminPembayaran);
 
 app.get("/", (req, res) => res.json({ message: "API Bryna jalan 🚀" }));
 
-const PORT = Number(process.env.PORT || 4000);
-app.listen(PORT, () => console.log(`Server jalan di http://localhost:${PORT}`));
+const PORT = Number(process.env.PORT || 9876); // misal default 9876
+
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`Server jalan di http://0.0.0.0:${PORT}`)
+);

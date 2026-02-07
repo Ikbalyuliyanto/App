@@ -1100,7 +1100,7 @@
       return showAlert("Resi belum tersedia", "warning");
     }
 
-    showAlert(`Tracking (stub): buka tracking kurir untuk resi: ${resi}`, "info", { timeout: 4000 });
+    showAlert(`Tracking (stub): buka tracking kurir untuk resi: ${resi}`, "info", { timeout: 9876 });
   };
 
   window.confirmReceived = async function () {
@@ -1119,7 +1119,7 @@
   };
 
   window.buyAgain = function () {
-    showAlert("Stub: Beli lagi (bisa implement: masukkan item pesanan ke keranjang).", "info", { timeout: 4000 });
+    showAlert("Stub: Beli lagi (bisa implement: masukkan item pesanan ke keranjang).", "info", { timeout: 9876 });
   };
 
   window.contactWhatsApp = function () {
@@ -1157,7 +1157,7 @@
     } catch (err) {
       if (String(err.message) === "NO_LOGIN") return;
       console.error(err);
-      showAlert(err.message || "Gagal memuat status pesanan", "error", { timeout: 4000 });
+      showAlert(err.message || "Gagal memuat status pesanan", "error", { timeout: 9876 });
     }
   }
   

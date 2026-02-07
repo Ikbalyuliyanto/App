@@ -53,6 +53,9 @@ CREATE TABLE "AlamatPengguna" (
     "kelurahan" TEXT NOT NULL,
     "kodePos" TEXT NOT NULL,
     "alamat" TEXT NOT NULL,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
+    "mapsUrl" TEXT,
     "isUtama" BOOLEAN NOT NULL DEFAULT false,
     "dibuatPada" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "diubahPada" TIMESTAMP(3) NOT NULL,
@@ -376,7 +379,7 @@ CREATE INDEX "Pembayaran_provider_idx" ON "Pembayaran"("provider");
 ALTER TABLE "ProfilPengguna" ADD CONSTRAINT "ProfilPengguna_penggunaId_fkey" FOREIGN KEY ("penggunaId") REFERENCES "Pengguna"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "AlamatPengguna" ADD CONSTRAINT "AlamatPengguna_penggunaId_fkey" FOREIGN KEY ("penggunaId") REFERENCES "Pengguna"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "AlamatPengguna" ADD CONSTRAINT "AlamatPengguna_penggunaId_fkey" FOREIGN KEY ("penggunaId") REFERENCES "Pengguna"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Produk" ADD CONSTRAINT "Produk_kategoriId_fkey" FOREIGN KEY ("kategoriId") REFERENCES "Kategori"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

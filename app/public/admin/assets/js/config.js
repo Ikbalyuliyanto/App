@@ -1,7 +1,8 @@
-const protocol = location.protocol;      // http / https
-const host = location.hostname;          // localhost / 192.168.x.x / domain
+const protocol = location.protocol;  // http / https
+const host = location.hostname;      // localhost / IP / domain
+const port = 9876;                    // Port Docker yang dipublish
 
-window.API_BASE = `${protocol}//${host}:4000`;
+window.API_BASE = `${protocol}//${host}:${port}`;
 
 window.apiRequest = async (endpoint, options = {}) => {
   const url = `${window.API_BASE}${endpoint}`;
