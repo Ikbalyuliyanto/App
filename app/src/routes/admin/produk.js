@@ -29,7 +29,7 @@ function padProductId(id) {
 }
 
 // ===== helper simpan webp (overwrite)
-async function saveWebp(buffer, outPath, maxKB = 150) {
+async function saveWebp(buffer, outPath, maxKB = 80) {
   let quality = 80;
   let output;
 
