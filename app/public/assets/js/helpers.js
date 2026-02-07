@@ -184,7 +184,7 @@
             <i class="fas fa-sign-in-alt"></i>
             <span>Masuk</span>
           </a>
-          <a href="/register.html" class="user-dropdown__item">
+          <a href="/daftar.html" class="user-dropdown__item">
             <i class="fas fa-user-plus"></i>
             <span>Daftar</span>
           </a>
