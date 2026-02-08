@@ -322,3 +322,63 @@
     });
   };
 })();
+
+
+  // Pesan
+  const WHATSAPP_NUMBER = "6285185774225";
+  const DEFAULT_MESSAGE = "Halo, saya ingin bertanya tentang produk di Ashanum";
+
+document.addEventListener("DOMContentLoaded", () => {
+  // Ambil token
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+
+  const whatsappWidget = document.querySelector(".whatsapp-chat-widget");
+
+  // ⛔ jika widget tidak ada di halaman ini, stop
+  if (!whatsappWidget) return;
+
+  if (!token) {
+    // Jika tidak login, sembunyikan widget
+    whatsappWidget.style.display = "none";
+  } else {
+    // Jika login, tampilkan widget
+    whatsappWidget.style.display = "block";
+  }
+});
+
+// Toggle Popup
+function toggleWhatsAppPopup() {
+  const popup = document.getElementById("whatsappPopup");
+  if (!popup) return;
+
+  popup.classList.toggle("active");
+
+  if (popup.classList.contains("active")) {
+    const badge = document.querySelector(".whatsapp-badge");
+    if (badge) badge.style.display = "none";
+  }
+}
+
+
+  // Buka WhatsApp langsung
+  function openWhatsApp(message = DEFAULT_MESSAGE) {
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  }
+
+  // Kirim pesan cepat
+  function sendWhatsAppMessage(message) {
+    openWhatsApp(message);
+  }
+
+  // Newsletter
+  function subscribeNewsletter() {
+    const email = document.getElementById('newsletterEmail').value;
+    if (email) {
+      alert('Terima kasih! Anda telah berlangganan newsletter kami.');
+      document.getElementById('newsletterEmail').value = '';
+    } else {
+      alert('Silakan masukkan email Anda.');
+    }
+  }

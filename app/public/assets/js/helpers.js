@@ -435,11 +435,11 @@
 })();
 
 
-document.addEventListener("DOMContentLoaded", () => {
   // Pesan
   const WHATSAPP_NUMBER = "6285185774225";
   const DEFAULT_MESSAGE = "Halo, saya ingin bertanya tentang produk di Ashanum";
 
+document.addEventListener("DOMContentLoaded", () => {
   // Ambil token
   const token =
     localStorage.getItem("token") || sessionStorage.getItem("token");
