@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - Ashanum</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="css/auth-style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Side -->
+        <div class="auth-left">
+            <div class="logo">Ashanum</div>
+            <h2>Bergabung Bersama Kami!</h2>
+            <p>Daftar sekarang dan nikmati pengalaman berbelanja terbaik dengan berbagai penawaran menarik</p>
+            <div class="auth-illustration">🎁</div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="auth-right">
+            <div class="auth-header">
+                <h1>Daftar Akun</h1>
+                <p>Lengkapi data Anda untuk membuat akun baru</p>
+            </div>
+
+            <form class="auth-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstname">Nama Depan <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="far fa-user"></i>
+                            <input type="text" id="firstname" placeholder="Nama depan" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastname">Nama Belakang <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="far fa-user"></i>
+                            <input type="text" id="lastname" placeholder="Nama belakang" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="far fa-envelope"></i>
+                        <input type="email" id="email" placeholder="nama@email.com" required />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Nomor Telepon <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-phone"></i>
+                            <input type="tel" id="phone" placeholder="08123456789" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Jenis Kelamin <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-venus-mars"></i>
+                            <select id="gender" required>
+                                <option value="">Pilih jenis kelamin</option>
+                                <option value="male">Laki-laki</option>
+                                <option value="female">Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Minimal 8 karakter"
+                            required
+                            oninput="checkPasswordStrength()"
+                        />
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill" id="strengthBar"></div>
+                        </div>
+                        <span id="strengthText">Masukkan password</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Konfirmasi Password <span class="required">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" placeholder="Ulangi password Anda" required />
+                    </div>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="terms" required />
+                    <label for="terms">
+                        Saya menyetujui
+                        <a href="#">Syarat & Ketentuan</a> dan
+                        <a href="#">Kebijakan Privasi</a> Ashanum
+                    </label>
+                </div>
+
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="newsletter" />
+                    <label for="newsletter">
+                        Saya ingin menerima informasi promo dan penawaran menarik dari Ashanum
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">Daftar Sekarang</button>
+            </form>
+
+            <div class="login-link">
+                Sudah punya akun? <a href="login.html">Masuk sekarang</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/alert.js"></script>
+    <script src="js/config.js"></script>
+    <script>
+        // Fungsi untuk cek kekuatan password
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/[0-9]/)) strength++;
+            if (password.match(/[^a-zA-Z0-9]/)) strength++;
+            
+            strengthBar.className = 'strength-bar-fill';
+            
+            if (password.length === 0) {
+                strengthText.textContent = 'Masukkan password';
+                strengthBar.style.width = '0%';
+            } else if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+                strengthText.textContent = 'Password lemah';
+                strengthText.style.color = '#f44336';
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-medium');
+                strengthText.textContent = 'Password sedang';
+                strengthText.style.color = '#ff9800';
+            } else {
+                strengthBar.classList.add('strength-strong');
+                strengthText.textContent = 'Password kuat';
+                strengthText.style.color = '#4caf50';
+            }
+        }
+
+        async function registerUser(data) {
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data),
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    showAlert(`Gagal daftar: ${errorData.message || res.statusText}`, 'error');
+                    return;
+                }
+
+                const result = await res.json();
+                showAlert("Pendaftaran berhasil! Silakan login.", "success");
+                
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 1000);
+            } catch (error) {
+                console.error(error);
+                showAlert("Terjadi kesalahan saat mendaftar: " + error.message, "error");
+            }
+        }
+
+        // Event listener submit form
+        document.getElementById("registerForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const data = {
+                firstname: document.getElementById("firstname").value.trim(),
+                lastname: document.getElementById("lastname").value.trim(),
+                email: document.getElementById("email").value.trim(),
+                phone: document.getElementById("phone").value.trim(),
+                gender: document.getElementById("gender").value,
+                password: document.getElementById("password").value,
+            };
+
+            const confirmPassword = document.getElementById("confirmPassword").value;
+
+            if (data.password !== confirmPassword) {
+                showAlert("Password dan konfirmasi password tidak sama!", "warning");
+                return;
+            }
+
+            if (!data.firstname || !data.lastname || !data.email || !data.phone || !data.gender || !data.password) {
+                showAlert("Semua field wajib diisi!", "warning");
+                return;
+            }
+
+            const termsChecked = document.getElementById("terms").checked;
+            if (!termsChecked) {
+                showAlert("Anda harus menyetujui Syarat & Ketentuan!", "warning");
+                return;
+            }
+
+            await registerUser(data);
+        });
+    </script>
+</body>
+</html>

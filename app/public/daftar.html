@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -402,7 +402,6 @@
 </head>
 <body>
     <div class="register-container">
-      <!-- Left Side -->
       <div class="register-left">
         <div class="logo">Ashanum</div>
         <h2>Bergabung Bersama Kami!</h2>
@@ -410,7 +409,6 @@
         <div class="register-illustration">🎁</div>
       </div>
   
-      <!-- Right Side -->
       <div class="register-right">
         <div class="register-header">
           <h1>Daftar Akun</h1>
@@ -513,11 +511,12 @@
         </form>
   
         <div class="login-link">
-          Sudah punya akun? <a href="#">Masuk sekarang</a>
+          Sudah punya akun? <a href="/login.html">Masuk sekarang</a>
         </div>
       </div>
     </div>
   
+    <script src="assets/js/alert.js"></script>
     <script>        
     const API_BASE = `${location.protocol}//${location.hostname}:9876`;
 
@@ -570,11 +569,11 @@
             }
 
             const result = await res.json();
-            alert(`Pendaftaran berhasil! Selamat datang, ${result.pengguna.nama}`);
+            showAlert("Pendaftaran berhasil! Silakan login.", "success");
             // Redirect ke halaman login, misal:
             window.location.href = "login.html";
             } catch (error) {
-            alert("Terjadi kesalahan saat mendaftar: " + error.message);
+            showAlert("Terjadi kesalahan saat mendaftar: " + error.message, "warning");
             }
         }
 
@@ -594,18 +593,17 @@
             const confirmPassword = document.getElementById("confirmPassword").value;
 
             if (data.password !== confirmPassword) {
-            alert("Password dan konfirmasi password tidak sama!");
+            showAlert("Password dan konfirmasi password tidak sama!", "warning");
             return;
             }
 
             if (!data.firstname || !data.lastname || !data.email || !data.phone || !data.gender || !data.password) {
-            alert("Semua field wajib diisi!");
+            showAlert("Semua field wajib diisi!", "warning");
             return;
             }
 
             await registerUser(data);
         });
     </script>
-
   </body>  
-</html>
+</html> -->

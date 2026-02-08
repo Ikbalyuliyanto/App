@@ -123,7 +123,7 @@
 
     const close = () => {
       el.style.animation = "appAlertOut .16s ease-in forwards";
-      setTimeout(() => el.remove(), 100);
+      setTimeout(() => el.remove(), 130);
     };
 
     el.querySelector(".app-alert__close").addEventListener("click", close);

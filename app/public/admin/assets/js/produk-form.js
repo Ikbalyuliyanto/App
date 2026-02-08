@@ -503,7 +503,73 @@ async function generateVariantsAuto() {
     showAlert(e.message || "Gagal generate varian", "error");
   }
 }
+// Loading
+(function injectLoadingStyle() {
+  const css = `
+    #loadingOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
 
+    #loadingOverlay .loading-box {
+      background: #fff;
+      padding: 20px 28px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 220px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    #loadingOverlay .spinner {
+      width: 42px;
+      height: 42px;
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #2563eb;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    #loadingOverlay p {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+
+  const style = document.createElement("style");
+  style.textContent = css;
+  document.head.appendChild(style);
+})();
+
+(function injectLoadingHtml() {
+  const div = document.createElement("div");
+  div.id = "loadingOverlay";
+  div.innerHTML = `
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Menyimpan data...</p>
+    </div>
+  `;
+  document.body.appendChild(div);
+})();
+
+function showLoading() {
+  document.getElementById("loadingOverlay").style.display = "flex";
+}
+
+function hideLoading() {
+  document.getElementById("loadingOverlay").style.display = "none";
+}
 // -------------------------
 // Save Product (create/update + upload + variants)
 // -------------------------
@@ -511,7 +577,7 @@ async function saveProduct() {
   const nama = document.getElementById("nama").value;
   const kategoriId = document.getElementById("kategoriId").value;
   const harga = document.getElementById("harga").value;
-
+  showLoading(); 
   if (!nama || !kategoriId || !harga) {
     showAlert("Nama, kategori, dan harga wajib diisi", "error");
     return;
@@ -625,7 +691,7 @@ async function saveProduct() {
       method: "PUT",
       body: { varianProduk: varianPayload },
     });
-
+    hideLoading()
     showAlert("Produk berhasil disimpan!", "success");
     setTimeout(() => (window.location.href = "produk.html"), 1200);
   } catch (err) {

@@ -206,6 +206,274 @@
     transform: translateY(-2px);
   }
 
+  /* ===== WHATSAPP LIVE CHAT ===== */
+  .whatsapp-chat-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+  }
+
+  .whatsapp-button {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    border: none;
+  }
+
+  .whatsapp-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+  }
+
+  .whatsapp-button i {
+    font-size: 32px;
+    color: white;
+  }
+
+  /* Pulse Animation */
+  .whatsapp-button::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(37, 211, 102, 0.4);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  /* Badge Notification */
+  .whatsapp-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4444;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    border: 2px solid white;
+    animation: bounce 1s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px);
+    }
+  }
+
+  /* Chat Popup */
+  .whatsapp-popup {
+    position: absolute;
+    bottom: 75px;
+    right: 0;
+    width: 320px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.3s ease;
+  }
+
+  .whatsapp-popup.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1) translateY(0);
+  }
+
+  .whatsapp-popup-header {
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .whatsapp-popup-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .whatsapp-popup-info h4 {
+    font-size: 16px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  .whatsapp-popup-status {
+    font-size: 13px;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: blink 1.5s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .whatsapp-popup-body {
+    padding: 20px;
+    background: #f0f2f5;
+  }
+
+  .whatsapp-message {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    position: relative;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  .whatsapp-message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 8px 8px 0;
+    border-color: transparent white transparent transparent;
+  }
+
+  .whatsapp-message-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 5px;
+  }
+
+  .whatsapp-message-time {
+    font-size: 11px;
+    color: #999;
+    text-align: right;
+  }
+
+  .whatsapp-popup-footer {
+    padding: 15px 20px;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .whatsapp-quick-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .quick-reply-btn {
+    background: #f0f2f5;
+    border: 1px solid #e5e7eb;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .quick-reply-btn:hover {
+    background: #e5e7eb;
+    border-color: #25d366;
+  }
+
+  .whatsapp-start-chat {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+  }
+
+  .whatsapp-start-chat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+
+  .whatsapp-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .whatsapp-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
   /* Responsive */
   @media (max-width: 968px) {
     .footer-content {
@@ -240,6 +508,26 @@
       flex-direction: column;
       gap: 10px;
     }
+
+    .whatsapp-popup {
+      width: 280px;
+      bottom: 70px;
+      right: -10px;
+    }
+
+    .whatsapp-chat-widget {
+      bottom: 20px;
+      right: 20px;
+    }
+
+    .whatsapp-button {
+      width: 55px;
+      height: 55px;
+    }
+
+    .whatsapp-button i {
+      font-size: 28px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -260,6 +548,16 @@
     .footer-benefits-grid {
       grid-template-columns: 1fr !important;
       gap: 20px !important;
+    }
+
+    .whatsapp-popup {
+      width: calc(100vw - 40px);
+      right: -5px;
+    }
+
+    .whatsapp-chat-widget {
+      bottom: 15px;
+      right: 15px;
     }
   }
 
@@ -343,11 +641,11 @@
           </div>
           <div class="contact-item">
             <i class="fas fa-phone-alt"></i>
-            <span>+62 812-3456-7890</span>
+            <span>+62 851-8577-4225</span>
           </div>
           <div class="contact-item">
             <i class="fas fa-envelope"></i>
-            <span><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="acdfd9dcdcc3ded8ecd6cddbcddbc5d5cd82cfc3c1">[email&#160;protected]</a></span>
+            <span>info@ashanum.com</span>
           </div>
           <div class="contact-item">
             <i class="far fa-clock"></i>
@@ -412,3 +710,59 @@
     </div>
   </div>
 </footer>
+
+<!-- WhatsApp Live Chat Widget -->
+<div class="whatsapp-chat-widget">
+  <!-- Chat Popup -->
+  <div class="whatsapp-popup" id="whatsappPopup">
+    <div class="whatsapp-popup-header">
+      <div class="whatsapp-popup-avatar">
+        <i class="fab fa-whatsapp"></i>
+      </div>
+      <div class="whatsapp-popup-info">
+        <h4>Customer Service</h4>
+        <div class="whatsapp-popup-status">
+          <span class="status-dot"></span>
+          <span>Online</span>
+        </div>
+      </div>
+      <button class="whatsapp-close-btn" onclick="toggleWhatsAppPopup()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="whatsapp-popup-body">
+      <div class="whatsapp-message">
+        <div class="whatsapp-message-text">
+          👋 Halo! Selamat datang di Ashanum.<br>
+          Ada yang bisa kami bantu?
+        </div>
+        <div class="whatsapp-message-time">Baru saja</div>
+      </div>
+    </div>
+
+    <div class="whatsapp-popup-footer">
+      <div class="whatsapp-quick-replies">
+        <button class="quick-reply-btn" onclick="sendWhatsAppMessage('Halo, saya ingin bertanya tentang produk')">
+          💬 Tanya tentang produk
+        </button>
+        <button class="quick-reply-btn" onclick="sendWhatsAppMessage('Halo, saya ingin cek status pesanan saya')">
+          📦 Cek status pesanan
+        </button>
+        <button class="quick-reply-btn" onclick="sendWhatsAppMessage('Halo, saya butuh bantuan')">
+          🆘 Butuh bantuan
+        </button>
+      </div>
+      <button class="whatsapp-start-chat" onclick="openWhatsApp()">
+        <i class="fab fa-whatsapp"></i>
+        <span>Mulai Chat</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- WhatsApp Button -->
+  <button class="whatsapp-button" onclick="toggleWhatsAppPopup()" aria-label="WhatsApp Chat">
+    <span class="whatsapp-badge">1</span>
+    <i class="fab fa-whatsapp"></i>
+  </button>
+</div>

@@ -50,10 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ===== helper url gambar =====
 function fixImgUrl(u) {
+  if (!u) return ""; // jika null/undefined, return string kosong
   if (u.startsWith("http://") || u.startsWith("https://")) return u;
-  // kalau /uploads/kaos.jpg -> http://localhost:9876/uploads/kaos.jpg
   return `${window.API_BASE}${u}`;
 }
+
 // ===== helper rupiah =====
 function formatRupiah(angka) {
   if (angka == null) return "Rp 0";
