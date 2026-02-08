@@ -323,6 +323,95 @@
   };
 })();
 
+function showSelect(message, options) {
+  return new Promise((resolve) => {
+      // Buat overlay
+      const modal = document.createElement("div");
+      modal.id = "customSelectModal";
+      modal.innerHTML = `
+          <div style="
+              position: fixed;
+              top:0; left:0;
+              width:100%; height:100%;
+              background: rgba(0,0,0,0.5);
+              display:flex;
+              justify-content:center;
+              align-items:center;
+              z-index:9999;
+              font-family: sans-serif;
+          ">
+              <div style="
+                  background:white;
+                  padding:20px 25px;
+                  border-radius:10px;
+                  max-width:400px;
+                  width:90%;
+                  text-align:center;
+                  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                  animation: fadeIn 0.2s ease;
+              ">
+                  <p style='font-size:16px; margin-bottom:15px;'>${message}</p>
+                  <select id="statusSelect" style="
+                      width: 100%;
+                      padding:8px 10px;
+                      font-size:15px;
+                      margin-bottom:20px;
+                      border-radius:5px;
+                      border:1px solid #ccc;
+                      outline:none;
+                  ">
+                      ${options.map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+                  </select>
+                  <div style="display:flex; justify-content: space-between;">
+                      <button id="cancelBtn" style="
+                          padding:8px 15px;
+                          background:#ccc;
+                          border:none;
+                          border-radius:5px;
+                          cursor:pointer;
+                          font-size:14px;
+                          transition: all 0.2s;
+                      ">Batal</button>
+                      <button id="okBtn" style="
+                          padding:8px 15px;
+                          background:#4caf50;
+                          color:white;
+                          border:none;
+                          border-radius:5px;
+                          cursor:pointer;
+                          font-size:14px;
+                          transition: all 0.2s;
+                      ">OK</button>
+                  </div>
+              </div>
+          </div>
+      `;
+
+      // Tambahkan ke body
+      document.body.appendChild(modal);
+
+      // Tombol OK
+      modal.querySelector("#okBtn").onclick = () => {
+          const val = modal.querySelector("#statusSelect").value;
+          document.body.removeChild(modal);
+          resolve(val);
+      };
+
+      // Tombol Batal
+      modal.querySelector("#cancelBtn").onclick = () => {
+          document.body.removeChild(modal);
+          resolve(null);
+      };
+
+      // Close klik di luar box
+      modal.firstElementChild.onclick = (e) => {
+          if (e.target === modal.firstElementChild) {
+              document.body.removeChild(modal);
+              resolve(null);
+          }
+      };
+  });
+}
 
   // Pesan
   const WHATSAPP_NUMBER = "6285185774225";

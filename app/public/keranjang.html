@@ -757,22 +757,28 @@
                     const itemId = Number(btn.getAttribute("data-item-id"));
                     if (!itemId) return;
 
-                    if (action === "remove") {
-                        if (!confirm("Hapus item ini dari keranjang?")) return;
-                        
-                        try {
-                            await apiAuth(`/api/keranjang/item/${itemId}`, { method: "DELETE" });
-                            showAlert("Item berhasil dihapus dari keranjang", "success");
-                            await loadKeranjang();
-                            
-                            // Refresh header badge
-                            if (window.refreshHeader) {
-                                window.refreshHeader();
+                    if (action === "remove") {                        
+                        showConfirm({
+                            title: "Hapus Item",
+                            message: "Apakah Anda yakin ingin menghapus item ini dari keranjang?",
+                            confirmText: "Hapus",
+                            cancelText: "Batal",
+                            type: "danger",
+                        }).then(async (ok) => {
+                            if (!ok) return;
+
+                            try {
+                                await apiAuth(`/api/keranjang/item/${itemId}`, { method: "DELETE" });
+                                showAlert("Item berhasil dihapus dari keranjang", "success");
+                                await loadKeranjang();
+
+                                // Refresh header badge
+                                if (window.refreshHeader) window.refreshHeader();
+                            } catch (err) {
+                                showAlert(err.message || "Gagal menghapus item", "error");
                             }
-                        } catch (err) {
-                            showAlert(err.message || "Gagal menghapus item", "error");
-                        }
-                        return;
+                        });
+                        return; // jangan lanjut ke kode default
                     }
 
                     const item = (keranjangData?.item || []).find((x) => x.id === itemId);

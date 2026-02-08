@@ -173,20 +173,26 @@ function viewOrder(id) {
 }
 
 async function updateStatus(id) {
-  // versi sederhana prompt
-  const status = prompt("Update status menjadi:\nMENUNGGU_PEMBAYARAN / DIPROSES / DIKIRIM / SELESAI / DIBATALKAN");
+  const options = [
+      { value: 'MENUNGGU_PEMBAYARAN', text: 'Menunggu Bayar' },
+      { value: 'DIPROSES', text: 'Diproses' },
+      { value: 'DIKIRIM', text: 'Dikirim' },
+      { value: 'SELESAI', text: 'Selesai' },
+      { value: 'DIBATALKAN', text: 'Dibatalkan' }
+  ];
+
+  const status = await showSelect("Pilih status baru:", options);
   if (!status) return;
 
   try {
-    await apiRequest(`/api/admin/pesanan/${id}/status`, {
-      method: "PATCH",
-      body: JSON.stringify({ status: status.trim().toUpperCase() })
-    });
-
-    showAlert("Status berhasil diupdate", "success");
-    await loadOrders();
+      await apiRequest(`/api/admin/pesanan/${id}/status`, {
+          method: "PATCH",
+          body: JSON.stringify({ status })
+      });
+      showAlert("Status berhasil diupdate", "success");
+      await loadOrders();
   } catch (e) {
-    console.error(e);
-    showAlert(e.message || "Gagal update status", "error");
+      console.error(e);
+      showAlert(e.message || "Gagal update status", "error");
   }
 }

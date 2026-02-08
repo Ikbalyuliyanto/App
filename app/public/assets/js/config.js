@@ -12,7 +12,7 @@
 
     showAlert("Silakan login terlebih dahulu", "warning");
     const ru = returnUrl || (window.location.pathname + window.location.search);
-    window.location.href = `/login.html?returnUrl=${encodeURIComponent(ru)}`;
+    window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
     return false;
   }
 
@@ -46,7 +46,7 @@
 
         showAlert("Sesi login berakhir. Silakan login lagi.", "warning", { timeout: 3000 });
         const ru = window.location.pathname + window.location.search;
-        window.location.href = `/login.html?returnUrl=${encodeURIComponent(ru)}`;
+        window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
       }
       throw new Error(data.message || "Request gagal");
     }

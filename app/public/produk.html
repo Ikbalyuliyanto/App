@@ -871,12 +871,40 @@
           renderVarianDanSetupLogic(p);
 
           if (btnKeranjang) btnKeranjang.onclick = tambahKeKeranjang;
+          // Ambil id produk dari URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const productId = Number(urlParams.get("id"));
 
+          const btnBeli = document.getElementById("btnBeli");
           if (btnBeli) {
-            btnBeli.onclick = () => {
-              showAlert("Fitur checkout sedang dalam pengembangan", "info");
+            btnBeli.onclick = async () => {
+              if (!productId) return alert("Produk tidak valid");
+
+              try {
+                // Ambil data produk dari API
+                const produkData = await apiAuth(`/api/produk/${productId}`, { method: "GET" });
+
+                // Buat array item checkout
+                const checkoutItem = [{
+                  id: produkData.id,
+                  jumlah: 1, // default 1
+                  produk: produkData,
+                  varian: null // kalau ada varian bisa disesuaikan
+                }];
+
+                // Simpan di sessionStorage agar checkout bisa baca
+                sessionStorage.setItem("checkout_selected_item_ids", JSON.stringify([produkData.id]));
+                sessionStorage.setItem("checkout_items_temp", JSON.stringify(checkoutItem));
+
+                // Redirect ke checkout
+                window.location.href = "/checkout.html";
+              } catch (err) {
+                console.error(err);
+                alert("Gagal load produk");
+              }
             };
           }
+
         } catch (err) {
           console.error(err);
           showAlert("Gagal mengambil data produk.", "error");

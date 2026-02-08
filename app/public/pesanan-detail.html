@@ -1104,17 +1104,21 @@
   };
 
   window.confirmReceived = async function () {
-    const orderId = getOrderIdFromUrl();
+    const orderId = getOrderIdFromUrl(); // ambil dari query params
     if (!orderId) return showAlert("Order ID tidak ditemukan", "error");
 
-    if (!confirm("Konfirmasi bahwa Anda sudah menerima pesanan?")) return;
+    const ok = await showConfirm("Konfirmasi bahwa Anda sudah menerima pesanan?");
+    if (!ok) return;
 
     try {
-      showAlert("✅ (Stub) Konfirmasi diterima. Buat endpoint PATCH /api/pesanan/:id/terima untuk update status ke SELESAI.", "info", {
-        timeout: 5000,
-      });
+        const res = await apiAuth(`/api/pesanan/${orderId}/terima`, { method: "PATCH" });
+        showAlert("✅ Pesanan berhasil dikonfirmasi diterima", "success", { timeout: 3000 });
+
+        // Optional: reload halaman / data pesanan
+        // loadPesananDetail(orderId);        
+        window.location.reload();
     } catch (err) {
-      showAlert(err.message || "Gagal konfirmasi penerimaan", "error");
+        showAlert(err.message || "Gagal konfirmasi penerimaan", "error");
     }
   };
 
