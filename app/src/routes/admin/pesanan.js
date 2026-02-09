@@ -122,6 +122,7 @@ router.get("/:id", auth, onlyAdmin, async (req, res) => {
 });
 
 // PATCH /api/admin/pesanan/:id/status  body: { status, resi? }
+// PATCH /api/admin/pesanan/:id/status  body: { status, resi? }
 router.patch("/:id/status", auth, onlyAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -129,26 +130,122 @@ router.patch("/:id/status", auth, onlyAdmin, async (req, res) => {
     if (!id) return res.status(400).json({ message: "ID tidak valid" });
     if (!status) return res.status(400).json({ message: "status wajib" });
 
-    // update status pesanan
-    const updated = await prisma.pesanan.update({
-      where: { id },
-      data: { status },
+    const result = await prisma.$transaction(async (tx) => {
+      // ambil status lama + item (buat hitung terjual/stok)
+      const existing = await tx.pesanan.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          status: true,
+          item: {
+            select: {
+              produkId: true,
+              varianId: true,
+              jumlah: true,
+            },
+          },
+        },
+      });
+
+      if (!existing) {
+        const err = new Error("Pesanan tidak ditemukan");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      // update status pesanan
+      const updated = await tx.pesanan.update({
+        where: { id },
+        data: { status },
+      });
+
+      // update resi kalau ada
+      if (resi) {
+        await tx.pengiriman.updateMany({
+          where: { pesananId: id },
+          data: { resi: String(resi) },
+        });
+      }
+
+      // ✅ INCREMENT TERJUAL hanya saat transisi -> SELESAI (dan sebelumnya bukan SELESAI)
+      const toSelesai = String(status) === "SELESAI";
+      const alreadySelesai = String(existing.status) === "SELESAI";
+
+      if (toSelesai && !alreadySelesai) {
+        // 1) naikan terjual per produk (akumulasi per produkId)
+        const mapProduk = new Map(); // produkId -> totalJumlah
+        for (const it of existing.item) {
+          const pid = it.produkId;
+          const qty = Number(it.jumlah || 0);
+          mapProduk.set(pid, (mapProduk.get(pid) || 0) + qty);
+        }
+
+        for (const [produkId, qty] of mapProduk.entries()) {
+          await tx.produk.update({
+            where: { id: produkId },
+            data: {
+              terjual: { increment: qty },
+            },
+          });
+        }
+
+        // 2) kurangi stok: kalau ada varianId -> kurangi stok varian
+        //    kalau varianId null -> kurangi stokProduk
+        for (const it of existing.item) {
+          const qty = Number(it.jumlah || 0);
+
+          if (it.varianId) {
+            await tx.varianProduk.update({
+              where: { id: it.varianId },
+              data: { stok: { decrement: qty } },
+            });
+          } else {
+            await tx.produk.update({
+              where: { id: it.produkId },
+              data: { stokProduk: { decrement: qty } },
+            });
+          }
+        }
+      }
+
+      return updated;
     });
 
-    // kalau kamu punya field resi di model Pengiriman, boleh update di sini.
-    // Kalau tidak punya, hapus blok ini.
-    if (resi) {
-      await prisma.pengiriman.updateMany({
-        where: { pesananId: id },
-        data: { resi: String(resi) },
-      }).catch(() => {});
-    }
-
-    res.json({ message: "Status diperbarui", pesanan: updated });
+    res.json({ message: "Status diperbarui", pesanan: result });
   } catch (e) {
     console.error("PATCH /api/admin/pesanan/:id/status error:", e);
-    res.status(500).json({ message: "Gagal update status" });
+    const code = e.statusCode || 500;
+    res.status(code).json({ message: e.message || "Gagal update status" });
   }
 });
+
+// router.patch("/:id/status", auth, onlyAdmin, async (req, res) => {
+//   try {
+//     const id = Number(req.params.id);
+//     const { status, resi } = req.body || {};
+//     if (!id) return res.status(400).json({ message: "ID tidak valid" });
+//     if (!status) return res.status(400).json({ message: "status wajib" });
+
+//     // update status pesanan
+//     const updated = await prisma.pesanan.update({
+//       where: { id },
+//       data: { status },
+//     });
+
+//     // kalau kamu punya field resi di model Pengiriman, boleh update di sini.
+//     // Kalau tidak punya, hapus blok ini.
+//     if (resi) {
+//       await prisma.pengiriman.updateMany({
+//         where: { pesananId: id },
+//         data: { resi: String(resi) },
+//       }).catch(() => {});
+//     }
+
+//     res.json({ message: "Status diperbarui", pesanan: updated });
+//   } catch (e) {
+//     console.error("PATCH /api/admin/pesanan/:id/status error:", e);
+//     res.status(500).json({ message: "Gagal update status" });
+//   }
+// });
 
 export default router;

@@ -1,5 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 import prisma from "../../prisma.js";
 
 const router = express.Router();
@@ -16,8 +17,9 @@ router.post("/login", async (req, res) => {
   if (!pengguna) {
     return res.status(401).json({ message: "Email tidak ditemukan" });
   }
-
-  if (pengguna.password !== password) {
+  
+  const validPassword = await bcrypt.compare(password, pengguna.password);
+  if (!validPassword) {
     return res.status(401).json({ message: "Password salah" });
   }
 
