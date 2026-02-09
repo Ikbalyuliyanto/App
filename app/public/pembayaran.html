@@ -1390,10 +1390,21 @@
 
     document.getElementById("paymentMethodDesc").textContent = "Silakan ikuti instruksi pembayaran";
   }
+ function makeOrderNumber(pesanan) {
+    const d = new Date(pesanan.dibuatPada || pesanan.createdAt || Date.now());
 
+    const yy = String(d.getFullYear()).slice(2);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+
+    // id pendek tapi tetap rapi
+    const idPart = String(pesanan.id ?? "").padStart(5, "0");
+
+    return `INV-${yy}${mm}${dd}-${idPart}`;
+  }
   function renderOrderData(pesanan) {
-    document.getElementById("orderId").textContent = pesanan.id;
-
+    // document.getElementById("orderId").textContent = pesanan.id;
+    document.getElementById("orderId").textContent = makeOrderNumber(pesanan);  
     const orderDate = new Date(pesanan.dibuatPada || pesanan.createdAt || Date.now());
     document.getElementById("orderDate").textContent = orderDate.toLocaleDateString("id-ID", {
       day: "numeric",

@@ -278,6 +278,9 @@
         <!-- Payment Section -->
         <div class="section">
           <h2 class="section-title"><i class="fas fa-credit-card"></i> Metode Pembayaran</h2>
+          <div class="alert alert-info">
+            Kami sedang melakukan peningkatan sistem pembayaran. Saat ini pembayaran hanya tersedia melalui COD (Bayar di Tempat).
+          </div>
 
           <div class="payment-method" onclick="selectPaymentCategory(0)">
             <div class="payment-header">
@@ -285,9 +288,10 @@
               <div class="payment-name">Transfer Bank</div>
             </div>
             <div class="payment-options">
-              <div class="payment-option-item"><input type="radio" name="payment" value="bca"><span>BCA Virtual Account</span></div>
+              <div class="payment-option-item"><input type="radio" name="payment" value=""><span>sedang Maintenance</span></div>
+              <!-- <div class="payment-option-item"><input type="radio" name="payment" value="bca"><span>BCA Virtual Account</span></div>
               <div class="payment-option-item"><input type="radio" name="payment" value="mandiri"><span>Mandiri Virtual Account</span></div>
-              <div class="payment-option-item"><input type="radio" name="payment" value="bni"><span>BNI Virtual Account</span></div>
+              <div class="payment-option-item"><input type="radio" name="payment" value="bni"><span>BNI Virtual Account</span></div> -->
             </div>
           </div>
 
@@ -297,9 +301,10 @@
               <div class="payment-name">E-Wallet</div>
             </div>
             <div class="payment-options">
-              <div class="payment-option-item"><input type="radio" name="payment" value="gopay"><span>GoPay</span></div>
+              <div class="payment-option-item"><input type="radio" name="payment" value=""><span>sedang Maintenance</span></div>
+              <!-- <div class="payment-option-item"><input type="radio" name="payment" value="gopay"><span>GoPay</span></div>
               <div class="payment-option-item"><input type="radio" name="payment" value="ovo"><span>OVO</span></div>
-              <div class="payment-option-item"><input type="radio" name="payment" value="dana"><span>DANA</span></div>
+              <div class="payment-option-item"><input type="radio" name="payment" value="dana"><span>DANA</span></div> -->
             </div>
           </div>
 
@@ -367,44 +372,85 @@
 
       <div class="modal-body">
         <form id="addressForm">
-          <div class="form-group">
-            <label class="form-label">Label Alamat <span class="required">*</span></label>
-            <input type="text" class="form-input" id="labelAlamat" required />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Nama Penerima <span class="required">*</span></label>
-            <input type="text" class="form-input" id="namaPenerima" required />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Nomor Telepon <span class="required">*</span></label>
-            <input type="tel" class="form-input" id="noTelp" required />
-          </div>
-
+          
           <div class="form-row">
+            <div class="form-group">              
+              <label class="form-label">Label Alamat <span class="required">*</span></label>
+              <input type="text" class="form-input" id="labelAlamat" required />
+            </div>
             <div class="form-group">
-              <label class="form-label">Provinsi <span class="required">*</span></label>
-              <input type="text" class="form-input" id="provinceInput" placeholder="DKI Jakarta" required />
+              <label class="form-label">Nama Penerima <span class="required">*</span></label>
+              <input type="text" class="form-input" id="namaPenerima" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor Telepon <span class="required">*</span></label>
+              <input type="tel" class="form-input" id="noTelp" required />
+            </div>
+          </div>
+
+          <!-- MODE PILIH / MANUAL -->
+          <div class="form-group" style="margin-bottom:12px;">
+            <label style="display:flex;gap:14px;align-items:center;cursor:pointer;">
+              <input type="radio" name="wilayahMode" value="select" checked>
+              <span>Pilih Wilayah (disarankan)</span>
+              <input type="radio" name="wilayahMode" value="manual">
+              <span>Isi Manual</span>
+            </label>
+            <small style="display:block;margin-top:6px;color:#6b7280;">
+              Jika data wilayah tidak muncul, gunakan mode manual.
+            </small>
+          </div>
+
+          <!-- MODE SELECT -->
+          <div id="wilayahSelectWrap">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Provinsi <span class="required">*</span></label>
+                <select class="form-input" id="provinceSelect"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
+                <select class="form-input" id="citySelect" disabled></select>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
-              <input type="text" class="form-input" id="cityInput" placeholder="Jakarta Pusat" required />
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Kecamatan <span class="required">*</span></label>
+                <select class="form-input" id="districtSelect" disabled></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kelurahan <span class="required">*</span></label>
+                <select class="form-input" id="subdistrictSelect" disabled></select>
+              </div>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Kecamatan <span class="required">*</span></label>
-              <input type="text" class="form-input" id="districtInput" placeholder="Menteng" required />
+          <!-- MODE MANUAL -->
+          <div id="wilayahManualWrap" style="display:none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Provinsi <span class="required">*</span></label>
+                <input type="text" class="form-input" id="provinceInput" placeholder="DKI Jakarta" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
+                <input type="text" class="form-input" id="cityInput" placeholder="Jakarta Pusat" />
+              </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Kelurahan <span class="required">*</span></label>
-              <input type="text" class="form-input" id="subdistrictInput" placeholder="Menteng" required />
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Kecamatan <span class="required">*</span></label>
+                <input type="text" class="form-input" id="districtInput" placeholder="Menteng" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Kelurahan <span class="required">*</span></label>
+                <input type="text" class="form-input" id="subdistrictInput" placeholder="Menteng" />
+              </div>
             </div>
           </div>
+
 
           <div class="form-group">
             <label class="form-label">Kode Pos <span class="required">*</span></label>
@@ -442,13 +488,13 @@
 <script src="assets/js/alert.js"></script>
 <script src="assets/js/config.js"></script>
 <script src="assets/js/helpers.js"></script>
-
 <script>
   // Wait for header to load before initializing
-  window.addEventListener('headerLoaded', function() {
-    console.log('Header loaded, initializing checkout page...');
+  window.addEventListener("headerLoaded", function () {
+    console.log("Header loaded, initializing checkout page...");
   });
 
+  // ===== DOM =====
   const addressListEl = document.getElementById("addressList");
   const shippingListEl = document.getElementById("shippingList");
   const productListEl = document.getElementById("productList");
@@ -468,6 +514,7 @@
   const locInfo = document.getElementById("locInfo");
   const modalTitle = document.getElementById("modalTitle");
 
+  // ===== STATE =====
   let checkoutItems = [];
   let alamatList = [];
   let layananList = [];
@@ -482,6 +529,21 @@
 
   let editingAddressId = null;
 
+  // ===== WILAYAH (DUAL MODE) DOM =====
+  const wilayahSelectWrap = document.getElementById("wilayahSelectWrap");
+  const wilayahManualWrap = document.getElementById("wilayahManualWrap");
+
+  const provinceInput = document.getElementById("provinceInput");
+  const cityInput = document.getElementById("cityInput");
+  const districtInput = document.getElementById("districtInput");
+  const subdistrictInput = document.getElementById("subdistrictInput");
+
+  const provinceSelect = document.getElementById("provinceSelect");
+  const citySelect = document.getElementById("citySelect");
+  const districtSelect = document.getElementById("districtSelect");
+  const subdistrictSelect = document.getElementById("subdistrictSelect");
+
+  // ===== UTIL =====
   function resetLocationState() {
     currentLat = null;
     currentLng = null;
@@ -489,32 +551,221 @@
     if (locInfo) locInfo.textContent = "";
   }
 
+  function openModal() {
+    addressModal.classList.add("show");
+    addressModal.style.display = "flex";
+  }
+  function closeModal() {
+    addressModal.classList.remove("show");
+    addressModal.style.display = "none";
+    setModalModeAdd();
+  }
+
+  // ===== WILAYAH MODE =====
+  function getWilayahMode() {
+    return document.querySelector('input[name="wilayahMode"]:checked')?.value || "select";
+  }
+
+  function setWilayahMode(mode) {
+    const isSelect = mode === "select";
+    if (wilayahSelectWrap) wilayahSelectWrap.style.display = isSelect ? "" : "none";
+    if (wilayahManualWrap) wilayahManualWrap.style.display = isSelect ? "none" : "";
+  }
+
+  function copySelectToManual() {
+    if (!provinceInput || !provinceSelect) return;
+    provinceInput.value = provinceSelect?.selectedOptions?.[0]?.textContent?.trim() || provinceInput.value || "";
+    cityInput.value = citySelect?.selectedOptions?.[0]?.textContent?.trim() || cityInput.value || "";
+    districtInput.value = districtSelect?.selectedOptions?.[0]?.textContent?.trim() || districtInput.value || "";
+    subdistrictInput.value = subdistrictSelect?.selectedOptions?.[0]?.textContent?.trim() || subdistrictInput.value || "";
+  }
+
+  function bindWilayahModeToggle() {
+    document.querySelectorAll('input[name="wilayahMode"]').forEach((r) => {
+      r.addEventListener("change", () => {
+        const mode = getWilayahMode();
+        setWilayahMode(mode);
+        if (mode === "manual") copySelectToManual();
+      });
+    });
+  }
+
+  // ===== WILAYAH SELECT (proxy backend anti-CORS) =====
+  function setOptions(el, list, placeholder) {
+    const arr = Array.isArray(list) ? list : [];
+    el.innerHTML =
+      `<option value="">${placeholder}</option>` +
+      arr.map((x) => `<option value="${x.code}">${escapeHtml(x.name)}</option>`).join("");
+  }
+
+  function selectByText(selectEl, text) {
+    if (!selectEl) return false;
+    const t = String(text || "").trim().toLowerCase();
+    if (!t) return false;
+
+    const opt = Array.from(selectEl.options).find(
+      (o) => String(o.textContent || "").trim().toLowerCase() === t
+    );
+    if (!opt) return false;
+
+    selectEl.value = opt.value;
+    return true;
+  }
+
+  let wilayahListenersBound = false;
+
+  async function loadRegencies(provinceCode) {
+    if (!citySelect || !districtSelect || !subdistrictSelect) return;
+
+    citySelect.disabled = true;
+    districtSelect.disabled = true;
+    subdistrictSelect.disabled = true;
+
+    setOptions(citySelect, [], "Memuat kota/kab...");
+    setOptions(districtSelect, [], "Pilih Kecamatan");
+    setOptions(subdistrictSelect, [], "Pilih Kelurahan");
+
+    if (!provinceCode) return;
+
+    const kotaRes = await apiAuth(`/api/wilayah/regencies/${encodeURIComponent(provinceCode)}`, { method: "GET" });
+    setOptions(citySelect, kotaRes?.data || [], "Pilih Kota/Kab");
+    citySelect.disabled = false;
+  }
+
+  async function loadDistricts(regencyCode) {
+    if (!districtSelect || !subdistrictSelect) return;
+
+    districtSelect.disabled = true;
+    subdistrictSelect.disabled = true;
+
+    setOptions(districtSelect, [], "Memuat kecamatan...");
+    setOptions(subdistrictSelect, [], "Pilih Kelurahan");
+
+    if (!regencyCode) return;
+
+    const kecRes = await apiAuth(`/api/wilayah/districts/${encodeURIComponent(regencyCode)}`, { method: "GET" });
+    setOptions(districtSelect, kecRes?.data || [], "Pilih Kecamatan");
+    districtSelect.disabled = false;
+  }
+
+  async function loadVillages(districtCode) {
+    if (!subdistrictSelect) return;
+
+    subdistrictSelect.disabled = true;
+    setOptions(subdistrictSelect, [], "Memuat kelurahan...");
+
+    if (!districtCode) return;
+
+    const kelRes = await apiAuth(`/api/wilayah/villages/${encodeURIComponent(districtCode)}`, { method: "GET" });
+    setOptions(subdistrictSelect, kelRes?.data || [], "Pilih Kelurahan");
+    subdistrictSelect.disabled = false;
+  }
+
+  async function initWilayahSelects() {
+    if (!provinceSelect || !citySelect || !districtSelect || !subdistrictSelect) return;
+
+    // reset awal
+    setOptions(provinceSelect, [], "Memuat provinsi...");
+    setOptions(citySelect, [], "Pilih Kota/Kab");
+    setOptions(districtSelect, [], "Pilih Kecamatan");
+    setOptions(subdistrictSelect, [], "Pilih Kelurahan");
+
+    citySelect.disabled = true;
+    districtSelect.disabled = true;
+    subdistrictSelect.disabled = true;
+
+    // load provinces
+    const provRes = await apiAuth("/api/wilayah/provinces", { method: "GET" });
+    setOptions(provinceSelect, provRes?.data || [], "Pilih Provinsi");
+
+    // bind listener hanya sekali
+    if (!wilayahListenersBound) {
+      wilayahListenersBound = true;
+
+      provinceSelect.addEventListener("change", async () => {
+        await loadRegencies(provinceSelect.value);
+      });
+
+      citySelect.addEventListener("change", async () => {
+        await loadDistricts(citySelect.value);
+      });
+
+      districtSelect.addEventListener("change", async () => {
+        await loadVillages(districtSelect.value);
+      });
+    }
+  }
+
+  // ✅ edit: isi dropdown dari alamat (tanpa provinceSelect.onchange)
+  async function setWilayahSelectFromAlamat(alamat) {
+    if (!provinceSelect || !citySelect || !districtSelect || !subdistrictSelect) return;
+
+    // pastikan provinces sudah ke-load
+    if (!provinceSelect.options.length || provinceSelect.options.length <= 1) {
+      await initWilayahSelects();
+    }
+
+    // PROV
+    if (!selectByText(provinceSelect, alamat.provinsi)) return;
+    await loadRegencies(provinceSelect.value);
+
+    // KOTA
+    if (!selectByText(citySelect, alamat.kota)) return;
+    await loadDistricts(citySelect.value);
+
+    // KEC
+    if (!selectByText(districtSelect, alamat.kecamatan)) return;
+    await loadVillages(districtSelect.value);
+
+    // KEL
+    selectByText(subdistrictSelect, alamat.kelurahan);
+  }
+
+  // ===== MODAL MODE ADD/EDIT =====
   function setModalModeAdd() {
     editingAddressId = null;
-    if (modalTitle) {
-      modalTitle.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tambah Alamat Baru`;
-    }
+    if (modalTitle) modalTitle.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tambah Alamat Baru`;
+
     document.getElementById("addressForm")?.reset();
     document.getElementById("isUtama").checked = false;
     resetLocationState();
+
+    // tampilkan mode sesuai radio
+    setWilayahMode(getWilayahMode());
+
+    // kosongkan manual input
+    if (provinceInput) provinceInput.value = "";
+    if (cityInput) cityInput.value = "";
+    if (districtInput) districtInput.value = "";
+    if (subdistrictInput) subdistrictInput.value = "";
   }
 
-  function setModalModeEdit(alamat) {
+  async function setModalModeEdit(alamat) {
     editingAddressId = alamat.id;
-    if (modalTitle) {
-      modalTitle.innerHTML = `<i class="fas fa-pen"></i> Edit Alamat`;
-    }
+    if (modalTitle) modalTitle.innerHTML = `<i class="fas fa-pen"></i> Edit Alamat`;
 
     document.getElementById("labelAlamat").value = alamat.label || "";
     document.getElementById("namaPenerima").value = alamat.namaPenerima || "";
     document.getElementById("noTelp").value = alamat.noTelp || "";
-    document.getElementById("provinceInput").value = alamat.provinsi || "";
-    document.getElementById("cityInput").value = alamat.kota || "";
-    document.getElementById("districtInput").value = alamat.kecamatan || "";
-    document.getElementById("subdistrictInput").value = alamat.kelurahan || "";
     document.getElementById("kodePos").value = alamat.kodePos || "";
     document.getElementById("alamatLengkap").value = alamat.alamat || "";
     document.getElementById("isUtama").checked = !!alamat.isUtama;
+
+    // selalu isi manual dulu sebagai fallback
+    if (provinceInput) provinceInput.value = alamat.provinsi || "";
+    if (cityInput) cityInput.value = alamat.kota || "";
+    if (districtInput) districtInput.value = alamat.kecamatan || "";
+    if (subdistrictInput) subdistrictInput.value = alamat.kelurahan || "";
+
+    // kalau mode select, coba set dropdown
+    if (getWilayahMode() === "select") {
+      try {
+        await setWilayahSelectFromAlamat(alamat);
+      } catch (e) {
+        console.warn("setWilayahSelectFromAlamat gagal, fallback manual:", e);
+        // fallback manual sudah terisi, jadi aman
+      }
+    }
 
     currentLat = alamat.latitude ?? null;
     currentLng = alamat.longitude ?? null;
@@ -529,23 +780,21 @@
     }
   }
 
-  function openModal() {
-    addressModal.classList.add("show");
-    addressModal.style.display = "flex";
-  }
-  function closeModal() {
-    addressModal.classList.remove("show");
-    addressModal.style.display = "none";
-    setModalModeAdd();
-  }
-
-  function openEditAddress(id) {
+  async function openEditAddress(id) {
     const alamat = alamatList.find((a) => a.id === id);
     if (!alamat) return alert("Alamat tidak ditemukan");
+
     openModal();
-    setModalModeEdit(alamat);
+    setWilayahMode(getWilayahMode());
+
+    // init dropdown dulu (supaya provinces ada)
+    await initWilayahSelects().catch(console.error);
+
+    // isi form edit
+    await setModalModeEdit(alamat);
   }
 
+  // ===== LOAD CHECKOUT =====
   async function loadCheckoutPage() {
     const data = await apiAuth("/api/checkout", { method: "GET" });
 
@@ -561,8 +810,10 @@
       selectedIds = [];
     }
 
-    checkoutItems = selectedIds.length
-      ? keranjangItems.filter((it) => selectedIds.includes(it.id))
+    const selectedSet = new Set(selectedIds.map((x) => Number(x)));
+
+    checkoutItems = selectedSet.size
+      ? keranjangItems.filter((it) => selectedSet.has(Number(it.id)))
       : keranjangItems.slice();
 
     renderAlamat();
@@ -571,6 +822,7 @@
     calculateTotal();
   }
 
+  // ===== RENDER ALAMAT =====
   function renderAlamat() {
     if (!alamatList.length) {
       addressListEl.innerHTML = `<div style="padding:12px;color:#777;">Belum ada alamat. Silakan tambah alamat.</div>`;
@@ -639,6 +891,7 @@
     };
   }
 
+  // ===== RENDER LAYANAN =====
   function renderLayanan() {
     if (!layananList.length) {
       shippingListEl.innerHTML = `<div style="padding:12px;color:#777;">Tidak ada layanan pengiriman aktif.</div>`;
@@ -691,6 +944,7 @@
     };
   }
 
+  // ===== RENDER PRODUCTS =====
   function renderProducts() {
     if (!checkoutItems.length) {
       productListEl.innerHTML = `<div style="padding:12px;color:#777;">Tidak ada item untuk checkout.</div>`;
@@ -713,11 +967,7 @@
         return `
           <div class="product-item">
             <div class="product-image" style="overflow:hidden;">
-              ${
-                gambar
-                  ? `<img src="${gambar}" alt="${nama}" style="width:100%;height:100%;object-fit:cover;">`
-                  : "📦"
-              }
+              ${gambar ? `<img src="${gambar}" alt="${nama}" style="width:100%;height:100%;object-fit:cover;">` : "📦"}
             </div>
             <div class="product-info">
               <div class="product-name">${nama}</div>
@@ -733,6 +983,7 @@
       .join("");
   }
 
+  // ===== TOTAL =====
   function calculateTotal() {
     let subtotalFinal = 0;
     let discountInfo = 0;
@@ -776,6 +1027,7 @@
     return out;
   }
 
+  // ===== PAYMENT / VOUCHER =====
   window.selectPaymentCategory = function (index) {
     const paymentMethods = document.querySelectorAll(".payment-method");
     paymentMethods.forEach((m, i) => m.classList.toggle("selected", i === index));
@@ -800,6 +1052,7 @@
     calculateTotal();
   };
 
+  // ===== PLACE ORDER =====
   window.placeOrder = async function () {
     const termsChecked = document.getElementById("terms").checked;
     if (!termsChecked) return showAlert("Mohon setujui syarat & ketentuan", "warning");
@@ -838,9 +1091,12 @@
     }
   };
 
-  openAddressModalBtn.addEventListener("click", () => {
+  // ===== MODAL EVENTS =====
+  openAddressModalBtn.addEventListener("click", async () => {
     setModalModeAdd();
     openModal();
+    setWilayahMode(getWilayahMode());
+    await initWilayahSelects().catch(console.error);
   });
 
   closeModalBtn.addEventListener("click", closeModal);
@@ -850,6 +1106,7 @@
     if (e.target === addressModal) closeModal();
   });
 
+  // ===== GEOLOCATION =====
   btnGetLocation?.addEventListener("click", () => {
     if (!navigator.geolocation) return alert("Browser tidak mendukung lokasi.");
 
@@ -873,14 +1130,31 @@
     );
   });
 
+  // ===== SAVE ADDRESS (DUAL MODE) =====
   saveAddressBtn.addEventListener("click", async () => {
     const label = document.getElementById("labelAlamat").value.trim();
     const namaPenerima = document.getElementById("namaPenerima").value.trim();
     const noTelp = document.getElementById("noTelp").value.trim();
-    const provinsi = document.getElementById("provinceInput").value.trim();
-    const kota = document.getElementById("cityInput").value.trim();
-    const kecamatan = document.getElementById("districtInput").value.trim();
-    const kelurahan = document.getElementById("subdistrictInput").value.trim();
+
+    const mode = getWilayahMode();
+
+    let provinsi = "";
+    let kota = "";
+    let kecamatan = "";
+    let kelurahan = "";
+
+    if (mode === "select") {
+      provinsi = provinceSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      kota = citySelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      kecamatan = districtSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      kelurahan = subdistrictSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+    } else {
+      provinsi = (provinceInput?.value || "").trim();
+      kota = (cityInput?.value || "").trim();
+      kecamatan = (districtInput?.value || "").trim();
+      kelurahan = (subdistrictInput?.value || "").trim();
+    }
+
     const kodePos = document.getElementById("kodePos").value.trim();
     const alamat = document.getElementById("alamatLengkap").value.trim();
     const isUtama = document.getElementById("isUtama").checked;
@@ -951,10 +1225,11 @@
     }
   });
 
+  // ===== DEFAULT PAYMENT =====
   function setDefaultPaymentCOD() {
     selectPaymentCategory(2);
 
-    document.querySelectorAll('input[name="payment"]').forEach(r => {
+    document.querySelectorAll('input[name="payment"]').forEach((r) => {
       r.checked = false;
     });
 
@@ -962,7 +1237,11 @@
     if (codRadio) codRadio.checked = true;
   }
 
+  // ===== INIT =====
   document.addEventListener("DOMContentLoaded", () => {
+    bindWilayahModeToggle();
+    setWilayahMode(getWilayahMode());
+
     loadCheckoutPage()
       .then(() => {
         setDefaultPaymentCOD();
@@ -973,8 +1252,8 @@
         showAlert(e.message || "Gagal load checkout", "error");
       });
   });
-
 </script>
+
 
 </body>
 </html>

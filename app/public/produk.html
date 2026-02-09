@@ -880,27 +880,42 @@
             btnBeli.onclick = async () => {
               if (!productId) return alert("Produk tidak valid");
 
+              // sesuaikan kalau ada varian yang dipilih
+              const selectedVarianId = window.selectedVarianId ?? null;
+
               try {
-                // Ambil data produk dari API
-                const produkData = await apiAuth(`/api/produk/${productId}`, { method: "GET" });
+                // 1) Tambah / merge item di keranjang
+                await apiAuth("/api/keranjang/item", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    produkId: Number(productId),
+                    varianId: selectedVarianId ? Number(selectedVarianId) : null,
+                    jumlah: 1,
+                  }),
+                });
 
-                // Buat array item checkout
-                const checkoutItem = [{
-                  id: produkData.id,
-                  jumlah: 1, // default 1
-                  produk: produkData,
-                  varian: null // kalau ada varian bisa disesuaikan
-                }];
+                // 2) Ambil ulang keranjang untuk dapat itemId terbaru
+                const cart = await apiAuth("/api/keranjang", { method: "GET" });
+                const items = cart?.item || [];
 
-                // Simpan di sessionStorage agar checkout bisa baca
-                sessionStorage.setItem("checkout_selected_item_ids", JSON.stringify([produkData.id]));
-                sessionStorage.setItem("checkout_items_temp", JSON.stringify(checkoutItem));
+                // 3) Cari item yang match produk + varian
+                const target = items.find((it) => {
+                  const sameProduk = Number(it.produk?.id) === Number(productId);
+                  const itVarianId = it.varian?.id ?? null;
+                  const sameVarian = Number(itVarianId || 0) === Number(selectedVarianId || 0);
+                  return sameProduk && sameVarian;
+                });
 
-                // Redirect ke checkout
+                if (!target?.id) throw new Error("Item keranjang tidak ditemukan setelah ditambahkan");
+
+                // 4) Simpan ID ITEM KERANJANG (bukan produkId)
+                sessionStorage.setItem("checkout_selected_item_ids", JSON.stringify([Number(target.id)]));
+
+                // 5) ke checkout
                 window.location.href = "/checkout.html";
               } catch (err) {
                 console.error(err);
-                alert("Gagal load produk");
+                alert(err.message || "Gagal Beli Sekarang");
               }
             };
           }

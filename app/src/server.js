@@ -13,6 +13,7 @@ import pesanan from "./routes/pesanan.js";
 import pembayaran from "./routes/pembayaran.js";
 import checkoutRoutes from "./routes/checkout.js";
 import pengguna from "./routes/pengguna.js";
+import wilayahRouter from "./routes/wilayah.js";
 
 // FRONT END
 
@@ -53,12 +54,15 @@ app.use("/api/auth", authRoutes);
 // ===== Route Auth (Admin)
 app.use("/api/admin/auth", authAdmin);
 
-// ===== Public API (boleh tanpa login)
 
+// ===== Public API (boleh tanpa login)
 app.use("/api/home", home);  
 app.use("/api/produk", produk);
 app.use("/api/kategori", kategori);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/wilayah", wilayahRouter);
+
+
 
 // ===== User API (WAJIB login)
 app.use("/api/keranjang", authJWT, keranjang);
@@ -66,12 +70,16 @@ app.use("/api/pesanan", authJWT, pesanan);
 app.use("/api/pembayaran", authJWT, pembayaran);
 app.use("/api/pengguna", authJWT, pengguna);
 
+
+
 // ===== Admin API (WAJIB login + ADMIN)
 app.use("/api/admin/produk", authJWT, adminOnly, adminProduk);
 app.use("/api/admin/pesanan", authJWT, adminOnly, adminPesanan);
 app.use("/api/admin/pengguna", authJWT, adminOnly, adminPengguna);
 app.use("/api/admin/kategori", authJWT, adminOnly, adminKategori);
 app.use("/api/admin/pembayaran", authJWT, adminOnly, adminPembayaran);
+
+
 
 app.get("/", (req, res) => res.json({ message: "API Bryna jalan 🚀" }));
 

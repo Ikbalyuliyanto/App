@@ -847,6 +847,19 @@
     return i === -1 ? 0 : i;
   }
 
+  // Order Number
+  function makeOrderNumber(pesanan) {
+    const d = new Date(pesanan.dibuatPada || pesanan.createdAt || Date.now());
+
+    const yy = String(d.getFullYear()).slice(2);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+
+    // id pendek tapi tetap rapi
+    const idPart = String(pesanan.id ?? "").padStart(5, "0");
+
+    return `INV-${yy}${mm}${dd}-${idPart}`;
+  }
   // ===== RENDER =====
   function renderStatusHeader(pesanan) {
     const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
@@ -860,7 +873,8 @@
     document.getElementById("statusSubtitle").textContent = config.subtitle;
     document.getElementById("statusIcon").textContent = config.icon;
 
-    document.getElementById("orderNumber").textContent = pesanan.id;
+    // document.getElementById("orderNumber").textContent = pesanan.id;
+    document.getElementById("orderNumber").textContent = makeOrderNumber(pesanan);
     document.getElementById("orderDate").textContent = formatDate(pesanan.dibuatPada || pesanan.createdAt);
     document.getElementById("orderTotal").textContent = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
   }
