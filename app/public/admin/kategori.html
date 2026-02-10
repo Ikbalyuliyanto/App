@@ -334,9 +334,8 @@
     }
 
     async function deleteCategory(id) {
-      if (!confirmDialog('Yakin ingin menghapus kategori ini? Semua produk dalam kategori ini akan terhapus!')) {
-        return;
-      }
+      const ok = await showConfirm("Konfirmasi bahwa Anda sudah menerima pesanan?");
+      if (!ok) return;
 
       try {
         await apiRequest(`/api/admin/kategori/${id}`, {
