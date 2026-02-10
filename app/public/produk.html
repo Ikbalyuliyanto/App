@@ -569,6 +569,28 @@
       </div>
     </div>
   </section>
+    
+  <!-- Produk Terkait -->
+  <section class="product-tabs" style="margin-top: 20px;">
+    <div class="tabs-container">
+      <div style="padding: 20px; border-bottom: 2px solid #f5f5f5;">
+        <h2 style="font-size: 24px; font-weight: bold; color: #333;">
+          <i class="fas fa-th-large" style="color: #ff4081; margin-right: 10px;"></i>
+          Produk Terkait
+        </h2>
+      </div>
+      
+      <div style="padding: 20px;">
+        <div id="relatedProductsGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px;">
+          <!-- Loading state -->
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 32px;"></i>
+            <p style="margin-top: 15px;">Memuat produk terkait...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Footer -->
   <div id="footer-container"></div>
@@ -878,8 +900,7 @@
           const btnBeli = document.getElementById("btnBeli");
           if (btnBeli) {
             btnBeli.onclick = async () => {
-              if (!productId) return alert("Produk tidak valid");
-
+              if (!productId) return showAlert("Produk tidak valid", "warning");
               // sesuaikan kalau ada varian yang dipilih
               const selectedVarianId = window.selectedVarianId ?? null;
 
@@ -914,8 +935,12 @@
                 // 5) ke checkout
                 window.location.href = "/checkout.html";
               } catch (err) {
+                if (err.message === "NO_LOGIN") {
+                  // login dibatalkan / user pilih batal
+                  return;
+                }
                 console.error(err);
-                alert(err.message || "Gagal Beli Sekarang");
+                showAlert(err.message || "Gagal Beli Sekarang", "error");
               }
             };
           }
@@ -923,9 +948,170 @@
         } catch (err) {
           console.error(err);
           showAlert("Gagal mengambil data produk.", "error");
+        }                
+        loadRelatedProducts(id);
+      }
+      // ========================================
+      // TAMBAHKAN KODE INI DI BAGIAN SCRIPT
+      // Letakkan SETELAH fungsi loadProduk()
+      // ========================================
+
+      // Load related products
+      async function loadRelatedProducts(productId) {
+        const grid = document.getElementById('relatedProductsGrid');
+        
+        try {
+          // Fetch produk terkait dari backend
+          const res = await fetch(`${API_BASE}/api/produk/${productId}/related`);
+          
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+
+          const products = await res.json();
+          renderRelatedProducts(products);
+          
+        } catch (err) {
+          console.error('Error loading related products:', err);
+          
+          // Fallback: jika endpoint belum ada, ambil manual
+          try {
+            const allRes = await fetch(`${API_BASE}/api/produk`);
+            if (!allRes.ok) throw new Error('Failed to load all products');
+            
+            const allProducts = await allRes.json();
+            const currentProduct = allProducts.find(p => p.id === Number(productId));
+            
+            if (currentProduct) {
+              // Filter manual: kategori sama, exclude produk ini, aktif only
+              const relatedProducts = allProducts
+                .filter(p => 
+                  p.kategoriId === currentProduct.kategoriId && 
+                  p.id !== Number(productId) &&
+                  p.aktif === true
+                )
+                .sort((a, b) => a.harga - b.harga) // sort dari termurah
+                .slice(0, 10); // ambil 10
+              
+              renderRelatedProducts(relatedProducts);
+            } else {
+              showEmptyState();
+            }
+          } catch (fallbackErr) {
+            console.error('Fallback also failed:', fallbackErr);
+            showEmptyState();
+          }
+        }
+        
+        function showEmptyState() {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+              <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+              <p>Tidak ada produk terkait</p>
+            </div>
+          `;
         }
       }
 
+      function renderRelatedProducts(products) {
+        const grid = document.getElementById('relatedProductsGrid');
+        
+        if (!products || products.length === 0) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+              <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; display: block; opacity: 0.5;"></i>
+              <p>Tidak ada produk terkait</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = products.map(p => {
+          const imageHtml = p.gambarUtama
+            ? `<img src="${toAbsoluteUrl(p.gambarUtama)}" alt="${escapeHtml(p.nama)}" style="width:100%;height:100%;object-fit:cover;">`
+            : '<div style="font-size:60px;">📦</div>';
+
+          const discountBadge = p.diskonPersen
+            ? `<span style="position:absolute;top:8px;left:8px;background:#ff4081;color:white;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:bold;">-${p.diskonPersen}%</span>`
+            : '';
+
+          const originalPrice = p.hargaAsli
+            ? `<span style="font-size:12px;color:#999;text-decoration:line-through;margin-left:5px;">Rp ${formatRupiah(p.hargaAsli)}</span>`
+            : '';
+
+          return `
+            <div class="related-product-card" onclick="window.location.href='produk.html?id=${p.id}'" 
+                style="background:white;border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.3s;border:1px solid #eee;">
+              <div style="width:100%;height:200px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;position:relative;">
+                ${imageHtml}
+                ${discountBadge}
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;margin-bottom:8px;height:36px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                  ${escapeHtml(p.nama)}
+                </div>
+                <div>
+                  <span style="font-size:16px;font-weight:bold;color:#ff4081;">Rp ${formatRupiah(p.harga)}</span>
+                  ${originalPrice}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        // Add hover effect via CSS-in-JS
+        const style = document.createElement('style');
+        style.textContent = `
+          .related-product-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+          }
+          @media (max-width: 1024px) {
+            #relatedProductsGrid {
+              grid-template-columns: repeat(4, 1fr) !important;
+            }
+          }
+          @media (max-width: 768px) {
+            #relatedProductsGrid {
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 10px !important;
+            }
+            .related-product-card > div:first-child {
+              height: 160px !important;
+            }
+          }
+        `;
+        if (!document.getElementById('related-products-style')) {
+          style.id = 'related-products-style';
+          document.head.appendChild(style);
+        }
+      }
+
+      // Helper functions (jika belum ada)
+      function escapeHtml(str) {
+        return String(str || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function formatRupiah(n) {
+        return Number(n || 0).toLocaleString("id-ID");
+      }
+
+      function toAbsoluteUrl(url) {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return `${API_BASE}${url}`;
+      }
+
+      // ========================================
+      // PANGGIL DI AKHIR loadProduk()
+      // Tambahkan baris ini di bagian akhir loadProduk():
+      // loadRelatedProducts(id);
+      // ========================================
       loadProduk();
     });
   </script>

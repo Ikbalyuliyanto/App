@@ -624,5 +624,4 @@ router.delete("/:id", async (req, res) => {
     res.status(409).json({ message: "Gagal hapus produk. Pastikan tidak sedang dipakai relasi lain." });
   }
 });
-
 export default router;
