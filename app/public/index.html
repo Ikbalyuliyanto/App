@@ -425,21 +425,12 @@ window.addEventListener("headerLoaded", initSearchBar);
 
     headerCats.forEach((cat) => {
       const li = document.createElement("li");
-      li.innerHTML = `<a href="javascript:void(0)" data-kategori="${cat.id}">${escapeHtml(cat.nama)}</a>`;
+      // ✅ REDIRECT KE HALAMAN KATEGORI
+      li.innerHTML = `<a href="kategori.html?id=${cat.id}">${escapeHtml(cat.nama)}</a>`;
       ul.appendChild(li);
     });
 
-    ul.querySelectorAll("a[data-kategori]").forEach((a) => {
-      a.addEventListener("click", () => {
-        ul.querySelectorAll("a").forEach((x) => x.classList.remove("active"));
-        a.classList.add("active");
-
-        const kategoriId = a.getAttribute("data-kategori") || "";
-        filterByKategori(kategoriId);
-      });
-    });
-
-    // klik ALL
+    // Klik ALL tetap di index
     ul.querySelector('a[data-kategori=""]')?.addEventListener("click", () => {
       filterByKategori("");
     });
@@ -464,8 +455,9 @@ window.addEventListener("headerLoaded", initSearchBar);
           <p>Koleksi Terbaru</p>
         </div>
       `;
+      // ✅ REDIRECT KE HALAMAN KATEGORI
       div.addEventListener("click", () => {
-        filterByKategori(String(cat.id));
+        window.location.href = `kategori.html?id=${cat.id}`;
       });
       container.appendChild(div);
     });

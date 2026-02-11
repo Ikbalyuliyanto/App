@@ -101,6 +101,7 @@ async function loadProduct(id) {
     document.getElementById("kategoriId").value = product.kategoriId || "";
     document.getElementById("merek").value = product.merek || "";
     document.getElementById("deskripsi").value = product.deskripsi || "";
+    document.getElementById("urlproduk").value = product.urlproduk || "";
 
     // Pricing
     document.getElementById("harga").value = product.harga ?? "";
@@ -588,6 +589,7 @@ async function saveProduct() {
     kategoriId: parseInt(kategoriId, 10),
     merek: document.getElementById("merek").value || null,
     deskripsi: document.getElementById("deskripsi").value || null,
+    urlproduk: document.getElementById("urlproduk").value || null,
     harga: parseInt(harga, 10),
     hargaAsli: document.getElementById("hargaAsli").value
       ? parseInt(document.getElementById("hargaAsli").value, 10)

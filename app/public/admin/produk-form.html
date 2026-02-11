@@ -245,7 +245,7 @@
                         </div>
                         <div class="card-body">
                             <div class="form-grid">
-                                <div class="form-group full-width">
+                                <div class="form-group">
                                     <label for="nama" class="required">Nama Produk</label>
                                     <input type="text" id="nama" required placeholder="Contoh: Samsung Galaxy S23 Ultra">
                                 </div>
@@ -262,16 +262,16 @@
                                     <input type="text" id="merek" placeholder="Contoh: Samsung, Nike, dll">
                                 </div>
 
-                                <div class="form-group full-width">
+                                <div class="form-group">
                                     <label for="deskripsi">Deskripsi Produk</label>
-                                    <textarea id="deskripsi" rows="4" placeholder="Deskripsikan produk Anda..."></textarea>
+                                    <textarea id="deskripsi" placeholder="Deskripsikan produk Anda..."></textarea>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="nama" class="required">Url Produk</label>
+                                    <input type="text" id="urlproduk" required placeholder="Contoh: Samsung Galaxy S23 Ultra">
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Pricing -->
-                    <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Harga & Stok</h3>
                         </div>
@@ -289,17 +289,21 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="diskonPersen">Diskon (%)</label>
-                                    <input type="number" id="diskonPersen" min="0" max="100" placeholder="20">
-                                </div>
-
-                                <div class="form-group">
                                     <label for="stokProduk">Stok Produk</label>
                                     <input type="number" id="stokProduk" min="0" value="0" placeholder="100">
                                     <small style="color: var(--gray-500);">Kosongkan jika pakai varian</small>
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="diskonPersen">Diskon (%)</label>
+                                    <input type="number" id="diskonPersen" min="0" max="100" placeholder="20">
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="checkbox-group">
+                                        <input type="checkbox" id="aktif" checked>
+                                        <label for="aktif">Produk Aktif</label>
+                                    </div>
                                     <div class="checkbox-group">
                                         <input type="checkbox" id="gratisOngkir" checked>
                                         <label for="gratisOngkir">Gratis Ongkir</label>
@@ -308,19 +312,9 @@
 
                                 <div class="form-group">
                                     <div class="checkbox-group">
-                                        <input type="checkbox" id="aktif" checked>
-                                        <label for="aktif">Produk Aktif</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="checkbox-group">
                                         <input type="checkbox" id="flashsale">
                                         <label for="flashsale">Flash Sale</label>
                                     </div>
-                                </div>
-
-                                <div class="form-group">
                                     <div class="checkbox-group">
                                         <input type="checkbox" id="terlaris" >
                                         <label for="terlaris">Terlaris</label>
