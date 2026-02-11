@@ -474,7 +474,6 @@ function makeSku(produkId, nilaiIds) {
 }
 
 async function generateVariantsFromDb(tx, produkId, { defaultHarga, defaultStok }) {
-  // ambil atribut + nilai dari DB
   const attrs = await tx.atributProduk.findMany({
     where: { produkId },
     orderBy: { urutan: "asc" },
@@ -483,131 +482,261 @@ async function generateVariantsFromDb(tx, produkId, { defaultHarga, defaultStok 
 
   if (!attrs.length) return { created: 0, reason: "NO_ATTR" };
 
-  const nilaiPerAttr = attrs.map((a) => (a.nilai || []).map((v) => v.id).filter(Boolean));
-  if (nilaiPerAttr.some((list) => list.length === 0)) return { created: 0, reason: "EMPTY_VALUE" };
+  const nilaiPerAttr = attrs.map((a) =>
+    (a.nilai || []).map((v) => v.id).filter(Boolean)
+  );
 
-  const combos = cartesianProduct(nilaiPerAttr); // [[nilaiId,nilaiId], ...]
+  if (nilaiPerAttr.some((list) => list.length === 0))
+    return { created: 0, reason: "EMPTY_VALUE" };
 
-  // create varian + join otomatis
+  const combos = cartesianProduct(nilaiPerAttr);
+
+  // ===============================
+  // 1️⃣ INSERT VARIAN (createMany)
+  // ===============================
+  const variantRows = combos.map((nilaiIds) => ({
+    produkId,
+    sku: makeSku(produkId, nilaiIds),
+    stok: Number(defaultStok || 0),
+    harga: defaultHarga != null ? Number(defaultHarga) : null,
+  }));
+
+  await tx.varianProduk.createMany({
+    data: variantRows,
+  });
+
+  // ===============================
+  // 2️⃣ AMBIL ULANG VARIAN YANG BARU DIBUAT
+  // ===============================
+  const createdVariants = await tx.varianProduk.findMany({
+    where: { produkId },
+    select: { id: true, sku: true },
+  });
+
+  const skuToId = new Map(
+    createdVariants.map((v) => [v.sku, v.id])
+  );
+
+  // ===============================
+  // 3️⃣ BULK INSERT JOIN TABLE
+  // ===============================
+  const joinRows = [];
+
   for (const nilaiIds of combos) {
-    await tx.varianProduk.create({
-      data: {
-        produkId,
-        sku: makeSku(produkId, nilaiIds),
-        stok: Number(defaultStok || 0),
-        harga: defaultHarga != null ? Number(defaultHarga) : null,
-        atribut: {
-          create: nilaiIds.map((nilaiId) => ({
-            nilai: { connect: { id: nilaiId } },
-          })),
-        },
-      },
+    const sku = makeSku(produkId, nilaiIds);
+    const varianId = skuToId.get(sku);
+
+    for (const nilaiId of nilaiIds) {
+      joinRows.push({
+        varianId,
+        nilaiId,
+      });
+    }
+  }
+
+  if (joinRows.length) {
+    await tx.varianProdukAtribut.createMany({
+      data: joinRows,
     });
   }
 
   return { created: combos.length, reason: "OK" };
 }
 
+
+// =====================================
+// ✅ PUT /api/admin/produk/:id/variants
+// =====================================
 // =====================================
 // ✅ PUT /api/admin/produk/:id/variants
 // =====================================
 router.put("/:id/variants", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ message: "ID tidak valid" });
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: "ID tidak valid" });
+    }
 
     const { varianProduk, autoGenerate } = req.body;
-    // Manual format: [{ sku, stok, harga, atribut: [{ nilaiId }] }]
 
-    const result = await prisma.$transaction(async (tx) => {
-      // ambil default dari produk
-      const produk = await tx.produk.findUnique({
-        where: { id },
-        select: { id: true, harga: true, stokProduk: true },
-      });
-      if (!produk) {
-        const err = new Error("Produk tidak ditemukan");
-        err.statusCode = 404;
-        throw err;
-      }
-
-      // ===== replace-all (hapus dulu semua varian lama) =====
-      await tx.varianProdukAtribut.deleteMany({
-        where: { varian: { produkId: id } },
-      });
-      await tx.varianProduk.deleteMany({ where: { produkId: id } });
-
-      // =========================
-      // MODE AUTO GENERATE
-      // =========================
-      const shouldAuto =
-        autoGenerate === true ||
-        !Array.isArray(varianProduk) ||
-        varianProduk.length === 0;
-
-      if (shouldAuto) {
-        const info = await generateVariantsFromDb(tx, id, {
-          defaultHarga: produk.harga,
-          defaultStok: produk.stokProduk,
-        });
-
-        // Kalau mau: karena stok sudah masuk ke varian, stokProduk bisa kamu nolkan biar tidak bingung
-        // await tx.produk.update({ where: { id }, data: { stokProduk: 0 } });
-
-        const after = await tx.produk.findUnique({
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // =========================
+        // 1️⃣ Ambil produk
+        // =========================
+        const produk = await tx.produk.findUnique({
           where: { id },
-          include: { varianProduk: { include: { atribut: true } } },
+          select: { id: true, harga: true, stokProduk: true },
         });
 
-        return { ...after, _auto: info };
-      }
+        if (!produk) {
+          const err = new Error("Produk tidak ditemukan");
+          err.statusCode = 404;
+          throw err;
+        }
 
-      // =========================
-      // MODE MANUAL (FE kirim)
-      // =========================
-      if (!Array.isArray(varianProduk)) {
-        const err = new Error("varianProduk harus array");
-        err.statusCode = 400;
-        throw err;
-      }
+        // =========================
+        // 2️⃣ Hapus semua varian lama
+        // =========================
+        await tx.varianProdukAtribut.deleteMany({
+          where: { varian: { produkId: id } },
+        });
 
-      for (const v of varianProduk) {
-        const created = await tx.varianProduk.create({
-          data: {
+        await tx.varianProduk.deleteMany({
+          where: { produkId: id },
+        });
+
+        // =========================
+        // 3️⃣ MODE AUTO GENERATE
+        // =========================
+        const shouldAuto =
+          autoGenerate === true ||
+          !Array.isArray(varianProduk) ||
+          varianProduk.length === 0;
+
+        if (shouldAuto) {
+          const info = await generateVariantsFromDb(tx, id, {
+            defaultHarga: produk.harga,
+            defaultStok: produk.stokProduk,
+          });
+
+          const after = await tx.produk.findUnique({
+            where: { id },
+            include: {
+              varianProduk: {
+                include: { atribut: true },
+              },
+            },
+          });
+
+          return { ...after, _auto: info };
+        }
+
+        // =========================
+        // 4️⃣ MODE MANUAL (OPTIMIZED)
+        // =========================
+        if (!Array.isArray(varianProduk)) {
+          const err = new Error("varianProduk harus array");
+          err.statusCode = 400;
+          throw err;
+        }
+
+        if (varianProduk.length === 0) {
+          return tx.produk.findUnique({
+            where: { id },
+            include: { varianProduk: true },
+          });
+        }
+
+        // 4.1 Validasi + siapkan varian rows
+        const variantRows = varianProduk.map((v) => {
+          if (!v.sku) {
+            const err = new Error("SKU wajib diisi pada manual mode");
+            err.statusCode = 400;
+            throw err;
+          }
+
+          return {
             produkId: id,
-            sku: v.sku ? String(v.sku) : null,
+            sku: String(v.sku),
             stok: v.stok != null ? Number(v.stok) : 0,
             harga: v.harga != null ? Number(v.harga) : null,
-          },
+          };
         });
 
-        const attrs = Array.isArray(v.atribut) ? v.atribut : [];
-        const rows = attrs
-          .filter((a) => a?.nilaiId != null)
-          .map((a) => ({ varianId: created.id, nilaiId: Number(a.nilaiId) }));
+        // 4.2 Bulk insert varian
+        await tx.varianProduk.createMany({
+          data: variantRows,
+        });
 
-        // prevent duplicate nilaiId
-        const uniq = Array.from(new Map(rows.map((r) => [r.nilaiId, r])).values());
+        // 4.3 Ambil varian yang baru dibuat
+        const createdVariants = await tx.varianProduk.findMany({
+          where: {
+            produkId: id,
+            sku: { in: variantRows.map((v) => v.sku) },
+          },
+          select: { id: true, sku: true },
+        });
 
-        if (uniq.length) await tx.varianProdukAtribut.createMany({ data: uniq });
+        const skuToId = new Map(
+          createdVariants.map((v) => [v.sku, v.id])
+        );
+
+        // 4.4 Siapkan join table rows
+        const joinRows = [];
+
+        for (const v of varianProduk) {
+          const varianId = skuToId.get(String(v.sku));
+          if (!varianId) continue;
+
+          const attrs = Array.isArray(v.atribut) ? v.atribut : [];
+
+          for (const a of attrs) {
+            if (a?.nilaiId != null) {
+              joinRows.push({
+                varianId,
+                nilaiId: Number(a.nilaiId),
+              });
+            }
+          }
+        }
+
+        // Remove duplicate
+        const uniqueJoinRows = Array.from(
+          new Map(
+            joinRows.map((r) => [`${r.varianId}-${r.nilaiId}`, r])
+          ).values()
+        );
+
+        if (uniqueJoinRows.length) {
+          await tx.varianProdukAtribut.createMany({
+            data: uniqueJoinRows,
+          });
+        }
+
+        // =========================
+        // 5️⃣ Return hasil akhir
+        // =========================
+        return tx.produk.findUnique({
+          where: { id },
+          include: {
+            varianProduk: {
+              include: {
+                atribut: {
+                  include: { nilai: true },
+                },
+              },
+            },
+          },
+        });
+      },
+      {
+        timeout: 20000, // 🔥 penting supaya tidak timeout 5 detik
       }
-
-      return tx.produk.findUnique({
-        where: { id },
-        include: { varianProduk: { include: { atribut: true } } },
-      });
-    });
+    );
 
     res.json(result);
   } catch (e) {
     console.error("PUT /:id/variants ERROR:", e);
 
-    if (e?.statusCode === 404) return res.status(404).json({ message: e.message });
-    if (e?.code === "P2002") return res.status(409).json({ message: "SKU duplikat" });
+    if (e?.statusCode === 404) {
+      return res.status(404).json({ message: e.message });
+    }
 
-    res.status(500).json({ message: e.message || "Gagal menyimpan varian" });
+    if (e?.statusCode === 400) {
+      return res.status(400).json({ message: e.message });
+    }
+
+    if (e?.code === "P2002") {
+      return res.status(409).json({ message: "SKU duplikat" });
+    }
+
+    res.status(500).json({
+      message: e.message || "Gagal menyimpan varian",
+    });
   }
 });
+
 // ✅ DELETE produk (+ bersihin folder uploads)
 router.delete("/:id", async (req, res) => {
   try {
