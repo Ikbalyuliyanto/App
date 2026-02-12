@@ -13,7 +13,7 @@
     .page-container {
       max-width: 1200px;
       margin: 20px auto 40px;
-      padding: 0 20px;
+      padding: 0 5px;
     }
 
     .page-header {
@@ -122,14 +122,14 @@
     .product-name {
       font-size: 14px;
       margin-bottom: 10px;
-      height: 40px;
+      height: 35px;
       overflow: hidden;
     }
 
     .price-container {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex-direction: column;
+      gap: 4px;
       margin-bottom: 8px;
     }
 
@@ -196,7 +196,7 @@
   </div>
 
   <div id="footer-container"></div>
-
+  
   <script src="../assets/js/alert.js"></script>
   <script src="../assets/js/config.js"></script>
   <script src="../assets/js/helpersindex.js"></script>
@@ -277,7 +277,7 @@
           </div>
         `;
 
-        card.onclick = () => window.location.href = `../produk.html?id=${p.id}`;
+        card.onclick = () => window.location.href = `produk.html?id=${p.id}`;
         grid.appendChild(card);
       });
     }
