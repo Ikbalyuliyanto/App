@@ -94,7 +94,7 @@
     .main-nav li a:hover { color: #ff4081; }
     .main-nav li a.active { color: #ffdd99; font-weight: 700; }
 
-    /* Hero - Desktop Banner */
+    /* Hero */
     .hero { max-width: 1200px; margin: 20px auto; padding: 0 5px; }
     .hero-banner {
       width: 100%;
@@ -113,21 +113,6 @@
       position: relative;
       overflow: hidden;
     }
-    
-    /* Mobile Banner - Hidden on Desktop */
-    .hero-banner-mobile {
-      display: none;
-      width: 100%;
-      height: 300px;
-      background-image: url('/assets/banermobile.webp');
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      border-radius: 0;
-      position: relative;
-      overflow: hidden;
-    }
-    
     .hero-content { text-align: center; z-index: 1; }
     .hero-content h1 { font-size: 48px; margin-bottom: 15px; }
     .hero-content p { font-size: 20px; margin-bottom: 25px; }
@@ -243,24 +228,12 @@
     @media (max-width: 1024px) {
       .product-grid { grid-template-columns: repeat(3, 1fr); gap: 15px; }
     }
-    
     @media (max-width: 768px) {
       .nav-container { flex-wrap: wrap; }
       .logo { font-size: 24px; }
       .search-bar { order: 3; max-width: 100%; width: 100%; margin: 10px 0 0 0; }
       .main-nav ul { gap: 20px; padding: 0 15px; }
-      
-      /* Switch Banners */
-      .hero { margin: 0; padding: 0; }
-      .hero-banner { 
-        display: none !important; /* Hide desktop banner */
-      }
-      .hero-banner-mobile { 
-        display: flex !important; /* Show mobile banner */
-        align-items: center;
-        justify-content: center;
-      }
-      
+      .hero-banner { height: 250px; }
       .hero-content h1 { font-size: 28px; }
       .hero-content p { font-size: 16px; }
       .category-card { min-width: 120px; height: 120px; }
@@ -275,6 +248,8 @@
       .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
       .footer-content { grid-template-columns: repeat(2, 1fr); }
     }
+    
+
   </style>
 </head>
 
@@ -291,21 +266,11 @@
 
   <!-- Hero Banner -->
   <section class="hero">
-    <!-- Desktop Banner -->
     <div class="hero-banner">
       <div class="hero-content">
         <h1></h1>
         <p style="color: #8b5a00;">Dapatkan diskon hingga 70%</p>
         <button class="btn-primary" id="shopNowBtn">SHOP NOW</button>
-      </div>
-    </div>
-    
-    <!-- Mobile Banner -->
-    <div class="hero-banner-mobile">
-      <div class="hero-content">
-        <h1></h1>
-        <p style="color: #8b5a00;">Dapatkan diskon hingga 70%</p>
-        <button class="btn-primary" id="shopNowBtnMobile">SHOP NOW</button>
       </div>
     </div>
   </section>
@@ -327,6 +292,14 @@
         <i class="fas fa-bolt" style="color: #8b5a00;"></i>
         <h2 class="section-title" style="margin: 0;">Ramadhan Super Sale</h2>
       </div>
+      <!-- <div class="timer">
+        <span>Berakhir</span>
+        <span class="time-box">02</span>
+        <span>:</span>
+        <span class="time-box">35</span>
+        <span>:</span>
+        <span class="time-box">48</span>
+      </div> -->
     </div>
 
     <!-- nanti bisa diisi produk flashsale=true -->
@@ -583,18 +556,10 @@ window.addEventListener("headerLoaded", initSearchBar);
       await loadHomeCategories();
       await loadHomeProducts();
 
-      // shop now scroll to flash sale - for both buttons
+      // shop now scroll to flash sale
       const shopBtn = document.getElementById("shopNowBtn");
-      const shopBtnMobile = document.getElementById("shopNowBtnMobile");
-      
       if (shopBtn) {
         shopBtn.addEventListener("click", () => {
-          document.querySelector(".flash-sale")?.scrollIntoView({ behavior: "smooth" });
-        });
-      }
-      
-      if (shopBtnMobile) {
-        shopBtnMobile.addEventListener("click", () => {
           document.querySelector(".flash-sale")?.scrollIntoView({ behavior: "smooth" });
         });
       }

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Banner - Ashanum Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-logo">Ashanum</h2>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                
+                <div class="nav-section">Master Data</div>
+                
+                <a href="kategori.html" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Kategori</span>
+                </a>
+                
+                <a href="produk.html" class="nav-item">
+                    <i class="fas fa-box"></i>
+                    <span>Produk</span>
+                </a>
+                
+                <div class="nav-section">Transaksi</div>
+                
+                <a href="pesanan.html" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Pesanan</span>
+                </a>
+                
+                <a href="pembayaran.html" class="nav-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Pembayaran</span>
+                </a>
+                
+                <div class="nav-section">Pengguna</div>
+                
+                <a href="pengguna.html" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Kelola Pengguna</span>
+                </a>
+                
+                <div class="nav-section">Pengaturan</div>
+                
+                <a href="setting.html" class="nav-item active">
+                    <i class="fas fa-cog"></i>
+                    <span>Pengaturan Banner</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <header class="topbar">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="topbar-right">
+                    <div class="topbar-item">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">5</span>
+                    </div>
+                    
+                    <div class="topbar-item user-menu">
+                        <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <div class="content-wrapper">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Pengaturan Banner</h1>
+                        <p class="page-subtitle">Kelola banner untuk halaman utama</p>
+                    </div>
+                </div>
+
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+
+                <!-- Banner Desktop Section -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-desktop"></i> Banner Desktop
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Upload Banner Desktop</label>
+                            <p style="color: var(--gray-500); font-size: 14px; margin-bottom: 10px;">
+                                Rekomendasi ukuran: 1200 x 400 pixels (Landscape)
+                            </p>
+                            <input type="file" id="bannerDesktopInput" accept="image/*" style="display: none;">
+                            <button class="btn btn-primary" onclick="document.getElementById('bannerDesktopInput').click()">
+                                <i class="fas fa-upload"></i> Pilih Gambar
+                            </button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Preview Banner Desktop</label>
+                            <div id="desktopPreview" style="
+                                width: 100%;
+                                max-width: 800px;
+                                height: 300px;
+                                border: 2px dashed var(--gray-300);
+                                border-radius: 8px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: var(--gray-100);
+                                position: relative;
+                                overflow: hidden;
+                            ">
+                                <div style="text-align: center; color: var(--gray-500);">
+                                    <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                    <p>Belum ada banner desktop</p>
+                                    <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-success" id="saveDesktopBtn" disabled>
+                                <i class="fas fa-save"></i> Simpan Banner Desktop
+                            </button>
+                            <button class="btn btn-danger" id="deleteDesktopBtn" style="display: none;">
+                                <i class="fas fa-trash"></i> Hapus Banner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Mobile Section -->
+                <div class="card" style="margin-top: 30px;">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-mobile-alt"></i> Banner Mobile
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Upload Banner Mobile</label>
+                            <p style="color: var(--gray-500); font-size: 14px; margin-bottom: 10px;">
+                                Rekomendasi ukuran: 768 x 400 pixels (Portrait/Square)
+                            </p>
+                            <input type="file" id="bannerMobileInput" accept="image/*" style="display: none;">
+                            <button class="btn btn-primary" onclick="document.getElementById('bannerMobileInput').click()">
+                                <i class="fas fa-upload"></i> Pilih Gambar
+                            </button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 20px;">
+                            <label>Preview Banner Mobile</label>
+                            <div id="mobilePreview" style="
+                                width: 100%;
+                                max-width: 400px;
+                                height: 300px;
+                                border: 2px dashed var(--gray-300);
+                                border-radius: 8px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background: var(--gray-100);
+                                position: relative;
+                                overflow: hidden;
+                            ">
+                                <div style="text-align: center; color: var(--gray-500);">
+                                    <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                    <p>Belum ada banner mobile</p>
+                                    <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-success" id="saveMobileBtn" disabled>
+                                <i class="fas fa-save"></i> Simpan Banner Mobile
+                            </button>
+                            <button class="btn btn-danger" id="deleteMobileBtn" style="display: none;">
+                                <i class="fas fa-trash"></i> Hapus Banner
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card" style="margin-top: 30px; border-left: 4px solid var(--info);">
+                    <div class="card-body">
+                        <h4 style="margin-bottom: 10px;">
+                            <i class="fas fa-info-circle" style="color: var(--info);"></i>
+                            Informasi
+                        </h4>
+                        <ul style="color: var(--gray-600); font-size: 14px; line-height: 1.8; padding-left: 20px;">
+                            <li>Banner Desktop akan ditampilkan di layar dengan lebar lebih dari 768px</li>
+                            <li>Banner Mobile akan ditampilkan di layar dengan lebar 768px atau kurang</li>
+                            <li>Format gambar yang direkomendasikan: JPG, PNG, atau WebP</li>
+                            <li>Ukuran file maksimal: 2MB untuk performa optimal</li>
+                            <li>Banner akan otomatis tersimpan di folder <code>/assets/</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/alert.js"></script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/main.js"></script>
+    
+    <script>
+        // Global variables
+        let desktopFile = null;
+        let mobileFile = null;
+
+        // Load existing banners on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExistingBanners();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Desktop banner
+            document.getElementById('bannerDesktopInput').addEventListener('change', handleDesktopUpload);
+            document.getElementById('saveDesktopBtn').addEventListener('click', saveDesktopBanner);
+            document.getElementById('deleteDesktopBtn').addEventListener('click', deleteDesktopBanner);
+
+            // Mobile banner
+            document.getElementById('bannerMobileInput').addEventListener('change', handleMobileUpload);
+            document.getElementById('saveMobileBtn').addEventListener('click', saveMobileBanner);
+            document.getElementById('deleteMobileBtn').addEventListener('click', deleteMobileBanner);
+        }
+
+        // Load existing banners
+        function loadExistingBanners() {
+            // Desktop banner
+            const desktopImg = new Image();
+            desktopImg.onload = function() {
+                showDesktopPreview(API_BASE + '/assets/baner.png');
+                document.getElementById('deleteDesktopBtn').style.display = 'inline-flex';
+            };
+            desktopImg.onerror = function() {
+                console.log('No desktop banner found');
+            };
+            desktopImg.src = API_BASE + '/assets/baner.png?t=' + Date.now();
+
+            // Mobile banner
+            const mobileImg = new Image();
+            mobileImg.onload = function() {
+                showMobilePreview(API_BASE + '/assets/banermobile.png');
+                document.getElementById('deleteMobileBtn').style.display = 'inline-flex';
+            };
+            mobileImg.onerror = function() {
+                console.log('No mobile banner found');
+            };
+            mobileImg.src = API_BASE + '/assets/banermobile.png?t=' + Date.now();
+        }
+
+        // Handle desktop upload
+        function handleDesktopUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showAlert('Hanya file gambar yang diperbolehkan!', 'error');
+                return;
+            }
+
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showAlert('Ukuran file maksimal 2MB!', 'error');
+                return;
+            }
+
+            desktopFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showDesktopPreview(e.target.result);
+                document.getElementById('saveDesktopBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Handle mobile upload
+        function handleMobileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showAlert('Hanya file gambar yang diperbolehkan!', 'error');
+                return;
+            }
+
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                showAlert('Ukuran file maksimal 2MB!', 'error');
+                return;
+            }
+
+            mobileFile = file;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                showMobilePreview(e.target.result);
+                document.getElementById('saveMobileBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Show desktop preview
+        function showDesktopPreview(src) {
+            const preview = document.getElementById('desktopPreview');
+            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        }
+
+        // Show mobile preview
+        function showMobilePreview(src) {
+            const preview = document.getElementById('mobilePreview');
+            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        }
+
+        // Save desktop banner
+        async function saveDesktopBanner() {
+            if (!desktopFile) {
+                showAlert('Pilih gambar terlebih dahulu!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('saveDesktopBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const formData = new FormData();
+                formData.append('banner', desktopFile);
+                formData.append('type', 'desktop');
+
+                const response = await fetch(`${API_BASE}/api/admin/setting/banner`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menyimpan banner');
+                }
+
+                const result = await response.json();
+                
+                showAlert('Banner desktop berhasil disimpan!', 'success');
+                document.getElementById('deleteDesktopBtn').style.display = 'inline-flex';
+                desktopFile = null;
+
+                // Reload preview
+                setTimeout(() => {
+                    showDesktopPreview(API_BASE + '/assets/baner.png?t=' + Date.now());
+                }, 500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Gagal menyimpan banner desktop', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Simpan Banner Desktop';
+            }
+        }
+
+        // Save mobile banner
+        async function saveMobileBanner() {
+            if (!mobileFile) {
+                showAlert('Pilih gambar terlebih dahulu!', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('saveMobileBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const formData = new FormData();
+                formData.append('banner', mobileFile);
+                formData.append('type', 'mobile');
+
+                const response = await fetch(`${API_BASE}/api/admin/setting/banner`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menyimpan banner');
+                }
+
+                const result = await response.json();
+                
+                showAlert('Banner mobile berhasil disimpan!', 'success');
+                document.getElementById('deleteMobileBtn').style.display = 'inline-flex';
+                mobileFile = null;
+
+                // Reload preview
+                setTimeout(() => {
+                    showMobilePreview(API_BASE + '/assets/banermobile.png?t=' + Date.now());
+                }, 500);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Gagal menyimpan banner mobile', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Simpan Banner Mobile';
+            }
+        }
+
+        // Delete desktop banner
+        async function deleteDesktopBanner() {
+            if (!confirm('Yakin ingin menghapus banner desktop?')) return;
+
+            const btn = document.getElementById('deleteDesktopBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/setting/banner/desktop`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menghapus banner');
+                }
+
+                showAlert('Banner desktop berhasil dihapus!', 'success');
+                
+                // Reset preview
+                document.getElementById('desktopPreview').innerHTML = `
+                    <div style="text-align: center; color: var(--gray-500);">
+                        <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
+                        <p>Belum ada banner desktop</p>
+                        <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
+                    </div>
+                `;
+                
+                btn.style.display = 'none';
+                document.getElementById('saveDesktopBtn').disabled = true;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Gagal menghapus banner desktop', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash"></i> Hapus Banner';
+            }
+        }
+
+        // Delete mobile banner
+        async function deleteMobileBanner() {
+            if (!confirm('Yakin ingin menghapus banner mobile?')) return;
+
+            const btn = document.getElementById('deleteMobileBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/setting/banner/mobile`, {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gagal menghapus banner');
+                }
+
+                showAlert('Banner mobile berhasil dihapus!', 'success');
+                
+                // Reset preview
+                document.getElementById('mobilePreview').innerHTML = `
+                    <div style="text-align: center; color: var(--gray-500);">
+                        <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
+                        <p>Belum ada banner mobile</p>
+                        <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
+                    </div>
+                `;
+                
+                btn.style.display = 'none';
+                document.getElementById('saveMobileBtn').disabled = true;
+
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert(error.message || 'Gagal menghapus banner mobile', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-trash"></i> Hapus Banner';
+            }
+        }
+    </script>
+</body>
+</html>
