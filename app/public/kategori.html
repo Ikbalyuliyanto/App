@@ -338,21 +338,6 @@
   <!-- Header -->
   <div id="header-container"></div>
 
-  <!-- Main Navigation -->
-  <nav class="main-nav">
-    <ul id="headerNav">
-      <li><a href="index.html">ALL</a></li>
-      <!-- kategori header=true akan di-inject di sini -->
-    </ul>
-  </nav>
-
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <a href="index.html"><i class="fas fa-home"></i> Home</a>
-    <span>/</span>
-    <span id="breadcrumbKategori">Kategori</span>
-  </div>
-
   <!-- Category Header -->
   <div class="category-header">
     <h1 id="categoryTitle">Loading...</h1>
@@ -365,7 +350,6 @@
       <button class="filter-btn active" data-filter="all">Semua</button>
       <button class="filter-btn" data-filter="flashsale">Flash Sale</button>
       <button class="filter-btn" data-filter="terlaris">Terlaris</button>
-      <button class="filter-btn" data-filter="terbaru">Terbaru</button>
     </div>
     <select class="sort-select" id="sortSelect">
       <option value="default">Urutkan</option>
@@ -393,19 +377,12 @@
   <!-- Footer -->
   <div id="footer-container"></div>
   
+  <script src="assets/js/alert.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/helpersindex.js"></script>
 
   <script>
     // === HELPERS ===
-    function escapeHtml(str) {
-      return String(str || "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
 
     function rupiah(n) {
       return Number(n || 0).toLocaleString("id-ID");
@@ -449,7 +426,6 @@
 
         // Update UI
         document.getElementById("categoryTitle").textContent = currentKategori.nama.toUpperCase();
-        document.getElementById("breadcrumbKategori").textContent = currentKategori.nama;
         document.title = `${currentKategori.nama} - Ashanum`;
 
         // Update active nav
@@ -474,9 +450,11 @@
 
     function renderHeaderNav(headerCats) {
       const ul = document.getElementById("headerNav");
+      if (!ul) return; // ⬅️ cegah error
+
       const allLi = ul.querySelector("li:first-child");
       ul.innerHTML = "";
-      ul.appendChild(allLi);
+      if (allLi) ul.appendChild(allLi);
 
       headerCats.forEach((cat) => {
         const li = document.createElement("li");
@@ -487,6 +465,8 @@
 
     function updateActiveNav(kategoriId) {
       const ul = document.getElementById("headerNav");
+      if (!ul) return; // ⬅️ cegah error
+
       ul.querySelectorAll("a").forEach((a) => {
         a.classList.remove("active");
         const href = a.getAttribute("href");

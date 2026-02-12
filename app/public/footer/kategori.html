@@ -197,8 +197,9 @@
 
   <div id="footer-container"></div>
 
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/helpers.js"></script>
+  <script src="../assets/js/alert.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/helpersindex.js"></script>
   
   <script>
     fetch('../header.html').then(r => r.text()).then(h => {
@@ -276,7 +277,7 @@
           </div>
         `;
 
-        card.onclick = () => window.location.href = `produk.html?id=${p.id}`;
+        card.onclick = () => window.location.href = `../produk.html?id=${p.id}`;
         grid.appendChild(card);
       });
     }
@@ -295,24 +296,32 @@
       return `${window.API_BASE}${u}`;
     }
 
-    document.getElementById('filterKategori')?.addEventListener('change', (e) => {
-      const kategoriId = e.target.value;
-      const filtered = kategoriId
+    // Fungsi untuk apply filter dan sort bersamaan
+    function applyFilters() {
+      const kategoriId = document.getElementById('filterKategori').value;
+      const sort = document.getElementById('filterSort').value;
+
+      // Filter berdasarkan kategori
+      let filtered = kategoriId
         ? allProducts.filter(p => String(p.kategoriId) === String(kategoriId))
-        : allProducts;
+        : [...allProducts];
+
+      // Sort
+      if (sort === 'terlaris') {
+        filtered.sort((a, b) => (b.terjual || 0) - (a.terjual || 0));
+      } else if (sort === 'termurah') {
+        filtered.sort((a, b) => a.harga - b.harga);
+      } else if (sort === 'termahal') {
+        filtered.sort((a, b) => b.harga - a.harga);
+      }
+      // 'terbaru' tidak perlu sorting khusus, gunakan urutan default dari API
+
       renderProducts(filtered);
-    });
+    }
 
-    document.getElementById('filterSort')?.addEventListener('change', (e) => {
-      const sort = e.target.value;
-      let sorted = [...allProducts];
-
-      if (sort === 'terlaris') sorted.sort((a, b) => (b.terjual || 0) - (a.terjual || 0));
-      else if (sort === 'termurah') sorted.sort((a, b) => a.harga - b.harga);
-      else if (sort === 'termahal') sorted.sort((a, b) => b.harga - a.harga);
-
-      renderProducts(sorted);
-    });
+    // Event listeners
+    document.getElementById('filterKategori')?.addEventListener('change', applyFilters);
+    document.getElementById('filterSort')?.addEventListener('change', applyFilters);
 
     document.addEventListener('DOMContentLoaded', loadProducts);
   </script>
