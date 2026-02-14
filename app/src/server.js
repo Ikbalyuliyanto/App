@@ -2,6 +2,9 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config(); // baca .env
+
 
 // FRONT 
 import home from "./routes/home.js";
@@ -40,16 +43,20 @@ const __dirname = path.dirname(__filename);
 // rootDir = zawawiya/
 const rootDir = path.join(__dirname, "..", "..");
 
+const devUploads = path.join(rootDir, "uploads");      // lokal/dev
+const prodUploads = path.join(process.cwd(), "uploads"); // Docker/prod
 // ===== Middleware dasar
 app.use(cors());
 app.use(express.json());
 
 // ✅ Static public (folder FE public ada di app/public)
 app.use(express.static(path.join(__dirname, "..", "public")));
-
-// ROOT container /usr/src/app
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-app.use("/uploads", express.static(path.join(rootDir, "uploads")));
+const uploadsPath = process.env.UPLOAD_ENV === "lokal" ? devUploads : prodUploads;
+app.use("/uploads", express.static(uploadsPath));
+console.log("Menggunakan folder uploads:", uploadsPath);
+
+
 
 // ===== Route Auth (login/register)
 app.use("/api/auth", authRoutes);
