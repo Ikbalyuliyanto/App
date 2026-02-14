@@ -227,297 +227,142 @@
     <script src="../assets/js/alert.js"></script>
     <script src="assets/js/config.js"></script>
     <script src="assets/js/main.js"></script>
-    
     <script>
-        // Global variables
         let desktopFile = null;
         let mobileFile = null;
-
-        // Load existing banners on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadExistingBanners();
-            setupEventListeners();
+        
+        document.addEventListener("DOMContentLoaded", () => {
+          loadExistingBanners();
+          setupEventListeners();
         });
-
-        // Setup event listeners
+        
         function setupEventListeners() {
-            // Desktop banner
-            document.getElementById('bannerDesktopInput').addEventListener('change', handleDesktopUpload);
-            document.getElementById('saveDesktopBtn').addEventListener('click', saveDesktopBanner);
-            document.getElementById('deleteDesktopBtn').addEventListener('click', deleteDesktopBanner);
-
-            // Mobile banner
-            document.getElementById('bannerMobileInput').addEventListener('change', handleMobileUpload);
-            document.getElementById('saveMobileBtn').addEventListener('click', saveMobileBanner);
-            document.getElementById('deleteMobileBtn').addEventListener('click', deleteMobileBanner);
+          document.getElementById('bannerDesktopInput').addEventListener('change', handleDesktopUpload);
+          document.getElementById('saveDesktopBtn').addEventListener('click', saveDesktopBanner);
+          document.getElementById('deleteDesktopBtn').addEventListener('click', deleteDesktopBanner);
+        
+          document.getElementById('bannerMobileInput').addEventListener('change', handleMobileUpload);
+          document.getElementById('saveMobileBtn').addEventListener('click', saveMobileBanner);
+          document.getElementById('deleteMobileBtn').addEventListener('click', deleteMobileBanner);
         }
-
-        // Load existing banners
+        
+        // ===============================
+        // LOAD EXISTING BANNERS
+        // ===============================
+        const desktopPath = "/assets/css/desktop.webp";
+        const mobilePath = "/assets/css/mobile.webp";
+        
         function loadExistingBanners() {
-            // Desktop banner
-            const desktopImg = new Image();
-            desktopImg.onload = function() {
-                showDesktopPreview(API_BASE + '/assets/baner.png');
-                document.getElementById('deleteDesktopBtn').style.display = 'inline-flex';
-            };
-            desktopImg.onerror = function() {
-                console.log('No desktop banner found');
-            };
-            desktopImg.src = API_BASE + '/assets/baner.png?t=' + Date.now();
-
-            // Mobile banner
-            const mobileImg = new Image();
-            mobileImg.onload = function() {
-                showMobilePreview(API_BASE + '/assets/banermobile.png');
-                document.getElementById('deleteMobileBtn').style.display = 'inline-flex';
-            };
-            mobileImg.onerror = function() {
-                console.log('No mobile banner found');
-            };
-            mobileImg.src = API_BASE + '/assets/banermobile.png?t=' + Date.now();
+          const desktopImg = new Image();
+          desktopImg.onload = () => {
+            showDesktopPreview(desktopPath + "?t=" + Date.now());
+            document.getElementById("deleteDesktopBtn").style.display = "inline-flex";
+          };
+          desktopImg.onerror = () => console.log("No desktop banner found");
+          desktopImg.src = desktopPath + "?t=" + Date.now();
+        
+          const mobileImg = new Image();
+          mobileImg.onload = () => {
+            showMobilePreview(mobilePath + "?t=" + Date.now());
+            document.getElementById("deleteMobileBtn").style.display = "inline-flex";
+          };
+          mobileImg.onerror = () => console.log("No mobile banner found");
+          mobileImg.src = mobilePath + "?t=" + Date.now();
         }
-
-        // Handle desktop upload
+        
+        // ===============================
+        // HANDLE UPLOAD & PREVIEW
+        // ===============================
+        function validateImage(file) {
+          if (!file.type.startsWith('image/')) { showAlert('Hanya file gambar yang diperbolehkan!', 'error'); return false; }
+          if (file.size > 2 * 1024 * 1024) { showAlert('Ukuran file maksimal 2MB!', 'error'); return false; }
+          return true;
+        }
+        
         function handleDesktopUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showAlert('Hanya file gambar yang diperbolehkan!', 'error');
-                return;
-            }
-
-            // Validate file size (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                showAlert('Ukuran file maksimal 2MB!', 'error');
-                return;
-            }
-
-            desktopFile = file;
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                showDesktopPreview(e.target.result);
-                document.getElementById('saveDesktopBtn').disabled = false;
-            };
-            reader.readAsDataURL(file);
+          const file = e.target.files[0];
+          if (!file || !validateImage(file)) return;
+          desktopFile = file;
+          const reader = new FileReader();
+          reader.onload = e => { showDesktopPreview(e.target.result); document.getElementById('saveDesktopBtn').disabled = false; };
+          reader.readAsDataURL(file);
         }
-
-        // Handle mobile upload
+        
         function handleMobileUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showAlert('Hanya file gambar yang diperbolehkan!', 'error');
-                return;
-            }
-
-            // Validate file size (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                showAlert('Ukuran file maksimal 2MB!', 'error');
-                return;
-            }
-
-            mobileFile = file;
-
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                showMobilePreview(e.target.result);
-                document.getElementById('saveMobileBtn').disabled = false;
-            };
-            reader.readAsDataURL(file);
+          const file = e.target.files[0];
+          if (!file || !validateImage(file)) return;
+          mobileFile = file;
+          const reader = new FileReader();
+          reader.onload = e => { showMobilePreview(e.target.result); document.getElementById('saveMobileBtn').disabled = false; };
+          reader.readAsDataURL(file);
         }
-
-        // Show desktop preview
-        function showDesktopPreview(src) {
-            const preview = document.getElementById('desktopPreview');
-            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        
+        function showDesktopPreview(src) { document.getElementById('desktopPreview').innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:contain;">`; }
+        function showMobilePreview(src) { document.getElementById('mobilePreview').innerHTML = `<img src="${src}" style="width:100%;height:100%;object-fit:contain;">`; }
+        
+        // ===============================
+        // SAVE & DELETE BANNER
+        // ===============================
+        async function saveDesktopBanner() { if (!desktopFile) return showAlert("Pilih gambar desktop terlebih dahulu!", "warning"); await uploadBanner(desktopFile, "desktop", "saveDesktopBtn", "deleteDesktopBtn"); desktopFile = null; }
+        async function saveMobileBanner() { if (!mobileFile) return showAlert("Pilih gambar mobile terlebih dahulu!", "warning"); await uploadBanner(mobileFile, "mobile", "saveMobileBtn", "deleteMobileBtn"); mobileFile = null; }
+        
+        async function uploadBanner(file, type, btnId, deleteBtnId) {
+          const btn = document.getElementById(btnId);
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+          try {
+            const formData = new FormData();
+            formData.append("type", type);
+            formData.append("banner", file);
+        
+            const result = await apiRequest("/api/admin/setting/banner", { method: "POST", body: formData, headers: {} });
+            showAlert(result.message || "Berhasil disimpan!", "success");
+            document.getElementById(deleteBtnId).style.display = 'inline-flex';
+        
+            // Preview langsung dari assets
+            setTimeout(() => {
+              const path = type === "desktop" ? desktopPath + "?t=" + Date.now() : mobilePath + "?t=" + Date.now();
+              type === "desktop" ? showDesktopPreview(path) : showMobilePreview(path);
+            }, 500);
+        
+          } catch (err) {
+            console.error(err);
+            showAlert(err.message || "Gagal menyimpan", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Simpan Banner';
+          }
         }
-
-        // Show mobile preview
-        function showMobilePreview(src) {
-            const preview = document.getElementById('mobilePreview');
-            preview.innerHTML = `<img src="${src}" style="width: 100%; height: 100%; object-fit: contain;">`;
+        
+        async function deleteDesktopBanner() { if (!confirm("Yakin ingin menghapus banner desktop?")) return; await deleteBanner("desktop", "desktopPreview", "deleteDesktopBtn", "saveDesktopBtn"); }
+        async function deleteMobileBanner() { if (!confirm("Yakin ingin menghapus banner mobile?")) return; await deleteBanner("mobile", "mobilePreview", "deleteMobileBtn", "saveMobileBtn"); }
+        
+        async function deleteBanner(type, previewId, btnId, saveBtnId) {
+          const btn = document.getElementById(btnId);
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+          try {
+            const result = await apiRequest(`/api/admin/setting/banner/${type}`, { method: "DELETE" });
+            showAlert(result.message || "Berhasil dihapus", "success");
+        
+            document.getElementById(previewId).innerHTML = `
+              <div style="text-align:center;color:var(--gray-500);">
+                <i class="fas fa-image" style="font-size:48px;margin-bottom:10px;"></i>
+                <p>Belum ada banner ${type}</p>
+              </div>
+            `;
+            btn.style.display = "none";
+            document.getElementById(saveBtnId).disabled = true;
+        
+          } catch (err) {
+            console.error(err);
+            showAlert(err.message || "Gagal menghapus", "error");
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash"></i> Hapus Banner';
+          }
         }
-
-        // Save desktop banner
-        async function saveDesktopBanner() {
-            if (!desktopFile) {
-                showAlert('Pilih gambar terlebih dahulu!', 'warning');
-                return;
-            }
-
-            const btn = document.getElementById('saveDesktopBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
-            try {
-                const formData = new FormData();
-                formData.append('banner', desktopFile);
-                formData.append('type', 'desktop');
-
-                const response = await fetch(`${API_BASE}/api/admin/setting/banner`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal menyimpan banner');
-                }
-
-                const result = await response.json();
-                
-                showAlert('Banner desktop berhasil disimpan!', 'success');
-                document.getElementById('deleteDesktopBtn').style.display = 'inline-flex';
-                desktopFile = null;
-
-                // Reload preview
-                setTimeout(() => {
-                    showDesktopPreview(API_BASE + '/assets/baner.png?t=' + Date.now());
-                }, 500);
-
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert(error.message || 'Gagal menyimpan banner desktop', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Simpan Banner Desktop';
-            }
-        }
-
-        // Save mobile banner
-        async function saveMobileBanner() {
-            if (!mobileFile) {
-                showAlert('Pilih gambar terlebih dahulu!', 'warning');
-                return;
-            }
-
-            const btn = document.getElementById('saveMobileBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-
-            try {
-                const formData = new FormData();
-                formData.append('banner', mobileFile);
-                formData.append('type', 'mobile');
-
-                const response = await fetch(`${API_BASE}/api/admin/setting/banner`, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal menyimpan banner');
-                }
-
-                const result = await response.json();
-                
-                showAlert('Banner mobile berhasil disimpan!', 'success');
-                document.getElementById('deleteMobileBtn').style.display = 'inline-flex';
-                mobileFile = null;
-
-                // Reload preview
-                setTimeout(() => {
-                    showMobilePreview(API_BASE + '/assets/banermobile.png?t=' + Date.now());
-                }, 500);
-
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert(error.message || 'Gagal menyimpan banner mobile', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-save"></i> Simpan Banner Mobile';
-            }
-        }
-
-        // Delete desktop banner
-        async function deleteDesktopBanner() {
-            if (!confirm('Yakin ingin menghapus banner desktop?')) return;
-
-            const btn = document.getElementById('deleteDesktopBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-
-            try {
-                const response = await fetch(`${API_BASE}/api/admin/setting/banner/desktop`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal menghapus banner');
-                }
-
-                showAlert('Banner desktop berhasil dihapus!', 'success');
-                
-                // Reset preview
-                document.getElementById('desktopPreview').innerHTML = `
-                    <div style="text-align: center; color: var(--gray-500);">
-                        <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
-                        <p>Belum ada banner desktop</p>
-                        <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
-                    </div>
-                `;
-                
-                btn.style.display = 'none';
-                document.getElementById('saveDesktopBtn').disabled = true;
-
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert(error.message || 'Gagal menghapus banner desktop', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-trash"></i> Hapus Banner';
-            }
-        }
-
-        // Delete mobile banner
-        async function deleteMobileBanner() {
-            if (!confirm('Yakin ingin menghapus banner mobile?')) return;
-
-            const btn = document.getElementById('deleteMobileBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-
-            try {
-                const response = await fetch(`${API_BASE}/api/admin/setting/banner/mobile`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Gagal menghapus banner');
-                }
-
-                showAlert('Banner mobile berhasil dihapus!', 'success');
-                
-                // Reset preview
-                document.getElementById('mobilePreview').innerHTML = `
-                    <div style="text-align: center; color: var(--gray-500);">
-                        <i class="fas fa-image" style="font-size: 48px; margin-bottom: 10px;"></i>
-                        <p>Belum ada banner mobile</p>
-                        <p style="font-size: 12px;">Upload gambar untuk melihat preview</p>
-                    </div>
-                `;
-                
-                btn.style.display = 'none';
-                document.getElementById('saveMobileBtn').disabled = true;
-
-            } catch (error) {
-                console.error('Error:', error);
-                showAlert(error.message || 'Gagal menghapus banner mobile', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-trash"></i> Hapus Banner';
-            }
-        }
-    </script>
+        </script>
+        
 </body>
 </html>

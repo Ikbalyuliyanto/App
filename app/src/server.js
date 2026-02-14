@@ -49,9 +49,8 @@ const prodUploads = path.join(process.cwd(), "uploads"); // Docker/prod
 app.use(cors());
 app.use(express.json());
 
-// ✅ Static public (folder FE public ada di app/public)
-app.use(express.static(path.join(__dirname, "..", "public")));
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 const uploadsPath = process.env.UPLOAD_ENV === "lokal" ? devUploads : prodUploads;
 app.use("/uploads", express.static(uploadsPath));
 console.log("Menggunakan folder uploads:", uploadsPath);

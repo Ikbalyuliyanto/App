@@ -1,49 +1,46 @@
-import express from "express";
-import multer from "multer";
-import path from "path";
-import fs from "fs";
+import path from 'path';
+import fs from 'fs';
+import express from 'express';
+import multer from 'multer';
 
 const router = express.Router();
 
-const uploadDir = path.join(process.cwd(), "app", "public", "assets");
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ==================== CONFIG MULTER ====================
+const assetsDir = path.join(process.cwd(), 'public', 'assets','css'); // ROOT/public/assets
+if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: uploadDir,
-  filename: (req, file, cb) => {
-    const type = req.body.type;
-    if (type === "desktop") {
-      cb(null, "baner.png");
-    } else if (type === "mobile") {
-      cb(null, "banermobile.png");
-    } else {
-      cb(new Error("Type tidak valid"));
-    }
+  destination: function (req, file, cb) {
+    cb(null, assetsDir);
+  },
+  filename: function (req, file, cb) {
+    const type = req.body.type; // 'desktop' atau 'mobile'
+    const fileName = type === 'desktop' ? 'desktop.webp' : 'mobile.webp';
+    cb(null, fileName);
   }
 });
 
 const upload = multer({ storage });
 
-// POST upload banner
+// ==================== UPLOAD BANNER ====================
 router.post("/banner", upload.single("banner"), (req, res) => {
-  res.json({ message: "Banner berhasil disimpan" });
+  if (!req.file) return res.status(400).json({ message: "File tidak ada" });
+  res.json({ message: "Banner berhasil disimpan!", file: req.file.filename });
 });
 
-// DELETE desktop
-router.delete("/banner/desktop", (req, res) => {
-  const filePath = path.join(uploadDir, "baner.png");
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  res.json({ message: "Banner desktop dihapus" });
-});
+// ==================== DELETE BANNER ====================
+router.delete("/banner/:type", (req, res) => {
+  const type = req.params.type; // 'desktop' atau 'mobile'
+  const fileName = type === "mobile" ? "mobile.webp" : "desktop.webp";
+  const filePath = path.join(assetsDir, fileName);
 
-// DELETE mobile
-router.delete("/banner/mobile", (req, res) => {
-  const filePath = path.join(uploadDir, "banermobile.png");
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  res.json({ message: "Banner mobile dihapus" });
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(404).json({ message: "File tidak ditemukan" });
+    }
+    res.json({ message: "Banner berhasil dihapus" });
+  });
 });
 
 export default router;
