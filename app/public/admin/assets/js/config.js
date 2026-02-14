@@ -1,5 +1,14 @@
 // config.js
-window.API_BASE = window.API_BASE || `${window.location.protocol}//${window.location.hostname}:${window.API_PORT || 9876}`;
+let API_BASE;
+if (window.location.hostname === "localhost") {
+  // DEV
+  API_BASE = "http://localhost:9876";
+} else {
+  // PROD
+  API_BASE = "https://ashanum.com";
+}
+window.API_BASE = API_BASE;
+
 
 window.apiRequest = async (endpoint, options = {}) => {
   const url = `${window.API_BASE}${endpoint}`;

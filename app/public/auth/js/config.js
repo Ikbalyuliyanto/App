@@ -1,2 +1,11 @@
 // API Configuration
-const API_BASE = `${location.protocol}//${location.hostname}:9876`;
+let API_BASE;
+if (window.location.hostname === "localhost") {
+  // DEV
+  API_BASE = "http://localhost:9876";
+} else {
+  // PROD
+  API_BASE = "https://ashanum.com";
+}
+window.API_BASE = API_BASE;
+
