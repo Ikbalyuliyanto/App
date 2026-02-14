@@ -48,7 +48,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // ROOT container /usr/src/app
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+// app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads", express.static(path.join(rootDir, "uploads")));
 
 // ===== Route Auth (login/register)
 app.use("/api/auth", authRoutes);

@@ -288,6 +288,7 @@
   <!-- Footer -->
   <div id="footer-container"></div>
   
+  <script src="assets/js/alert.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/helpersindex.js"></script>
 <script>
@@ -338,7 +339,239 @@
   }, 100);
 })();
 </script>
-
+<script>
+  /* =========================
+     HELPERS
+  ========================= */
+  function escapeHtml(str) {
+    return String(str || "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+  
+  function randomGradient(idx) {
+    const g = [
+      "linear-gradient(135deg,#f093fb 0%,#f5576c 100%)",
+      "linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)",
+      "linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)",
+      "linear-gradient(135deg,#fa709a 0%,#fee140 100%)",
+      "linear-gradient(135deg,#a8edea 0%,#fed6e3 100%)",
+      "linear-gradient(135deg,#30cfd0 0%,#330867 100%)",
+      "linear-gradient(135deg,#ffecd2 0%,#fcb69f 100%)"
+    ];
+    return g[idx % g.length];
+  }
+  
+  function rupiah(n) {
+    return Number(n || 0).toLocaleString("id-ID");
+  }
+  
+  function imgUrl(u) {
+    if (!u) return "";
+    if (u.startsWith("http")) return u;
+    return `${window.API_BASE}${u}`;
+  }
+  
+  /* =========================
+     STATE
+  ========================= */
+  let allProducts = [];
+  let searchTimeout;
+  
+  /* =========================
+     LOAD DATA
+  ========================= */
+  async function loadHomeCategories() {
+    const categories = await apiRequest("/api/kategori");
+    const headerCats = (categories || []).filter(c => c.header === true);
+    const bodyCats   = (categories || []).filter(c => c.body !== false);
+  
+    renderHeaderNav(headerCats);
+    renderBodyCategories(bodyCats);
+  }
+  
+  async function loadHomeProducts() {
+    const products = await apiRequest("/api/produk");
+    allProducts = (products || []).filter(p => p.aktif === true);
+    renderSections(allProducts);
+  }
+  
+  /* =========================
+     RENDER
+  ========================= */
+  function renderHeaderNav(headerCats) {
+    const ul = document.getElementById("headerNav");
+    if (!ul) return;
+  
+    const allLi = ul.querySelector("li:first-child");
+    ul.innerHTML = "";
+    if (allLi) ul.appendChild(allLi);
+  
+    headerCats.forEach(cat => {
+      const li = document.createElement("li");
+      li.innerHTML = `<a href="javascript:void(0)" data-kategori="${cat.id}">${escapeHtml(cat.nama)}</a>`;
+      ul.appendChild(li);
+    });
+  
+    ul.querySelectorAll("a[data-kategori]").forEach(a => {
+      a.addEventListener("click", () => {
+        ul.querySelectorAll("a").forEach(x => x.classList.remove("active"));
+        a.classList.add("active");
+        filterByKategori(a.getAttribute("data-kategori") || "");
+      });
+    });
+  }
+  
+  function renderBodyCategories(bodyCats) {
+    const container = document.getElementById("bodyCategories");
+    if (!container) return;
+  
+    container.innerHTML = "";
+  
+    bodyCats.forEach((cat, idx) => {
+      const div = document.createElement("div");
+      div.className = "category-card";
+      div.style.background = randomGradient(idx);
+      div.innerHTML = `
+        <div class="category-overlay">
+          <h3>${escapeHtml(cat.nama).toUpperCase()}</h3>
+          <p>Koleksi Terbaru</p>
+        </div>
+      `;
+      div.addEventListener("click", () => {
+        filterByKategori(String(cat.id));
+      });
+      container.appendChild(div);
+    });
+  }
+  
+  function renderSections(products) {
+    renderProductGrid("flashSaleGrid", products);
+  }
+  
+  function renderProductGrid(targetId, items) {
+    const grid = document.getElementById(targetId);
+    if (!grid) return;
+  
+    grid.innerHTML = "";
+  
+    if (!items.length) {
+      const searchQuery = document.getElementById("searchInput")?.value?.trim();
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:#777">
+          ${searchQuery
+            ? `Tidak ada produk ditemukan untuk "${escapeHtml(searchQuery)}"`
+            : "Belum ada produk"}
+        </div>
+      `;
+      return;
+    }
+  
+    items.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <div class="product-image">
+          ${p.gambarUtama
+            ? `<img src="${imgUrl(p.gambarUtama)}" style="width:100%;height:100%;object-fit:cover">`
+            : `<div style="font-size:60px;">📦</div>`}
+        </div>
+        <div class="product-info">
+          <div class="product-name">${escapeHtml(p.nama)}</div>
+          <div class="price-container">
+            <span class="current-price">Rp ${rupiah(p.harga)}</span>
+          </div>
+        </div>
+      `;
+      card.addEventListener("click", () => {
+        window.location.href = `produk.html?id=${p.id}`;
+      });
+      grid.appendChild(card);
+    });
+  }
+  
+  /* =========================
+     FILTER
+  ========================= */
+  function filterByKategori(id) {
+    document.getElementById("searchInput").value = "";
+    if (!id) return renderSections(allProducts);
+  
+    const filtered = allProducts.filter(p => String(p.kategoriId) === String(id));
+    renderSections(filtered);
+  }
+  
+  function filterBySearch(query) {
+    const q = String(query || "").trim().toLowerCase();
+    if (!q) return renderSections(allProducts);
+  
+    const filtered = allProducts.filter(p =>
+      String(p.nama || "").toLowerCase().includes(q) ||
+      String(p.deskripsi || "").toLowerCase().includes(q)
+    );
+  
+    renderSections(filtered);
+  
+    console.log(
+      filtered.length
+        ? `Ditemukan ${filtered.length} produk untuk "${query}"`
+        : `Tidak ada produk yang cocok dengan "${query}"`
+    );
+  }
+  
+  /* =========================
+     INIT
+  ========================= */
+  document.addEventListener("DOMContentLoaded", async () => {
+    await loadHomeCategories();
+    await loadHomeProducts();
+  
+    const q = (new URL(window.location.href).searchParams.get("q") || "").trim();
+    const input = document.getElementById("searchInput");
+  
+    if (input) {
+      input.value = q;
+  
+      input.addEventListener("input", e => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          filterBySearch(e.target.value);
+        }, 300);
+      });
+  
+      input.addEventListener("keypress", e => {
+        if (e.key === "Enter") {
+          clearTimeout(searchTimeout);
+          filterBySearch(e.target.value);
+        }
+      });
+    }
+  
+    if (q) filterBySearch(q);
+  });
+  
+  /* =========================
+     USER (ASYNC HEADER SAFE)
+  ========================= */
+  let userIcon, userDropdown;
+  
+  window.addEventListener("headerLoaded", () => {
+    userIcon = document.getElementById("userIcon");
+    userDropdown = document.getElementById("userDropdown");
+  
+    if (!userIcon || !userDropdown) return;
+  
+    userIcon.addEventListener("click", e => {
+      e.preventDefault();
+      userDropdown.style.display =
+        userDropdown.style.display === "block" ? "none" : "block";
+    });
+  });
+  </script>
+<!-- 
   <script>
     window.addEventListener("headerLoaded", () => {
       const q = (new URL(window.location.href).searchParams.get("q") || "").trim();
@@ -520,7 +753,7 @@
               <span class="current-price">Rp ${rupiah(p.harga)}</span>
               ${original}
             </div>
-            <div class="product-sold">Terjual ${rupiah(p.terjual || 0)}</div>
+            <div class="product-sold">Terjual ${formatTerjual(p.terjual)}</div>
           </div>
         `;
 
@@ -583,6 +816,12 @@
         await loadHomeCategories();
         await loadHomeProducts();
 
+        // 🔥 Jalankan pencarian SETELAH produk siap
+        const q = (new URL(window.location.href).searchParams.get("q") || "").trim();
+        if (q) {
+          filterBySearch(q);
+        }
+
         // search input dengan debounce
         const search = document.getElementById("searchInput");
         if (search) {
@@ -616,8 +855,22 @@
     });
 
     // ===== USER & KERANJANG =====
-    const userIcon = document.getElementById("userIcon");
-    const userDropdown = document.getElementById("userDropdown");
+    let userIcon;
+    let userDropdown;
+
+    window.addEventListener("headerLoaded", () => {
+      userIcon = document.getElementById("userIcon");
+      userDropdown = document.getElementById("userDropdown");
+
+      if (userIcon && userDropdown) {
+        userIcon.addEventListener("click", (e) => {
+          e.preventDefault();
+          updateUserDropdown();
+          userDropdown.style.display =
+            userDropdown.style.display === "block" ? "none" : "block";
+        });
+      }
+    });
     const keranjangIcon = document.getElementById("keranjangIcon");
     const keranjangBadge = document.getElementById("keranjangBadge");
 
@@ -644,6 +897,7 @@
     }
 
     function updateUserDropdown() {
+      if (!userDropdown) return;
       const ul = userDropdown.querySelector("ul");
       ul.innerHTML = "";
 
@@ -684,45 +938,77 @@
       }
     }
 
-    userIcon.addEventListener("click", (e) => {
-      e.preventDefault();
-      updateUserDropdown();
-      userDropdown.style.display = userDropdown.style.display === "block" ? "none" : "block";
-    });
+    if (userIcon && userDropdown) {
+      userIcon.addEventListener("click", (e) => {
+        e.preventDefault();
+        updateUserDropdown();
+        userDropdown.style.display =
+          userDropdown.style.display === "block" ? "none" : "block";
+      });
+    }
 
     // tutup dropdown kalau klik di luar
     document.addEventListener("click", (e) => {
-      if (!userIcon.contains(e.target) && !userDropdown.contains(e.target)) {
+      if (!userIcon || !userDropdown) return;
+
+      if (
+        !userIcon.contains(e.target) &&
+        !userDropdown.contains(e.target)
+      ) {
         userDropdown.style.display = "none";
       }
     });
 
     // Keranjang: kalau belum login, lempar ke login dengan returnUrl
-    keranjangIcon.addEventListener("click", (e) => {
-      e.preventDefault();
-      if (isLoggedIn()) {
-        window.location.href = "/keranjang.html";
-      } else {
-        const returnUrl = "/keranjang.html";
-        alert("Silakan login terlebih dahulu");
-        window.location.href = `/login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
-      }
-    });
+    if (keranjangIcon) {
+      keranjangIcon.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (isLoggedIn()) {
+          window.location.href = "/keranjang.html";
+        } else {
+          const returnUrl = "/keranjang.html";
+          alert("Silakan login terlebih dahulu");
+          window.location.href =
+            `/login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+        }
+      });
+    }
+    // keranjangIcon.addEventListener("click", (e) => {
+    //   e.preventDefault();
+    //   if (isLoggedIn()) {
+    //     window.location.href = "/keranjang.html";
+    //   } else {
+    //     const returnUrl = "/keranjang.html";
+    //     alert("Silakan login terlebih dahulu");
+    //     window.location.href = `/login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+    //   }
+    // });
 
     // Badge keranjang
     function updateKeranjangBadge() {
+      if (!keranjangBadge) return;
+
       if (!isLoggedIn()) {
         keranjangBadge.textContent = "";
         return;
       }
+
       const items = JSON.parse(localStorage.getItem("keranjang") || "[]");
       keranjangBadge.textContent = items.length ? String(items.length) : "0";
     }
+    // function updateKeranjangBadge() {
+    //   if (!isLoggedIn()) {
+    //     keranjangBadge.textContent = "";
+    //     return;
+    //   }
+    //   const items = JSON.parse(localStorage.getItem("keranjang") || "[]");
+    //   keranjangBadge.textContent = items.length ? String(items.length) : "0";
+    // }
 
     updateUserDropdown();
     updateKeranjangBadge();
 
-  </script>
+  </script> -->
 
 </body>
 </html>

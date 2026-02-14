@@ -736,9 +736,17 @@
         document.getElementById("ratingText").textContent =
           `${ratingRata} (${Number(jumlahRating).toLocaleString("id-ID")} rating)`;
 
-        const terjual = p.terjual ?? 0;
-        document.getElementById("terjualText").textContent =
-          `| Terjual ${Number(terjual).toLocaleString("id-ID")}`;
+        // Terjual
+        let terjual = p.terjual;
+        if (!terjual || terjual === 0) terjual = 1000; // jika 0 / null / undefined, pakai 1000
+
+        function formatTerjual(num) {
+          if (num >= 1000 && num < 1000000) return `${(num / 1000).toFixed(1)}RB+`;
+          if (num >= 1000000) return `${(num / 1000000).toFixed(1)}JT+`;
+          return num;
+        }
+
+        document.getElementById("terjualText").textContent = `| Terjual ${formatTerjual(terjual)}`;
 
         document.getElementById("ratingSummary").textContent =
           `Rating: ${ratingRata}/5 dari ${Number(jumlahRating).toLocaleString("id-ID")} ulasan`;

@@ -166,8 +166,8 @@
   <div id="footer-container"></div>
 
   <script src="../assets/js/alert.js"></script>
-  <script src="../assets/js/config.js"></script>
-  <script src="../assets/js/helpers.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
   
   <script>
     fetch('../header.html').then(r => r.text()).then(h => {
@@ -220,12 +220,12 @@
               ${p.hargaAsli ? `<span class="original-price">Rp ${rupiah(p.hargaAsli)}</span>` : ''}
             </div>
             <div class="product-sold">
-              <i class="fas fa-fire"></i> Terjual ${rupiah(p.terjual || 0)}
+              <i class="fas fa-fire"></i> Terjual ${formatTerjual(p.terjual)}
             </div>
           </div>
         `;
 
-        card.onclick = () => window.location.href = `produk.html?id=${p.id}`;
+        card.onclick = () => window.location.href = `../produk.html?id=${p.id}`;
         grid.appendChild(card);
       });
     }

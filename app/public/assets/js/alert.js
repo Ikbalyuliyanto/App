@@ -471,3 +471,21 @@ function toggleWhatsAppPopup() {
       alert('Silakan masukkan email Anda.');
     }
   }
+  
+      // UI Helpers
+// Format angka terjual
+function formatTerjual(num) {
+  // Jika null/undefined/0 → tampil 1RB+
+  if (!num || num === 0) return "1RB+";
+
+  if (num >= 1000 && num < 1000000) return `${(num / 1000).toFixed(1)}RB+`;
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}JT+`;
+  return num; // < 1000
+}
+
+// Format rating
+function formatRating(rating, jumlahRating) {
+  const r = rating ?? 0;
+  const j = jumlahRating ?? 0;
+  return `${r} (${j.toLocaleString("id-ID")} rating)`;
+}

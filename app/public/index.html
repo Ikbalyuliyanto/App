@@ -547,7 +547,7 @@ window.addEventListener("headerLoaded", initSearchBar);
             <span class="current-price">Rp ${rupiah(p.harga)}</span>
             ${original}
           </div>
-          <div class="product-sold">Terjual ${rupiah(p.terjual || 0)}</div>
+          <div class="product-sold">Terjual ${formatTerjual(p.terjual)}</div>
         </div>
       `;
 
