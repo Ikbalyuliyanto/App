@@ -53,7 +53,6 @@
   
 
   function initHeaderComponent() {
-    const API_BASE = `${location.protocol}//${location.hostname}:9876`;
     
     const userIcon = document.getElementById('userIcon');
     const keranjangIcon = document.getElementById('keranjangIcon');

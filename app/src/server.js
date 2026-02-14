@@ -47,8 +47,8 @@ app.use(express.json());
 // ✅ Static public (folder FE public ada di app/public)
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// ✅ Static uploads (folder uploads sejajar app, ada di zawawiya/uploads)
-app.use("/uploads", express.static(path.join(rootDir, "uploads")));
+// ROOT container /usr/src/app
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // ===== Route Auth (login/register)
 app.use("/api/auth", authRoutes);

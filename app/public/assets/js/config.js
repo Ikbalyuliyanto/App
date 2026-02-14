@@ -6,11 +6,8 @@
 // CONFIG
 // =========================
 (() => {
-  const protocol = window.location.protocol; // http / https
-  const host = window.location.hostname;     // localhost / IP / domain
-  const port = 9876;                         // Port Docker yang dipublish
-
-  window.API_BASE = `${protocol}//${host}:${port}`;
+ // config.js
+window.API_BASE = window.API_BASE || `${window.location.protocol}//${window.location.hostname}:${window.API_PORT || 9876}`;
 
   // =========================
   // STORAGE HELPERS

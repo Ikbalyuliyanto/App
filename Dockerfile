@@ -2,19 +2,21 @@ FROM node:20-bookworm
 
 WORKDIR /usr/src/app
 
-# copy package.json & package-lock.json dulu
+# Copy package.json dulu (biar cache install optimal)
 COPY app/package*.json ./
 
-# install dependency
+# Install dependency
 RUN npm install
 
-# copy seluruh source code
+# Copy source code
 COPY app/ .
 
-# generate prisma client (di dalam Linux container)
+# Copy folder uploads
+# COPY uploads ./uploads
+
+# Generate prisma client
 RUN npx prisma generate
 
 EXPOSE 9876
 
-# pastikan prisma bisa membaca env di runtime
 CMD ["node", "src/server.js"]
