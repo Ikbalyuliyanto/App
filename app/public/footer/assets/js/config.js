@@ -3,15 +3,14 @@
 // CONFIG
 // =========================
 (() => {
+const host = window.location.hostname;
 
-let API_BASE;
-if (window.location.hostname === "localhost") {
-  // DEV
+if (host === "localhost" || host === "127.0.0.1") {
   API_BASE = "http://localhost:9876";
 } else {
-  // PROD
   API_BASE = "https://ashanum.com";
 }
+
 window.API_BASE = API_BASE;
 
   // =========================

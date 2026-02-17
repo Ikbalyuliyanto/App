@@ -495,6 +495,7 @@ window.addEventListener("headerLoaded", initSearchBar);
     // Ambil semua produk dari endpoint public
     const products = await apiRequest("/api/produk");
 
+  console.log("DATA PRODUK DARI BACKEND:", products); // 👈 tambahkan ini
     // hanya produk aktif
     allProducts = (products || []).filter((p) => p.aktif === true);
 
