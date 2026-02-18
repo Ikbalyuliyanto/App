@@ -440,3 +440,117 @@
     window.includeHeaderFooter();
   }
 })();
+
+  // ===== FLOATING ACTION MENU =====
+  
+  // Toggle floating menu
+  function toggleFloatingMenu() {
+    const btn = document.getElementById('floatingMainBtn');
+    const items = document.getElementById('floatingMenuItems');
+    
+    btn.classList.toggle('active');
+    items.classList.toggle('active');
+    
+    // Close kategori dropdown if open
+    closeKategoriDropdown();
+  }
+
+  // Toggle kategori dropdown
+  function toggleKategoriDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('kategoriDropdown');
+    const isActive = dropdown.classList.contains('active');
+    
+    if (!isActive) {
+      dropdown.classList.add('active');
+      loadKategoriDropdown();
+    } else {
+      dropdown.classList.remove('active');
+    }
+  }
+
+  // Close kategori dropdown
+  function closeKategoriDropdown() {
+    const dropdown = document.getElementById('kategoriDropdown');
+    dropdown.classList.remove('active');
+  }
+
+  // Load kategori list
+  async function loadKategoriDropdown() {
+    const body = document.getElementById('kategoriDropdownBody');
+    
+    try {
+      const response = await fetch(`${window.API_BASE || ''}/api/kategori`);
+      if (!response.ok) throw new Error('Failed to load');
+      
+      const categories = await response.json();
+      
+      if (!categories || categories.length === 0) {
+        body.innerHTML = '<div style="padding: 20px; text-align: center; color: #999; font-size: 14px;">Belum ada kategori</div>';
+        return;
+      }
+      
+      body.innerHTML = categories.map(cat => `
+        <a href="/kategori.html?id=${cat.id}" class="kategori-item">
+          <i class="fas fa-tag"></i>
+          <span>${escapeHtml(cat.nama)}</span>
+        </a>
+      `).join('');
+      
+    } catch (error) {
+      console.error('Error loading categories:', error);
+      body.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff4444; font-size: 14px;">Gagal memuat kategori</div>';
+    }
+  }
+
+  // Scroll to top
+  function scrollToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }
+
+  // Show/hide scroll to top button
+  window.addEventListener('scroll', function() {
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    if (window.pageYOffset > 300) {
+      scrollBtn.classList.add('show');
+    } else {
+      scrollBtn.classList.remove('show');
+    }
+  });
+
+  // Update cart badge
+  function updateFloatingCartBadge() {
+    const badge = document.getElementById('floatingCartBadge');
+    // Get cart count from localStorage or API
+    // This is a placeholder - adjust based on your implementation
+    const cartCount = 0; // Replace with actual cart count
+    if (badge) {
+      badge.textContent = cartCount;
+      badge.style.display = cartCount > 0 ? 'flex' : 'none';
+    }
+  }
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('kategoriDropdown');
+    const menu = document.getElementById('floatingMenu');
+    
+    if (!menu.contains(event.target)) {
+      closeKategoriDropdown();
+    }
+  });
+
+  // Helper function
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Initialize on load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateFloatingCartBadge();
+  });

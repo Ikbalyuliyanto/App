@@ -474,6 +474,226 @@
     background: rgba(255, 255, 255, 0.3);
   }
 
+  /* ===== FLOATING ACTION MENU ===== */
+  .floating-action-menu {
+    position: fixed;
+    bottom: 110px;
+    right: 30px;
+    z-index: 9998;
+  }
+
+  .floating-main-btn {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .floating-main-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+  }
+
+  .floating-main-btn.active {
+    transform: rotate(45deg);
+  }
+
+  .floating-menu-items {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+  }
+
+  .floating-menu-items.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .floating-menu-item {
+    width: 48px;
+    height: 48px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    color: #333;
+    text-decoration: none;
+  }
+
+  .floating-menu-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    background: #667eea;
+    color: white;
+  }
+
+  .floating-menu-item i {
+    font-size: 20px;
+  }
+
+  /* Tooltip */
+  .floating-menu-item::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 60px;
+    background: #333;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+
+  .floating-menu-item:hover::before {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Badge for Cart */
+  .floating-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ff4444;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    border: 2px solid white;
+  }
+
+  /* Kategori Dropdown */
+  .kategori-dropdown {
+    position: fixed;
+    right: 100px;
+    bottom: 200px;
+    width: 300px;
+    max-height: 400px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+    z-index: 9997;
+    overflow: hidden;
+  }
+
+  .kategori-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+  }
+
+  .kategori-dropdown-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kategori-dropdown-header h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .kategori-dropdown-header button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .kategori-dropdown-header button:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .kategori-dropdown-body {
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 10px;
+  }
+
+  .kategori-item {
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .kategori-item:hover {
+    background: #f3f4f6;
+  }
+
+  .kategori-item i {
+    font-size: 18px;
+    color: #667eea;
+    width: 24px;
+    text-align: center;
+  }
+
+  .kategori-item span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Show scroll to top only when scrolled */
+  #scrollTopBtn {
+    display: none;
+  }
+
+  #scrollTopBtn.show {
+    display: flex;
+  }
+
   /* Responsive */
   @media (max-width: 968px) {
     .footer-content {
@@ -528,6 +748,29 @@
     .whatsapp-button i {
       font-size: 28px;
     }
+
+    .floating-action-menu {
+      bottom: 95px;
+      right: 20px;
+    }
+
+    .floating-main-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+
+    .floating-menu-item {
+      width: 44px;
+      height: 44px;
+    }
+
+    .kategori-dropdown {
+      right: 20px;
+      bottom: 160px;
+      width: calc(100vw - 40px);
+      max-width: 300px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -557,6 +800,11 @@
 
     .whatsapp-chat-widget {
       bottom: 15px;
+      right: 15px;
+    }
+
+    .floating-action-menu {
+      bottom: 85px;
       right: 15px;
     }
   }
@@ -637,7 +885,7 @@
         <div class="footer-contact">
           <div class="contact-item">
             <i class="fas fa-map-marker-alt"></i>
-            <span>Jl. Raya No. 123<br>Jakarta, Indonesia 12345</span>
+            <span>Perum BCA Blok D No. 123<br>Bekasi Karanganyar 17530</span>
           </div>
           <div class="contact-item">
             <i class="fas fa-phone-alt"></i>
@@ -645,7 +893,7 @@
           </div>
           <div class="contact-item">
             <i class="fas fa-envelope"></i>
-            <span>info@ashanum.com</span>
+            <span>contact.ashanum@gmail.com</span>
           </div>
           <div class="contact-item">
             <i class="far fa-clock"></i>
@@ -710,6 +958,55 @@
     </div>
   </div>
 </footer>
+
+
+<!-- Floating Action Menu -->
+<div class="floating-action-menu" id="floatingMenu">
+  <!-- Main Menu Button -->
+  <button class="floating-main-btn" id="floatingMainBtn" onclick="toggleFloatingMenu()" aria-label="Menu">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Menu Items (Hidden by default) -->
+  <div class="floating-menu-items" id="floatingMenuItems">
+    <!-- Home -->
+    <a href="/index.html" class="floating-menu-item" data-tooltip="Home">
+      <i class="fas fa-home"></i>
+    </a>
+
+    <!-- Kategori -->
+    <div class="floating-menu-item" data-tooltip="Kategori" onclick="toggleKategoriDropdown(event)">
+      <i class="fas fa-th-large"></i>
+    </div>
+
+    <!-- Scroll to Top -->
+    <button class="floating-menu-item" data-tooltip="Ke Atas" onclick="scrollToTop()" id="scrollTopBtn">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Keranjang -->
+    <a href="/keranjang.html" class="floating-menu-item" data-tooltip="Keranjang">
+      <i class="fas fa-shopping-cart"></i>
+      <span class="floating-badge" id="floatingCartBadge">0</span>
+    </a>
+  </div>
+
+  <!-- Kategori Dropdown -->
+  <div class="kategori-dropdown" id="kategoriDropdown">
+    <div class="kategori-dropdown-header">
+      <h4>Pilih Kategori</h4>
+      <button onclick="closeKategoriDropdown()" aria-label="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="kategori-dropdown-body" id="kategoriDropdownBody">
+      <div style="text-align: center; padding: 20px; color: #999;">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p style="margin-top: 10px; font-size: 14px;">Memuat kategori...</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- WhatsApp Live Chat Widget -->
 <div class="whatsapp-chat-widget">

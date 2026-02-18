@@ -1,7 +1,7 @@
 let allProducts = [];
 let filteredProducts = [];
 let pagination = null;
-let itemsPerPage = 10;
+let itemsPerPage = 20;
 
 // Filters
 let filterNama = "";
@@ -173,7 +173,7 @@ function resetFilters() {
 }
 
 function changeItemsPerPage() {
-  itemsPerPage = parseInt(document.getElementById("itemsPerPage").value || "10", 10);
+  itemsPerPage = parseInt(document.getElementById("itemsPerPage").value || "20", 20);
   renderTable();
 }
 
@@ -195,7 +195,7 @@ function renderCurrentPage() {
   if (items.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="text-center" style="padding: 40px;">
+        <td colspan="11" class="text-center" style="padding: 40px;">
           <i class="fas fa-inbox" style="font-size: 48px; color: var(--gray-300); display: block; margin-bottom: 15px;"></i>
           Tidak ada produk ditemukan
         </td>
@@ -204,45 +204,130 @@ function renderCurrentPage() {
     return;
   }
 
-  items.forEach((product) => {
+  const currentPage = Number(pagination.currentPage) || 1;
+  const perPage = itemsPerPage;
+
+  let rows = "";
+
+  items.forEach((product, index) => {
+
+    const nomor = (currentPage - 1) * perPage + index + 1;
+
     const statusBadge =
       product.aktif !== false
         ? '<span class="badge badge-success">Aktif</span>'
         : '<span class="badge badge-danger">Nonaktif</span>';
 
-    const row = `
+    const flashsaleBadge = product.flashsale
+      ? '<span class="badge badge-danger">🔥 Ya</span>'
+      : '';
+
+    const terlarisBadge = product.terlaris
+      ? '<span class="badge badge-warning">🏆 Ya</span>'
+      : '';
+
+    const untukmuBadge = product.untukmu
+      ? '<span class="badge badge-primary">⭐ Ya</span>'
+      : '';
+
+    rows += `
       <tr>
+        <td>${nomor}</td>
+
         <td>
           <img src="${fixImgUrl(product.gambarUtama)}"
                alt="${product.nama}"
                style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
         </td>
-        <td>
-          <div style="font-weight: 500;">${product.nama}</div>
-          ${product.merek ? `<small style="color: var(--gray-500);">${product.merek}</small>` : ""}
-        </td>
+
+        <td>${product.nama}</td>
         <td>${product.kategori?.nama || "-"}</td>
         <td>${formatRupiah(product.harga)}</td>
         <td>${product.stokProduk || 0} pcs</td>
+
+        <td>${flashsaleBadge}</td>
+        <td>${terlarisBadge}</td>
+        <td>${untukmuBadge}</td>
+
         <td>${statusBadge}</td>
+
         <td>
           <div class="action-buttons">
-            <a href="produk-form.html?id=${product.id}" class="btn-icon btn-primary" title="Edit">
+            <a href="produk-form.html?id=${product.id}" class="btn-icon btn-primary">
               <i class="fas fa-edit"></i>
             </a>
-            <button class="btn-icon btn-danger" onclick="deleteProduct(${product.id})" title="Hapus">
+            <button class="btn-icon btn-danger" onclick="deleteProduct(${product.id})">
               <i class="fas fa-trash"></i>
             </button>
           </div>
         </td>
       </tr>
     `;
-
-    tbody.innerHTML += row;
   });
+
+  tbody.innerHTML = rows;
 
   pagination.renderPagination("pagination", renderCurrentPage);
 }
+
+// function renderCurrentPage() {
+//   const tbody = document.getElementById("tableBody");
+//   if (!tbody) return;
+
+//   const items = pagination.getCurrentItems();
+//   tbody.innerHTML = "";
+
+//   if (items.length === 0) {
+//     tbody.innerHTML = `
+//       <tr>
+//         <td colspan="7" class="text-center" style="padding: 40px;">
+//           <i class="fas fa-inbox" style="font-size: 48px; color: var(--gray-300); display: block; margin-bottom: 15px;"></i>
+//           Tidak ada produk ditemukan
+//         </td>
+//       </tr>
+//     `;
+//     return;
+//   }
+
+//   items.forEach((product) => {
+//     const statusBadge =
+//       product.aktif !== false
+//         ? '<span class="badge badge-success">Aktif</span>'
+//         : '<span class="badge badge-danger">Nonaktif</span>';
+
+//     const row = `
+//       <tr>
+//         <td>
+//           <img src="${fixImgUrl(product.gambarUtama)}"
+//                alt="${product.nama}"
+//                style="width: 60px; height: 60px; border-radius: 8px; object-fit: cover;">
+//         </td>
+//         <td>
+//           <div style="font-weight: 500;">${product.nama}</div>
+//           ${product.merek ? `<small style="color: var(--gray-500);">${product.merek}</small>` : ""}
+//         </td>
+//         <td>${product.kategori?.nama || "-"}</td>
+//         <td>${formatRupiah(product.harga)}</td>
+//         <td>${product.stokProduk || 0} pcs</td>
+//         <td>${statusBadge}</td>
+//         <td>
+//           <div class="action-buttons">
+//             <a href="produk-form.html?id=${product.id}" class="btn-icon btn-primary" title="Edit">
+//               <i class="fas fa-edit"></i>
+//             </a>
+//             <button class="btn-icon btn-danger" onclick="deleteProduct(${product.id})" title="Hapus">
+//               <i class="fas fa-trash"></i>
+//             </button>
+//           </div>
+//         </td>
+//       </tr>
+//     `;
+
+//     tbody.innerHTML += row;
+//   });
+
+//   pagination.renderPagination("pagination", renderCurrentPage);
+// }
 
 async function deleteProduct(id) {
   

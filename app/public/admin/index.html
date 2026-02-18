@@ -10,98 +10,12 @@
 <body>
     <div class="admin-wrapper">
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2 class="sidebar-logo">Ashanum</h2>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <a href="index.html" class="nav-item active">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Dashboard</span>
-                </a>
-                
-                <div class="nav-section">Master Data</div>
-                
-                <a href="kategori.html" class="nav-item">
-                    <i class="fas fa-tags"></i>
-                    <span>Kategori</span>
-                </a>
-                
-                <a href="produk.html" class="nav-item">
-                    <i class="fas fa-box"></i>
-                    <span>Produk</span>
-                </a>
-                
-                <div class="nav-section">Transaksi</div>
-                
-                <a href="pesanan.html" class="nav-item">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>Pesanan</span>
-                </a>
-                
-                <a href="pembayaran.html" class="nav-item">
-                    <i class="fas fa-credit-card"></i>
-                    <span>Pembayaran</span>
-                </a>
-                
-                <div class="nav-section">Pengguna</div>
-                
-                <a href="pengguna.html" class="nav-item">
-                    <i class="fas fa-users"></i>
-                    <span>Kelola Pengguna</span>
-                </a>
-                
-                <div class="nav-section">Setting</div>
-                
-                <a href="setting.html" class="nav-item">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Setting Penjualan</span>
-                </a>
-
-                <div class="nav-section">Laporan</div>
-                
-                <a href="laporan.html" class="nav-item">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Laporan Penjualan</span>
-                </a>
-                
-                <div style="padding: 20px; border-top: 1px solid var(--gray-200); margin-top: 20px;">
-                    <a href="#logout" class="nav-item" style="color: #ef4444;" onclick="event.preventDefault(); Auth.logout();">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </div>
-            </nav>
-        </aside>
+        <div id="sidebar-container"></div>
 
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Top Bar -->
-            <header class="topbar">
-                <div class="topbar-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="topbar-item">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">5</span>
-                    </div>
-                    
-                    <div class="topbar-item user-menu">
-                        <img src="https://ui-avatars.com/api/?name=Admin&background=667eea&color=fff" alt="Admin">
-                        <span>Admin</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                </div>
-            </header>
-
+            <!-- Top Bar -->            
+            <div id="header-container"></div>
             <!-- Page Content -->
             <div class="content-wrapper">
                 <div class="page-header">

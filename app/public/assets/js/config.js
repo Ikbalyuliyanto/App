@@ -128,58 +128,22 @@ window.API_BASE = API_BASE;
   };
 })();
 
-  // // =========================
-  // // AUTH / API
-  // // =========================
-  // const API_BASE = `${location.protocol}//${location.hostname}:9876`;
+// public/js/analytics.js
+// =========================
+// GOOGLE ANALYTICS
+// =========================
+const measurementId = "G-8JBQCX0E7D";
 
-  // const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
-  // const getUserNama = () => localStorage.getItem("userNama") || sessionStorage.getItem("userNama");
-  // const isLoggedIn = () => !!getToken();
+if (measurementId) {
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  document.head.appendChild(script);
 
-  // function requireLogin(returnUrl) {
-  //   if (isLoggedIn()) return true;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
 
-  //   showAlert("Silakan login terlebih dahulu", "warning");
-  //   const ru = returnUrl || (window.location.pathname + window.location.search);
-  //   window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
-  //   return false;
-  // }
-
-  // function authHeaders() {
-  //   const token = getToken();
-  //   return token ? { Authorization: `Bearer ${token}` } : {};
-  // }
-
-  // async function apiAuth(path, options = {}) {
-  //   if (!requireLogin(window.location.pathname + window.location.search)) {
-  //     throw new Error("NO_LOGIN");
-  //   }
-
-  //   const res = await fetch(`${API_BASE}${path}`, {
-  //     ...options,
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       ...(options.headers || {}),
-  //       ...authHeaders(),
-  //     },
-  //   });
-
-  //   const data = await res.json().catch(() => ({}));
-
-  //   if (!res.ok) {
-  //     if (res.status === 401) {
-  //       localStorage.removeItem("token");
-  //       sessionStorage.removeItem("token");
-  //       localStorage.removeItem("userNama");
-  //       sessionStorage.removeItem("userNama");
-
-  //       showAlert("Sesi login berakhir. Silakan login lagi.", "warning", { timeout: 3000 });
-  //       const ru = window.location.pathname + window.location.search;
-  //       window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
-  //     }
-  //     throw new Error(data.message || "Request gagal");
-  //   }
-
-  //   return data;
-  // }
+  gtag('js', new Date());
+  gtag('config', measurementId);
+}

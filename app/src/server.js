@@ -28,6 +28,7 @@ import adminPengguna from "./routes/admin/pengguna.js";
 import adminKategori from "./routes/admin/kategori.js";
 import adminPembayaran from "./routes/admin/pembayaran.js";
 import adminSetting from "./routes/admin/setting.js";
+import laporanRouter from "./routes/admin/laporan.js";
 // ADMIN END
 
 import authJWT from "./middleware/auth.js";
@@ -87,6 +88,7 @@ app.use("/api/admin/pengguna", authJWT, adminOnly, adminPengguna);
 app.use("/api/admin/kategori", authJWT, adminOnly, adminKategori);
 app.use("/api/admin/pembayaran", authJWT, adminOnly, adminPembayaran);
 app.use("/api/admin/setting", authJWT, adminOnly, adminSetting);
+app.use("/api/admin/laporan",    authJWT, adminOnly, laporanRouter); 
 
 
 

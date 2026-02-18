@@ -1,0 +1,60 @@
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2 class="sidebar-logo">Ashanum</h2>
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item" data-page="dashboard">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section">Master Data</div>
+        <a href="kategori.html" class="nav-item" data-page="kategori">
+            <i class="fas fa-tags"></i>
+            <span>Kategori</span>
+        </a>
+        <a href="produk.html" class="nav-item" data-page="produk">
+            <i class="fas fa-box"></i>
+            <span>Produk</span>
+        </a>
+
+        <div class="nav-section">Transaksi</div>
+        <a href="pesanan.html" class="nav-item" data-page="pesanan">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Pesanan</span>
+        </a>
+        <a href="pembayaran.html" class="nav-item" data-page="pembayaran">
+            <i class="fas fa-credit-card"></i>
+            <span>Pembayaran</span>
+        </a>
+
+        <div class="nav-section">Pengguna</div>
+        <a href="pengguna.html" class="nav-item" data-page="pengguna">
+            <i class="fas fa-users"></i>
+            <span>Kelola Pengguna</span>
+        </a>
+
+        <div class="nav-section">Setting</div>
+        <a href="setting.html" class="nav-item" data-page="setting">
+            <i class="fas fa-file-alt"></i>
+            <span>Setting Baner</span>
+        </a>
+
+        <div class="nav-section">Laporan</div>
+        <a href="laporan.html" class="nav-item" data-page="laporan">
+            <i class="fas fa-file-alt"></i>
+            <span>Laporan Penjualan</span>
+        </a>
+
+        <div style="padding: 20px; border-top: 1px solid var(--gray-200); margin-top: 20px;">
+            <a href="#logout" class="nav-item" style="color: #ef4444;" onclick="event.preventDefault(); Auth.logout();">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+</aside>
