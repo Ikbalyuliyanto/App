@@ -358,6 +358,23 @@ model ItemPesanan {
   @@index([varianId])
 }
 
+model Ulasan {
+  id        Int      @id @default(autoincrement())
+  produkId  Int
+  penggunaId Int?     // cuma angka, optional
+  email     String?   // simpan email user atau guest
+  nama      String?   // simpan nama user
+  pesananId Int?
+  rating    Int       // 1-5
+  komentar  String?
+  foto      String?
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  @@index([produkId])
+}
+
 model Pengiriman {
   id        Int @id @default(autoincrement())
   pesananId Int @unique

@@ -17,6 +17,7 @@ import pembayaran from "./routes/pembayaran.js";
 import checkoutRoutes from "./routes/checkout.js";
 import pengguna from "./routes/pengguna.js";
 import wilayahRouter from "./routes/wilayah.js";
+import ulasan from "./routes/ulasan.js";
 
 // FRONT END
 
@@ -78,6 +79,7 @@ app.use("/api/keranjang", authJWT, keranjang);
 app.use("/api/pesanan", authJWT, pesanan);
 app.use("/api/pembayaran", authJWT, pembayaran);
 app.use("/api/pengguna", authJWT, pengguna);
+app.use("/api/ulasan", authJWT, ulasan);
 
 
 

@@ -511,16 +511,15 @@
     });
   }
 
-  // Show/hide scroll to top button
   window.addEventListener('scroll', function() {
     const scrollBtn = document.getElementById('scrollTopBtn');
+    if (!scrollBtn) return; // ← tambah ini, keluar jika elemen tidak ada
     if (window.pageYOffset > 300) {
       scrollBtn.classList.add('show');
     } else {
       scrollBtn.classList.remove('show');
     }
   });
-
   // Update cart badge
   function updateFloatingCartBadge() {
     const badge = document.getElementById('floatingCartBadge');
@@ -538,6 +537,7 @@
     const dropdown = document.getElementById('kategoriDropdown');
     const menu = document.getElementById('floatingMenu');
     
+    if (!menu) return; // ← tambah ini  
     if (!menu.contains(event.target)) {
       closeKategoriDropdown();
     }
