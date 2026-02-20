@@ -9,3 +9,4 @@ if (window.location.hostname === "localhost") {
 }
 window.API_BASE = API_BASE;
 
+const GOOGLE_CLIENT_ID = "1015410214032-ocr8mocppr8734l0sdq9c8haba76mtcp.apps.googleusercontent.com";

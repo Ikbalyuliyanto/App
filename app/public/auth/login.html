@@ -4,140 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Ashanum</title>
+
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Style -->
     <link href="css/auth-style.css" rel="stylesheet">
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="auth-container">
-        <!-- Left Side -->
-        <div class="auth-left">
-            <div class="logo">Ashanum</div>
-            <h2>Selamat Datang Kembali!</h2>
-            <p>Masuk ke akun Anda untuk melanjutkan belanja produk-produk terbaik dengan harga terjangkau</p>
-            <div class="auth-illustration">🛍️</div>
-        </div>
 
-        <!-- Right Side -->
-        <div class="auth-right">
-            <div class="auth-header">
-                <h1>Masuk</h1>
-                <p>Masukkan email dan password Anda untuk melanjutkan</p>
-            </div>
+<div class="auth-container">
 
-            <form class="auth-form" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <div class="input-wrapper">
-                        <i class="far fa-envelope"></i>
-                        <input type="email" id="email" placeholder="nama@email.com" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Masukkan password Anda" required>
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="remember">
-                        <label for="remember">Ingat saya</label>
-                    </div>
-                    <a href="reset-password.html" class="forgot-password">Lupa password?</a>
-                </div>
-
-                <button type="submit" class="btn-primary">Masuk</button>
-            </form>
-
-            <div class="divider">
-                <span>atau masuk dengan</span>
-            </div>
-
-            <div class="social-login">
-                <button class="btn-social btn-google">
-                    <i class="fab fa-google"></i>
-                    Google
-                </button>
-                <button class="btn-social btn-facebook">
-                    <i class="fab fa-facebook-f"></i>
-                    Facebook
-                </button>
-            </div>
-
-            <div class="signup-link">
-                Belum punya akun? <a href="daftar.html">Daftar sekarang</a>
-            </div>
-        </div>
+    <!-- LEFT -->
+    <div class="auth-left">
+        <div class="logo">Ashanum</div>
+        <h2>Selamat Datang Kembali!</h2>
+        <p>Masuk ke akun Anda untuk melanjutkan belanja produk terbaik dengan harga terjangkau</p>
+        <div class="auth-illustration">🛍️</div>
     </div>
 
-    <script src="js/alert.js"></script>
-    <script src="js/config.js"></script>
-    <script>
-        async function handleLogin(event) {
-            event.preventDefault();
+    <!-- RIGHT -->
+    <div class="auth-right">
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const remember = document.getElementById('remember').checked;
+        <div class="auth-header">
+            <h1>Masuk</h1>
+            <p>Masukkan email dan password Anda untuk melanjutkan</p>
+        </div>
 
-            if (!email || !password) {
-                showAlert('Email dan password wajib diisi!', 'warning');
-                return;
-            }
+        <!-- FORM LOGIN -->
+        <form class="auth-form" onsubmit="handleLogin(event)">
 
-            try {
-                const res = await fetch(`${API_BASE}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
+            <div class="form-group">
+                <label>Email</label>
+                <div class="input-wrapper">
+                    <i class="far fa-envelope"></i>
+                    <input type="email" id="email" placeholder="nama@email.com" required>
+                </div>
+            </div>
 
-                const data = await res.json();
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Masukkan password Anda" required>
+                </div>
+            </div>
 
-                if (!res.ok) {
-                    showAlert(
-                        data.message || 'Login gagal. Cek email dan password.',
-                        'error'
-                    );
-                    return;
-                }
+            <div class="form-options">
+                <div>
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Ingat saya</label>
+                </div>
+                <a href="reset-password.html">Lupa password?</a>
+            </div>
 
-                // Simpan token dan nama user
-                const storage = remember ? localStorage : sessionStorage;
+            <button type="submit" class="btn-primary">Masuk</button>
 
-                storage.setItem('token', data.token);
+        </form>
 
-                const namaLengkap = [
-                    data.pengguna?.namaDepan,
-                    data.pengguna?.namaBelakang
-                ].filter(Boolean).join(' ');
+        <!-- DIVIDER -->
+        <div class="divider">
+            <span>atau masuk dengan</span>
+        </div>
 
-                storage.setItem('userNama', namaLengkap);
+        <!-- GOOGLE LOGIN -->
+        <div class="social-login">
+            <div id="googleBtn"></div>
+        </div>
 
-                showAlert(
-                    `Login berhasil! Selamat datang, ${namaLengkap}`,
-                    'success'
-                );
+        <div class="signup-link">
+            Belum punya akun? <a href="daftar.html">Daftar sekarang</a>
+        </div>
 
-                // Redirect ke returnUrl jika ada
-                const params = new URLSearchParams(window.location.search);
-                const returnUrl = params.get("returnUrl");
+    </div>
+</div>
 
-                setTimeout(() => {
-                    window.location.href = returnUrl || "/index.html";
-                }, 800);
+<!-- JS -->
+<script src="js/alert.js"></script>
+<script src="js/config.js"></script>
 
-            } catch (error) {
-                console.error(error);
-                showAlert(
-                    'Terjadi kesalahan jaringan, silakan coba lagi.',
-                    'error'
-                );
-            }
+<script>
+// =============================
+// LOGIN EMAIL PASSWORD
+// =============================
+async function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const remember = document.getElementById('remember').checked;
+
+    if (!email || !password) {
+        showAlert('Email dan password wajib diisi!', 'warning');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            showAlert(data.message || 'Login gagal!', 'error');
+            return;
         }
-    </script>
+
+        const storage = remember ? localStorage : sessionStorage;
+
+        storage.setItem('token', data.token);
+        storage.setItem('userNama', data.pengguna?.namaLengkap || '');
+
+        showAlert(`Login berhasil!`, 'success');
+
+        setTimeout(() => {
+            window.location.href = "/index.html";
+        }, 800);
+
+    } catch (err) {
+        console.error(err);
+        showAlert('Terjadi kesalahan jaringan.', 'error');
+    }
+}
+
+
+
+    // =============================
+    // GOOGLE LOGIN
+    // =============================
+    window.onload = function () {
+
+        google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: handleGoogleResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("googleBtn"),
+            {
+                theme: "outline",
+                size: "large",
+                width: 300
+            }
+        );
+
+        google.accounts.id.prompt(); // supaya muncul pilihan akun
+    };
+
+
+    async function handleGoogleResponse(response) {
+
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/google-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok || !data.token)
+                throw new Error(data.message || "Login Google gagal");
+
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('userNama', data.pengguna?.namaLengkap || '');
+
+            showAlert(`Login berhasil!`, 'success');
+
+            setTimeout(() => {
+                window.location.href = "/index.html";
+            }, 800);
+
+        } catch (err) {
+            console.error(err);
+            showAlert(err.message, 'error');
+        }
+    }
+</script>
+
 </body>
 </html>
