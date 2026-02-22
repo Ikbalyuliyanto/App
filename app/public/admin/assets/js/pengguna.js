@@ -45,7 +45,7 @@ async function apiAdmin(path, options = {}) {
     return apiRequest(path, options);
   }
 
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token = localStorage.getItem("admintoken") || sessionStorage.getItem("admintoken");
   if (!token) {
     alert("Silakan login admin terlebih dahulu");
     window.location.href = "/login.html";

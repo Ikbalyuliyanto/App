@@ -523,10 +523,10 @@
                     
                     // Save token and user data
                     if (remember) {
-                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('admintoken', data.token);
                         localStorage.setItem('user', JSON.stringify(data.pengguna));
                     } else {
-                        sessionStorage.setItem('token', data.token);
+                        sessionStorage.setItem('admintoken', data.token);
                         sessionStorage.setItem('user', JSON.stringify(data.pengguna));
                     }
                     
@@ -556,10 +556,10 @@
                     const demoToken = 'demo_token_' + Date.now();
                     
                     if (remember) {
-                        localStorage.setItem('token', demoToken);
+                        localStorage.setItem('admintoken', demoToken);
                         localStorage.setItem('user', JSON.stringify(demoUser));
                     } else {
-                        sessionStorage.setItem('token', demoToken);
+                        sessionStorage.setItem('admintoken', demoToken);
                         sessionStorage.setItem('user', JSON.stringify(demoUser));
                     }
                     
@@ -577,7 +577,7 @@
         });
         // Check if already logged in
         window.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const token = localStorage.getItem('admintoken') || sessionStorage.getItem('admintoken');
             if (token) {
                 window.location.href = 'index.html';
             }

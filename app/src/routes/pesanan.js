@@ -157,47 +157,81 @@ router.get("/:id", auth, async (req, res) => {
  * PATCH /api/pesanan/:id/batalkan
  * Hanya bisa jika MENUNGGU_PEMBAYARAN
  */
-router.patch("/:id/batalkan", auth, async (req, res) => {
+// PATCH /api/pesanan/:id/batal  ← SATU-SATUNYA endpoint batal
+router.patch("/:id/batal", auth, async (req, res) => {
   try {
     const penggunaId = req.user.id;
     const id = Number(req.params.id);
     if (!id) return res.status(400).json({ message: "ID pesanan tidak valid" });
 
+    // Auto expire dulu
     await prisma.$transaction(async (tx) => {
       await autoExpirePayments(tx, penggunaId);
     });
 
-    const latest = await prisma.pesanan.findFirst({
+    const pesanan = await prisma.pesanan.findFirst({
       where: { id, penggunaId },
-      select: { status: true },
+      include: { pembayaran: true, item: true },
     });
 
-    if (!latest) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
+    if (!pesanan)
+      return res.status(404).json({ message: "Pesanan tidak ditemukan" });
 
-    if (latest.status !== "MENUNGGU_PEMBAYARAN") {
-      return res.status(400).json({ message: "Pesanan tidak bisa dibatalkan pada status ini" });
-    }
+    if (pesanan.status !== "MENUNGGU_PEMBAYARAN")
+      return res.status(400).json({
+        message: "Pesanan tidak bisa dibatalkan pada status ini",
+      });
 
-    const updated = await prisma.$transaction(async (tx) => {
-      const up = await tx.pesanan.update({
+    await prisma.$transaction(async (tx) => {
+      await tx.pesanan.update({
         where: { id },
         data: { status: "DIBATALKAN" },
       });
 
-      const pay = await tx.pembayaran.findUnique({ where: { pesananId: id } });
-      if (pay && pay.status === "MENUNGGU") {
+      if (pesanan.pembayaran) {
         await tx.pembayaran.update({
-          where: { id: pay.id },
+          where: { id: pesanan.pembayaran.id },
           data: { status: "DIBATALKAN" },
         });
       }
 
-      return up;
+      // Kembalikan item ke keranjang
+      const keranjang = await tx.keranjang.findFirst({
+        where: { penggunaId, aktif: true },
+      });
+
+      if (keranjang) {
+        for (const item of pesanan.item) {
+          const existing = await tx.itemKeranjang.findFirst({
+            where: {
+              keranjangId: keranjang.id,
+              produkId:    item.produkId,
+              varianId:    item.varianId ?? null,
+            },
+          });
+
+          if (existing) {
+            await tx.itemKeranjang.update({
+              where: { id: existing.id },
+              data:  { jumlah: existing.jumlah + item.jumlah },
+            });
+          } else {
+            await tx.itemKeranjang.create({
+              data: {
+                keranjangId: keranjang.id,
+                produkId:    item.produkId,
+                varianId:    item.varianId ?? null,
+                jumlah:      item.jumlah,
+              },
+            });
+          }
+        }
+      }
     });
 
-    res.json({ message: "Pesanan berhasil dibatalkan", pesanan: updated });
+    res.json({ message: "Pesanan berhasil dibatalkan, item dikembalikan ke keranjang" });
   } catch (e) {
-    console.error("PATCH /api/pesanan/:id/batalkan error:", e);
+    console.error("PATCH /:id/batal error:", e);
     res.status(500).json({ message: "Gagal membatalkan pesanan" });
   }
 });

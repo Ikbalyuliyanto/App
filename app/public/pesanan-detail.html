@@ -5,1165 +5,854 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Status Pesanan - Ashanum</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --primary:       #EE4D2D;
+      --primary-dark:  #d43f20;
+      --primary-light: #fff5f3;
+      --primary-mid:   #ffeae6;
+      --success:       #00897B;
+      --success-light: #e8f5e9;
+      --warning:       #F59E0B;
+      --warning-light: #fffbeb;
+      --danger:        #EF4444;
+      --danger-light:  #fef2f2;
+      --blue:          #3B82F6;
+      --blue-light:    #EFF6FF;
+      --purple:        #8B5CF6;
+      --purple-light:  #F5F3FF;
+      --gray-50:       #FAFAFA;
+      --gray-100:      #F4F4F5;
+      --gray-200:      #E4E4E7;
+      --gray-300:      #D4D4D8;
+      --gray-400:      #A1A1AA;
+      --gray-500:      #71717A;
+      --gray-600:      #52525B;
+      --gray-700:      #3F3F46;
+      --gray-800:      #27272A;
+      --gray-900:      #18181B;
+      --radius-sm:     6px;
+      --radius:        10px;
+      --radius-lg:     16px;
+      --shadow-sm:     0 1px 3px rgba(0,0,0,0.07);
+      --shadow:        0 2px 10px rgba(0,0,0,0.08);
+      --shadow-lg:     0 8px 30px rgba(0,0,0,0.12);
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: Arial, sans-serif;
-      color: #333;
-      background: #f5f5f5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--gray-50);
+      color: var(--gray-800);
     }
 
-    /* Breadcrumb */
-    .breadcrumb {
-      max-width: 1200px;
-      margin: 20px auto;
-      padding: 0 20px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
+    /* ── LAYOUT ── */
+    .page-wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
     }
 
-    .back-button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #333;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      padding: 8px 16px;
-      border-radius: 6px;
-      transition: all 0.3s;
-      background: white;
-      border: 1px solid #ddd;
-    }
-
-    .back-button:hover {
-      background: #f5f5f5;
-      color: #ff4081;
-    }
-
-    .back-button i {
-      font-size: 14px;
-    }
-
-    .breadcrumb-links {
-      font-size: 14px;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .breadcrumb a {
-      color: #666;
-      text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-      color: #ff4081;
-    }
-
-    .breadcrumb span {
-      margin: 0;
-    }
-
-    /* Container */
-    .order-container {
-      max-width: 1200px;
-      margin: 0 auto 40px;
-      padding: 0 20px;
-    }
-
-    /* Status Header Card */
-    .status-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 25px;
-      color: white;
-      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-    }
-
-    .status-header.success {
-      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
-    }
-
-    .status-header.cancelled {
-      background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
-    }
-
-    .status-header.completed {
-      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    }
-
-    .status-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-    }
-
-    .status-info h1 {
-      font-size: 28px;
-      margin-bottom: 8px;
-    }
-
-    .status-subtitle {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-
-    .status-icon {
-      font-size: 64px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-    }
-
-    .order-meta {
-      display: flex;
-      gap: 30px;
-      flex-wrap: wrap;
-    }
-
-    .meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .meta-label {
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    .meta-value {
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    /* Grid Layout */
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 25px;
-    }
-
-    /* Section */
-    .section {
-      background: #fff;
-      border-radius: 12px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 20px;
+    /* ── BACK BUTTON ── */
+    .back-row {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #f5f5f5;
-    }
-
-    .section-title i {
-      color: #667eea;
-      font-size: 20px;
-    }
-
-    /* Timeline Tracking */
-    .tracking-timeline {
-      position: relative;
-      padding-left: 40px;
-    }
-
-    .timeline-item {
-      position: relative;
-      padding-bottom: 30px;
-    }
-
-    .timeline-item:last-child {
-      padding-bottom: 0;
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -29px;
-      top: 8px;
-      bottom: -22px;
-      width: 2px;
-      background: #e5e5e5;
-    }
-
-    .timeline-item:last-child::before {
-      display: none;
-    }
-
-    .timeline-item.active::before {
-      background: #667eea;
-    }
-
-    .timeline-dot {
-      position: absolute;
-      left: -40px;
-      top: 0;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #e5e5e5;
-      border: 3px solid #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-    }
-
-    .timeline-item.active .timeline-dot {
-      background: #667eea;
-      animation: dotPulse 2s infinite;
-    }
-
-    .timeline-item.completed .timeline-dot {
-      background: #4caf50;
-    }
-
-    .timeline-dot i {
-      font-size: 10px;
-      color: white;
-    }
-
-    @keyframes dotPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
-      50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
-    }
-
-    .timeline-content {
-      background: #f9f9f9;
-      padding: 15px;
-      border-radius: 8px;
-    }
-
-    .timeline-item.active .timeline-content {
-      background: #f8f9ff;
-      border: 2px solid #667eea;
-    }
-
-    .timeline-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 5px;
-    }
-
-    .timeline-desc {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 8px;
-    }
-
-    .timeline-time {
-      font-size: 13px;
-      color: #999;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* Shipping Info */
-    .shipping-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 12px;
-      padding: 20px;
-      color: white;
       margin-bottom: 20px;
     }
-
-    .shipping-header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .shipping-icon {
-      width: 50px;
-      height: 50px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-
-    .shipping-info h3 {
-      font-size: 18px;
-      margin-bottom: 5px;
-    }
-
-    .shipping-info p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .tracking-number {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 12px 15px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .tracking-number span {
-      font-family: 'Courier New', monospace;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-
-    .copy-btn-small {
-      background: rgba(255, 255, 255, 0.3);
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.3s;
-    }
-
-    .copy-btn-small:hover {
-      background: rgba(255, 255, 255, 0.4);
-    }
-
-    /* Address Card */
-    .address-card {
-      background: #f9f9f9;
-      border-radius: 8px;
-      padding: 15px;
-    }
-
-    .address-card h4 {
-      font-size: 15px;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .address-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    /* Product Items */
-    .product-item {
-      display: flex;
-      gap: 15px;
-      padding: 15px 0;
-      border-bottom: 1px solid #f5f5f5;
-    }
-
-    .product-item:last-child {
-      border-bottom: none;
-    }
-
-    .product-image {
-      width: 70px;
-      height: 70px;
-      background: #f5f5f5;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      border: 1px solid #eee;
-      overflow: hidden;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-info {
-      flex: 1;
-    }
-
-    .product-name {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 5px;
-      color: #333;
-    }
-
-    .product-variant {
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 8px;
-    }
-
-    .product-price {
-      font-size: 15px;
-      font-weight: bold;
-      color: #ff4081;
-    }
-
-    .product-quantity {
-      font-size: 13px;
-      color: #666;
-      margin-left: 10px;
-    }
-
-    /* Summary */
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      font-size: 14px;
-      padding: 8px 0;
-    }
-
-    .summary-label {
-      color: #666;
-    }
-
-    .summary-value {
-      font-weight: 600;
-      color: #333;
-    }
-
-    .summary-divider {
-      border-top: 2px solid #f5f5f5;
-      margin: 15px 0;
-    }
-
-    .summary-total {
-      display: flex;
-      justify-content: space-between;
-      padding: 15px 0;
-      font-size: 18px;
-    }
-
-    .summary-total .summary-label {
-      font-weight: bold;
-      color: #333;
-    }
-
-    .summary-total .summary-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #ff4081;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .btn {
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-    }
-
-    .btn-secondary {
-      background: white;
-      color: #667eea;
-      border: 2px solid #667eea;
-    }
-
-    .btn-secondary:hover {
-      background: #f8f9ff;
-    }
-
-    .btn-danger {
-      background: white;
-      color: #f44336;
-      border: 2px solid #f44336;
-    }
-
-    .btn-danger:hover {
-      background: #ffebee;
-    }
-
-    /* Help Box */
-    .help-box {
-      background: #f8f9ff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .help-box h4 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    .help-box p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 15px;
-    }
-
-    .help-btn {
-      padding: 10px 20px;
-      background: white;
-      border: 2px solid #e5e5e5;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
+    .back-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      color: #333;
-      margin: 0 5px;
+      gap: 7px;
+      padding: 8px 16px;
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-600);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+    }
+    .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .breadcrumb-text {
+      font-size: 13px;
+      color: var(--gray-400);
+    }
+    .breadcrumb-text a { color: var(--gray-400); text-decoration: none; }
+    .breadcrumb-text a:hover { color: var(--primary); }
+    .breadcrumb-text .sep { margin: 0 6px; }
+    .breadcrumb-text .current { color: var(--gray-700); font-weight: 600; }
+
+    /* ── STATUS CARD ── */
+    .status-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      margin-bottom: 16px;
     }
 
-    .help-btn:hover {
-      border-color: #667eea;
-      color: #667eea;
-      background: #f8f9ff;
+    .status-banner {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: linear-gradient(135deg, var(--gray-900) 0%, var(--gray-700) 100%);
+      color: #fff;
     }
+    .status-banner.waiting  { background: linear-gradient(135deg, #78350f 0%, #b45309 100%); }
+    .status-banner.success  { background: linear-gradient(135deg, #064e3b 0%, #00897B 100%); }
+    .status-banner.failed   { background: linear-gradient(135deg, #7f1d1d 0%, var(--danger) 100%); }
+    .status-banner.cancelled{ background: linear-gradient(135deg, #3f3f46 0%, #52525b 100%); }
+    .status-banner.shipping { background: linear-gradient(135deg, #1e3a8a 0%, var(--blue) 100%); }
+    .status-banner.complete { background: linear-gradient(135deg, #4c1d95 0%, var(--purple) 100%); }
+
+    .s-icon-wrap {
+      width: 52px; height: 52px; min-width: 52px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+    }
+    .s-text h2 { font-size: 18px; font-weight: 800; margin-bottom: 3px; }
+    .s-text p  { font-size: 13px; opacity: .8; }
+    .s-badge-wrap { margin-left: auto; }
+    .s-chip {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.2);
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .order-meta-bar {
+      padding: 12px 24px;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .meta-chip { display: flex; flex-direction: column; gap: 2px; }
+    .meta-chip .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--gray-400); font-weight: 700; }
+    .meta-chip .val { font-size: 13px; font-weight: 700; color: var(--gray-800); }
+
+    /* ── GRID ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--gray-200);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .card-head {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--gray-100);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-head-icon {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary);
+      font-size: 13px;
+    }
+    .card-head h3 { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .card-body { padding: 16px 20px; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 36px; }
+    .tl-item {
+      position: relative;
+      padding-bottom: 24px;
+    }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -25px; top: 12px; bottom: -12px;
+      width: 2px;
+      background: var(--gray-200);
+    }
+    .tl-item:last-child::before { display: none; }
+    .tl-item.done::before   { background: var(--success); }
+    .tl-item.active::before { background: var(--primary); }
+
+    .tl-dot {
+      position: absolute;
+      left: -36px; top: 0;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      border: 2.5px solid #fff;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2;
+    }
+    .tl-item.done .tl-dot   { background: var(--success); }
+    .tl-item.active .tl-dot {
+      background: var(--primary);
+      animation: tlPulse 2s infinite;
+    }
+    .tl-dot i { font-size: 9px; color: #fff; }
+
+    @keyframes tlPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(238,77,45,.6); }
+      50%      { box-shadow: 0 0 0 8px rgba(238,77,45,0); }
+    }
+
+    .tl-content {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .tl-item.active .tl-content {
+      background: var(--primary-light);
+      border-color: #fcc9bd;
+    }
+    .tl-title { font-size: 14px; font-weight: 700; color: var(--gray-800); margin-bottom: 3px; }
+    .tl-desc  { font-size: 13px; color: var(--gray-500); margin-bottom: 6px; }
+    .tl-time  { font-size: 12px; color: var(--gray-400); display: flex; align-items: center; gap: 4px; }
+
+    /* ── SHIPPING CARD ── */
+    .ship-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, var(--blue) 100%);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .ship-banner-top {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .ship-icon-wrap {
+      width: 44px; height: 44px; min-width: 44px;
+      background: rgba(255,255,255,.15);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    .ship-banner h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+    .ship-banner p  { font-size: 13px; opacity: .85; }
+    .resi-row {
+      background: rgba(255,255,255,.15);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .resi-lbl { font-size: 11px; opacity: .8; margin-bottom: 4px; }
+    .resi-num {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+    .copy-resi {
+      background: rgba(255,255,255,.25);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background .15s;
+    }
+    .copy-resi:hover { background: rgba(255,255,255,.35); }
+
+    /* ── PRODUCT LIST ── */
+    .prod-row {
+      display: flex;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .prod-row:last-child { border-bottom: none; }
+    .prod-img {
+      width: 64px; height: 64px; min-width: 64px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--gray-200);
+      background: var(--gray-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      overflow: hidden;
+    }
+    .prod-img img { width: 100%; height: 100%; object-fit: cover; }
+    .prod-info { flex: 1; }
+    .prod-name { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 3px; line-height: 1.4; }
+    .prod-var  { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
+    .prod-price { font-size: 15px; font-weight: 800; color: var(--primary); }
+    .prod-qty   { font-size: 12px; color: var(--gray-400); margin-left: 6px; }
+
+    /* ── ADDRESS ── */
+    .addr-box {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .addr-name  { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
+    .addr-phone { font-size: 13px; color: var(--gray-500); margin-bottom: 8px; }
+    .addr-full  { font-size: 13px; color: var(--gray-600); line-height: 1.7; }
+
+    /* ── SUMMARY ── */
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 13px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .sum-row:last-of-type { border-bottom: none; }
+    .sum-row .lbl { color: var(--gray-500); }
+    .sum-row .val { font-weight: 700; color: var(--gray-800); }
+    .sum-row .val.free   { color: var(--success); }
+    .sum-row .val.green  { color: var(--success); }
+    .sum-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--primary-light);
+      border-top: 1px solid #fcc9bd;
+    }
+    .sum-total .tl { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+    .sum-total .tv { font-size: 20px; font-weight: 800; color: var(--primary); }
+
+    /* ── ACTION BUTTONS ── */
+    .action-block { padding: 14px 20px; border-top: 1px solid var(--gray-200); display: flex; flex-direction: column; gap: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none;
+      text-decoration: none;
+      transition: all .2s;
+      width: 100%;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: #fff; color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+    .btn-outline:hover { border-color: var(--gray-400); color: var(--gray-800); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { opacity: .9; }
+    .btn-danger { background: #fff; color: var(--danger); border: 1.5px solid #fecaca; }
+    .btn-danger:hover { background: var(--danger-light); }
+    .btn-return { background: #fff7ed; color: #c2410c; border: 1.5px solid #fed7aa; }
+    .btn-return:hover { background: #ffedd5; }
+
+    /* Card info pengembalian di sidebar */
+    .pg-info-card {
+      margin: 0 14px 14px;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 13px;
+      border: 1px solid;
+    }
+    .pg-info-card .pg-title { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .pg-info-card .pg-sub   { font-size: 11px; opacity: .75; line-height: 1.5; }
+    .pg-info-card .pg-meta  { font-size: 11px; margin-top: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .pg-info-card .pg-meta span { background: rgba(0,0,0,.06); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+    /* Help */
+    .help-box {
+      padding: 14px 20px;
+      border-top: 1px solid var(--gray-100);
+    }
+    .help-box-title { font-size: 12px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+    .help-btns { display: flex; gap: 8px; }
+    .help-btn {
+      flex: 1; padding: 8px 6px;
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      border-radius: var(--radius-sm);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px; font-weight: 700;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      color: var(--gray-600);
+      transition: all .2s;
+    }
+    .help-btn:hover { border-color: var(--primary); color: var(--primary); }
 
     /* Responsive */
-    @media (max-width: 968px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .status-top {
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .status-icon {
-        font-size: 48px;
-      }
-    }
-
     @media (max-width: 768px) {
-      .breadcrumb {
-        font-size: 12px;
-        padding: 0 15px;
-        margin: 15px auto;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .back-button {
-        font-size: 13px;
-        padding: 6px 12px;
-      }
-
-      .back-button i {
-        font-size: 12px;
-      }
-
-      .breadcrumb-links {
-        font-size: 12px;
-      }
-
-      .status-header {
-        padding: 20px;
-      }
-
-      .status-info h1 {
-        font-size: 24px;
-      }
-
-      .section {
-        padding: 20px;
-      }
-
-      .order-container {
-        padding: 0 15px;
-      }
+      .content-grid { grid-template-columns: 1fr; }
+      .status-banner { flex-wrap: wrap; }
+      .order-meta-bar { gap: 16px; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <div id="header-container"></div>
 
-  <!-- Order Container -->
-  <div class="order-container">
-    <!-- Status Header -->
-    <div class="status-header" id="statusHeader">
-      <div class="status-top">
-        <div class="status-info">
-          <h1 id="statusTitle">-</h1>
-          <p class="status-subtitle" id="statusSubtitle">-</p>
+<div id="header-container"></div>
+
+<div class="page-wrap">
+  <!-- Back Row -->
+  <div class="back-row">
+    <a href="/pesanan.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali</a>
+    <div class="breadcrumb-text">
+      <a href="/">Beranda</a><span class="sep">›</span>
+      <a href="/pesanan.html">Pesanan</a><span class="sep">›</span>
+      <span class="current">Detail</span>
+    </div>
+  </div>
+
+  <!-- Status Card -->
+  <div class="status-card" id="statusCard">
+    <div class="status-banner waiting" id="statusBanner">
+      <div class="s-icon-wrap" id="statusIconWrap"><span id="statusEmoji">⏳</span></div>
+      <div class="s-text">
+        <h2 id="statusTitle">Menunggu Pembayaran</h2>
+        <p id="statusSubtitle">Silakan selesaikan pembayaran Anda</p>
+      </div>
+      <div class="s-badge-wrap">
+        <span class="s-chip" id="statusChip">Belum Dibayar</span>
+      </div>
+    </div>
+    <div class="order-meta-bar">
+      <div class="meta-chip"><span class="lbl">No. Pesanan</span><span class="val" id="orderNumber">-</span></div>
+      <div class="meta-chip"><span class="lbl">Tanggal</span><span class="val" id="orderDate">-</span></div>
+      <div class="meta-chip"><span class="lbl">Total</span><span class="val" id="orderTotal" style="color:var(--primary);">Rp 0</span></div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- LEFT -->
+    <div>
+      <!-- Shipping Banner (hanya DIKIRIM/SELESAI) -->
+      <div id="shippingCard" style="display:none;">
+        <div class="ship-banner">
+          <div class="ship-banner-top">
+            <div class="ship-icon-wrap">🚚</div>
+            <div>
+              <h3 id="shippingCourier">-</h3>
+              <p id="shippingEstimate">-</p>
+            </div>
+          </div>
+          <div class="resi-row">
+            <div>
+              <div class="resi-lbl">Nomor Resi</div>
+              <div class="resi-num" id="trackingNumber">-</div>
+            </div>
+            <button class="copy-resi" onclick="copyTrackingNumber()"><i class="fas fa-copy"></i> Salin</button>
+          </div>
         </div>
-        <div class="status-icon" id="statusIcon">📦</div>
       </div>
 
-      <div class="order-meta">
-        <div class="meta-item">
-          <span class="meta-label">Nomor Pesanan</span>
-          <span class="meta-value" id="orderNumber">-</span>
+      <!-- Timeline -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon"><i class="fas fa-clipboard-list"></i></div>
+          <h3>Status Pesanan</h3>
         </div>
-        <div class="meta-item">
-          <span class="meta-label">Tanggal Pesanan</span>
-          <span class="meta-value" id="orderDate">-</span>
+        <div class="card-body">
+          <div class="timeline" id="trackingTimeline"></div>
         </div>
-        <div class="meta-item">
-          <span class="meta-label">Total Pembayaran</span>
-          <span class="meta-value" id="orderTotal">Rp 0</span>
+      </div>
+
+      <!-- Products -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-head-icon"><i class="fas fa-shopping-bag"></i></div>
+          <h3>Produk yang Dibeli</h3>
         </div>
+        <div class="card-body" id="productList" style="padding-top:4px;padding-bottom:4px;"></div>
       </div>
     </div>
 
-    <!-- Content Grid -->
-    <div class="content-grid">
-      <!-- Left Side -->
-      <div>
-        <!-- Tracking Timeline -->
-        <div class="section">
-          <h2 class="section-title">
-            <i class="fas fa-clipboard-list"></i>
-            Status Pesanan
-          </h2>
-
-          <div class="tracking-timeline" id="trackingTimeline"></div>
-        </div>
-
-        <!-- Product List -->
-        <div class="section">
-          <h2 class="section-title">
-            <i class="fas fa-shopping-bag"></i>
-            Produk yang Dibeli
-          </h2>
-
-          <div id="productList"></div>
-        </div>
-      </div>
-
-      <!-- Right Side -->
-      <div>
-        <!-- Shipping Info -->
-        <div id="shippingCard" style="display:none;">
-          <div class="shipping-card">
-            <div class="shipping-header">
-              <div class="shipping-icon">🚚</div>
-              <div class="shipping-info">
-                <h3 id="shippingCourier">-</h3>
-                <p id="shippingEstimate">-</p>
-              </div>
-            </div>
-
-            <div class="tracking-number">
-              <div>
-                <div style="font-size: 12px; opacity: 0.8; margin-bottom: 5px;">Nomor Resi</div>
-                <span id="trackingNumber">-</span>
-              </div>
-              <button class="copy-btn-small" onclick="copyTrackingNumber()">
-                <i class="fas fa-copy"></i>
-              </button>
-            </div>
-          </div>
-        </div>
+    <!-- RIGHT -->
+    <div>
+      <!-- Sidebar sticky card -->
+      <div class="card" style="position:sticky;top:76px;">
 
         <!-- Shipping Address -->
-        <div class="section">
-          <h2 class="section-title">
-            <i class="fas fa-map-marker-alt"></i>
-            Alamat Pengiriman
-          </h2>
-
-          <div class="address-card">
-            <h4 id="receiverName">-</h4>
-            <p id="receiverPhone">-</p>
-            <p id="addressFull" style="margin-top: 10px;">-</p>
+        <div class="card-head">
+          <div class="card-head-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <h3>Alamat Pengiriman</h3>
+        </div>
+        <div class="card-body">
+          <div class="addr-box">
+            <div class="addr-name"  id="receiverName">-</div>
+            <div class="addr-phone" id="receiverPhone">-</div>
+            <div class="addr-full"  id="addressFull">-</div>
           </div>
         </div>
 
         <!-- Payment Summary -->
-        <div class="section">
-          <h2 class="section-title">
-            <i class="fas fa-receipt"></i>
-            Rincian Pembayaran
-          </h2>
-
-          <div class="summary-row">
-            <span class="summary-label">Subtotal Produk</span>
-            <span class="summary-value" id="subtotalValue">Rp 0</span>
-          </div>
-
-          <div class="summary-row">
-            <span class="summary-label">Diskon Produk</span>
-            <span class="summary-value" style="color: #ff4081;" id="discountValue">-Rp 0</span>
-          </div>
-
-          <div class="summary-row">
-            <span class="summary-label">Ongkos Kirim</span>
-            <span class="summary-value" id="shippingValue">Rp 0</span>
-          </div>
-
-          <div class="summary-row">
-            <span class="summary-label">Voucher Diskon</span>
-            <span class="summary-value" style="color: #4caf50;" id="voucherValue">-Rp 0</span>
-          </div>
-
-          <div class="summary-divider"></div>
-
-          <div class="summary-total">
-            <span class="summary-label">Total Pembayaran</span>
-            <span class="summary-value" id="totalValue">Rp 0</span>
-          </div>
+        <div class="card-head" style="border-top:1px solid var(--gray-100);">
+          <div class="card-head-icon"><i class="fas fa-receipt"></i></div>
+          <h3>Rincian Pembayaran</h3>
+        </div>
+        <div class="card-body" style="padding-bottom:4px;">
+          <div class="sum-row"><span class="lbl">Subtotal</span><span class="val" id="subtotalValue">Rp 0</span></div>
+          <div class="sum-row"><span class="lbl">Diskon Produk</span><span class="val" style="color:var(--primary);" id="discountValue">Rp 0</span></div>
+          <div class="sum-row"><span class="lbl">Ongkos Kirim</span><span class="val" id="shippingValue">GRATIS</span></div>
+          <div class="sum-row"><span class="lbl">Voucher</span><span class="val green" id="voucherValue">Rp 0</span></div>
+        </div>
+        <div class="sum-total">
+          <span class="tl">Total Pembayaran</span>
+          <span class="tv" id="totalValue">Rp 0</span>
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons" id="actionButtons"></div>
+        <div class="action-block" id="actionButtons"></div>
 
-        <!-- Help Box -->
+        <!-- Help -->
         <div class="help-box">
-          <h4>Butuh Bantuan?</h4>
-          <p>Hubungi customer service kami</p>
-          <button class="help-btn" onclick="contactWhatsApp()">
-            <i class="fab fa-whatsapp" style="color: #25d366;"></i>
-            WhatsApp
-          </button>
-          <button class="help-btn" onclick="contactEmail()">
-            <i class="fas fa-envelope" style="color: #667eea;"></i>
-            Email
-          </button>
+          <div class="help-box-title">Butuh Bantuan?</div>
+          <div class="help-btns">
+            <button class="help-btn" onclick="contactWhatsApp()"><i class="fab fa-whatsapp" style="color:#25d366;"></i> WhatsApp</button>
+            <button class="help-btn" onclick="contactEmail()"><i class="fas fa-envelope" style="color:var(--primary);"></i> Email</button>
+          </div>
         </div>
+
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Footer -->
-  <div id="footer-container"></div>
+<div id="footer-container"></div>
 
-  <script src="assets/js/alert.js"></script>
-  <script src="assets/js/config.js"></script>
-  <script src="assets/js/helpers.js"></script>
-  
-  <script>
-  // Wait for header to load before initializing
+<script src="assets/js/alert.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/helpers.js"></script>
+<script>
   window.addEventListener('headerLoaded', function() {
     console.log('Header loaded, initializing order detail page...');
   });
 
   function getVariantAttributesFromDb(varian) {
-    const out = [];
-    const maps = varian?.atribut || [];
+    const out = [], maps = varian?.atribut || [];
     for (const m of maps) {
-      const label = m?.nilai?.atribut?.nama;
-      const value = m?.nilai?.nilai;
+      const label = m?.nilai?.atribut?.nama, value = m?.nilai?.nilai;
       if (label && value) out.push({ label, value });
     }
     return out;
   }
 
-  // ===== STATUS CONFIG =====
+  // ── STATUS CONFIG ──
   const statusConfig = {
-    MENUNGGU_PEMBAYARAN: {
-      title: "Menunggu Pembayaran",
-      subtitle: "Silakan selesaikan pembayaran Anda",
-      icon: "⏳",
-      class: "",
-    },
-    DIPROSES: {
-      title: "Pesanan Sedang Diproses",
-      subtitle: "Pesanan Anda sedang dipersiapkan",
-      icon: "📦",
-      class: "",
-    },
-    DIKIRIM: {
-      title: "Pesanan Sedang Dikirim",
-      subtitle: "Paket Anda dalam perjalanan",
-      icon: "🚚",
-      class: "",
-    },
-    SELESAI: {
-      title: "Pesanan Selesai",
-      subtitle: "Terima kasih atas pesanan Anda",
-      icon: "🎉",
-      class: "completed",
-    },
-    DIBATALKAN: {
-      title: "Pesanan Dibatalkan",
-      subtitle: "Pesanan Anda telah dibatalkan",
-      icon: "❌",
-      class: "cancelled",
-    },
+    MENUNGGU_PEMBAYARAN: { title: "Menunggu Pembayaran",       subtitle: "Silakan selesaikan pembayaran Anda",                  emoji: "⏳", bannerCls: "waiting",   chip: "Belum Dibayar"  },
+    MENUNGGU_KONFIRMASI: { title: "Menunggu Konfirmasi Admin", subtitle: "Pembayaran diterima, pesanan sedang dikonfirmasi",    emoji: "🔍", bannerCls: "",          chip: "Dikonfirmasi"   },
+    DIPROSES:            { title: "Pesanan Sedang Diproses",   subtitle: "Pesanan Anda sedang dipersiapkan oleh penjual",       emoji: "📦", bannerCls: "",          chip: "Diproses"       },
+    DIKIRIM:             { title: "Pesanan Sedang Dikirim",    subtitle: "Paket Anda dalam perjalanan menuju lokasi",           emoji: "🚚", bannerCls: "shipping",  chip: "Dikirim"        },
+    SELESAI:             { title: "Pesanan Selesai",           subtitle: "Terima kasih atas pesanan Anda!",                     emoji: "🎉", bannerCls: "complete",  chip: "Selesai"        },
+    DIBATALKAN:          { title: "Pesanan Dibatalkan",        subtitle: "Pesanan Anda telah dibatalkan",                       emoji: "❌", bannerCls: "cancelled", chip: "Dibatalkan"     },
   };
 
-  // ===== TIMELINE STEPS =====
   const timelineSteps = [
-    { key: "MENUNGGU_PEMBAYARAN", title: "Menunggu Pembayaran", desc: "Pesanan menunggu pembayaran", icon: "clock" },
-    { key: "DIPROSES", title: "Pesanan Diproses", desc: "Penjual mempersiapkan pesanan", icon: "box" },
-    { key: "DIKIRIM", title: "Pesanan Dikirim", desc: "Paket dalam perjalanan", icon: "truck" },
-    { key: "SELESAI", title: "Pesanan Selesai", desc: "Pesanan diterima", icon: "check-double" },
+    { key: "MENUNGGU_PEMBAYARAN", title: "Menunggu Pembayaran",       desc: "Pesanan menunggu pembayaran" },
+    { key: "MENUNGGU_KONFIRMASI", title: "Menunggu Konfirmasi Admin", desc: "Pembayaran diterima, admin sedang mengkonfirmasi" },
+    { key: "DIPROSES",            title: "Pesanan Diproses",           desc: "Penjual mempersiapkan pesanan" },
+    { key: "DIKIRIM",             title: "Pesanan Dikirim",            desc: "Paket dalam perjalanan" },
+    { key: "SELESAI",             title: "Pesanan Selesai",            desc: "Pesanan diterima" },
   ];
 
-  function statusRank(status) {
-    const order = ["MENUNGGU_PEMBAYARAN", "DIPROSES", "DIKIRIM", "SELESAI"];
-    const i = order.indexOf(status);
-    return i === -1 ? 0 : i;
+  function statusRank(s) {
+    const o = ["MENUNGGU_PEMBAYARAN","MENUNGGU_KONFIRMASI","DIPROSES","DIKIRIM","SELESAI"];
+    const i = o.indexOf(s); return i === -1 ? 0 : i;
   }
 
-  // Order Number
-  function makeOrderNumber(pesanan) {
-    const d = new Date(pesanan.dibuatPada || pesanan.createdAt || Date.now());
-
-    const yy = String(d.getFullYear()).slice(2);
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-
-    // id pendek tapi tetap rapi
-    const idPart = String(pesanan.id ?? "").padStart(5, "0");
-
-    return `INV-${yy}${mm}${dd}-${idPart}`;
+  function makeOrderNumber(p) {
+    const d = new Date(p.dibuatPada || p.createdAt || Date.now());
+    return `INV-${String(d.getFullYear()).slice(2)}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-${String(p.id??0).padStart(5,"0")}`;
   }
-  // ===== RENDER =====
+
   function renderStatusHeader(pesanan) {
-    const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
-    const config = statusConfig[status] || statusConfig.MENUNGGU_PEMBAYARAN;
-
-    const headerEl = document.getElementById("statusHeader");
-    headerEl.className = "status-header";
-    if (config.class) headerEl.className = "status-header " + config.class;
-
-    document.getElementById("statusTitle").textContent = config.title;
-    document.getElementById("statusSubtitle").textContent = config.subtitle;
-    document.getElementById("statusIcon").textContent = config.icon;
-
-    // document.getElementById("orderNumber").textContent = pesanan.id;
-    document.getElementById("orderNumber").textContent = makeOrderNumber(pesanan);
-    document.getElementById("orderDate").textContent = formatDate(pesanan.dibuatPada || pesanan.createdAt);
-    document.getElementById("orderTotal").textContent = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
+    const s  = pesanan.status || "MENUNGGU_PEMBAYARAN";
+    const cfg = statusConfig[s] || statusConfig.MENUNGGU_PEMBAYARAN;
+    const banner = document.getElementById("statusBanner");
+    banner.className = "status-banner " + cfg.bannerCls;
+    document.getElementById("statusEmoji").textContent    = cfg.emoji;
+    document.getElementById("statusTitle").textContent    = cfg.title;
+    document.getElementById("statusSubtitle").textContent = cfg.subtitle;
+    document.getElementById("statusChip").textContent     = cfg.chip;
+    document.getElementById("orderNumber").textContent    = makeOrderNumber(pesanan);
+    document.getElementById("orderDate").textContent      = formatDate(pesanan.dibuatPada || pesanan.createdAt);
+    document.getElementById("orderTotal").textContent     = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
   }
 
-  function getTimestampForStep(pesanan, stepKey) {
-    if (stepKey === "MENUNGGU_PEMBAYARAN") return formatDate(pesanan.dibuatPada || pesanan.createdAt);
-
-    if (stepKey === "DIPROSES") {
-      const paidAt = pesanan.pembayaran?.paidAt;
-      return paidAt ? formatDate(paidAt) : null;
-    }
-
-    if (stepKey === "DIKIRIM") {
-      const shippedAt = pesanan.pengiriman?.diubahPada || pesanan.pengiriman?.dibuatPada;
-      return shippedAt ? formatDate(shippedAt) : null;
-    }
-
-    if (stepKey === "SELESAI") return null;
-
+  function getTimestampForStep(pesanan, key) {
+    if (key === "MENUNGGU_PEMBAYARAN") return formatDate(pesanan.dibuatPada || pesanan.createdAt);
+    if (key === "DIPROSES") { const p = pesanan.pembayaran?.paidAt; return p ? formatDate(p) : null; }
+    if (key === "DIKIRIM")  { const t = pesanan.pengiriman?.diubahPada || pesanan.pengiriman?.dibuatPada; return t ? formatDate(t) : null; }
     return null;
   }
 
   function renderTimeline(pesanan) {
-    const container = document.getElementById("trackingTimeline");
+    const el = document.getElementById("trackingTimeline");
     const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
 
     if (status === "DIBATALKAN") {
-      container.innerHTML = `
-        <div class="timeline-item active">
-          <div class="timeline-dot"></div>
-          <div class="timeline-content">
-            <div class="timeline-title">Pesanan Dibatalkan</div>
-            <div class="timeline-desc">Pesanan tidak dilanjutkan.</div>
-            <div class="timeline-time">
-              <i class="far fa-clock"></i>
-              ${formatDate(pesanan.diubahPada || pesanan.updatedAt || pesanan.dibuatPada)}
-            </div>
+      el.innerHTML = `
+        <div class="tl-item active">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-title">Pesanan Dibatalkan</div>
+            <div class="tl-desc">Pesanan tidak dilanjutkan.</div>
+            <div class="tl-time"><i class="far fa-clock"></i> ${formatDate(pesanan.diubahPada || pesanan.updatedAt || pesanan.dibuatPada)}</div>
           </div>
-        </div>
-      `;
+        </div>`;
       return;
     }
 
-    const currentIndex = statusRank(status);
+    const cur = statusRank(status);
+    el.innerHTML = timelineSteps.map((step, i) => {
+      let cls = "";
+      if (i < cur)       cls = "done";
+      else if (i === cur) cls = "active";
+      const ts = getTimestampForStep(pesanan, step.key);
+      return `
+        <div class="tl-item ${cls}">
+          <div class="tl-dot">${cls==="done"?'<i class="fas fa-check"></i>':""}</div>
+          <div class="tl-content">
+            <div class="tl-title">${step.title}</div>
+            <div class="tl-desc">${step.desc}</div>
+            ${ts ? `<div class="tl-time"><i class="far fa-clock"></i> ${ts}</div>` : ""}
+          </div>
+        </div>`;
+    }).join("");
 
-    container.innerHTML = timelineSteps
-      .map((step, index) => {
-        let itemClass = "";
-        if (index < currentIndex) itemClass = "completed";
-        else if (index === currentIndex) itemClass = "active";
-
-        const timestamp = getTimestampForStep(pesanan, step.key);
-
-        return `
-          <div class="timeline-item ${itemClass}">
-            <div class="timeline-dot">
-              ${itemClass === "completed" ? '<i class="fas fa-check"></i>' : ""}
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-title">${step.title}</div>
-              <div class="timeline-desc">${step.desc}</div>
-              ${
-                timestamp
-                  ? `
-                <div class="timeline-time">
-                  <i class="far fa-clock"></i>
-                  ${timestamp}
-                </div>
-              `
-                  : ""
-              }
+    // Tambah entry pengembalian di bawah timeline jika ada
+    const pg = pesanan.pengembalian;
+    if (pg && status === "SELESAI") {
+      const pgMap = {
+        DIAJUKAN:             { icon: "📋", title: "Pengajuan Pengembalian",     desc: "Pengembalian diajukan dan menunggu tinjauan admin",       color: "#0958d9" },
+        DISETUJUI:            { icon: "✅", title: "Pengembalian Disetujui",     desc: "Admin menyetujui — menunggu pengiriman barang kembali",    color: "#15803d" },
+        DITOLAK:              { icon: "❌", title: "Pengembalian Ditolak",       desc: "Pengajuan pengembalian tidak dapat diproses",              color: "#b91c1c" },
+        BARANG_DIKIRIM_BALIK: { icon: "📦", title: "Barang Dikirim Kembali",    desc: `Resi: ${escapeHtml(pg.resiKembali || "-")}`,               color: "#c2410c" },
+        SELESAI:              { icon: "🎉", title: "Pengembalian Selesai",       desc: "Refund ditransfer / barang pengganti sudah dikirim",       color: "#15803d" },
+      };
+      const pgCfg = pgMap[pg.status] || pgMap.DIAJUKAN;
+      el.innerHTML += `
+        <div class="tl-item active" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--gray-200);">
+          <div class="tl-dot" style="background:#fff7ed;border-color:#fed7aa;font-size:11px;">${pgCfg.icon}</div>
+          <div class="tl-content" style="background:#fff7ed;border-color:#fed7aa;">
+            <div class="tl-title" style="color:${pgCfg.color};">${pgCfg.title}</div>
+            <div class="tl-desc">${pgCfg.desc}</div>
+            <div style="margin-top:6px;">
+              <a href="/pengembalian-detail.html?id=${encodeURIComponent(pg.id)}"
+                style="font-size:12px;font-weight:700;color:var(--primary);text-decoration:none;">
+                <i class="fas fa-arrow-right"></i> Lihat Detail Pengembalian
+              </a>
             </div>
           </div>
-        `;
-      })
-      .join("");
+        </div>`;
+    }
   }
 
   function renderShippingInfo(pesanan) {
-    const shippingCard = document.getElementById("shippingCard");
+    const el   = document.getElementById("shippingCard");
     const ship = pesanan.pengiriman;
-
-    if (!ship || !(pesanan.status === "DIKIRIM" || pesanan.status === "SELESAI")) {
-      shippingCard.style.display = "none";
-      return;
-    }
-
-    shippingCard.style.display = "block";
-
-    const layanan = ship?.layanan;
-    const kurir = layanan?.kurir;
-
-    document.getElementById("shippingCourier").textContent = layanan
-      ? `${layanan.nama}${kurir ? ` (${kurir.nama || kurir.kode})` : ""}`
-      : "Kurir";
-
-    document.getElementById("shippingEstimate").textContent = layanan
-      ? `Estimasi tiba ${layanan.estimasiHari} hari`
-      : "Sedang dikirim";
-
-    document.getElementById("trackingNumber").textContent = ship?.resi || "Belum tersedia";
+    if (!ship || !(pesanan.status === "DIKIRIM" || pesanan.status === "SELESAI")) { el.style.display = "none"; return; }
+    el.style.display = "block";
+    const l = ship?.layanan, k = l?.kurir;
+    document.getElementById("shippingCourier").textContent  = l ? `${l.nama}${k ? ` (${k.nama||k.kode})` : ""}` : "Kurir";
+    document.getElementById("shippingEstimate").textContent = l ? `Estimasi tiba ${l.estimasiHari} hari` : "Sedang dikirim";
+    document.getElementById("trackingNumber").textContent   = ship?.resi || "Belum tersedia";
   }
 
   function renderProducts(items) {
-    const container = document.getElementById("productList");
-
-    if (!items || !items.length) {
-      container.innerHTML = '<p style="color:#777;padding:15px 0;">Tidak ada produk</p>';
-      return;
-    }
-
-    container.innerHTML = items
-      .map((it) => {
-        const nama = escapeHtml(it.produk?.nama || "Produk");
-        const qty = Number(it.jumlah || 1);
-        const harga = Number(it.harga ?? it.varian?.harga ?? it.produk?.harga ?? 0);
-
-        const attrs = getVariantAttributesFromDb(it.varian);
-        const variantText = attrs.length
-          ? attrs.map((a) => `${escapeHtml(a.label)}: ${escapeHtml(a.value)}`).join(" | ")
-          : "";
-
-        const gambar = it.produk?.gambarUtama ? toAbsoluteUrl(it.produk.gambarUtama) : "";
-
-        return `
-          <div class="product-item">
-            <div class="product-image">
-              ${gambar ? `<img src="${gambar}" alt="${nama}">` : "📦"}
-            </div>
-            <div class="product-info">
-              <div class="product-name">${nama}</div>
-              ${variantText ? `<div class="product-variant">${variantText}</div>` : ""}
-              <div>
-                <span class="product-price">${rupiah(harga)}</span>
-                <span class="product-quantity">x${qty}</span>
-              </div>
-            </div>
+    const el = document.getElementById("productList");
+    if (!items?.length) { el.innerHTML = `<p style="color:var(--gray-400);padding:12px 0;font-size:13px;">Tidak ada produk</p>`; return; }
+    el.innerHTML = items.map(it => {
+      const nama = escapeHtml(it.produk?.nama || "Produk");
+      const qty  = Number(it.jumlah || 1);
+      const harga = Number(it.harga ?? it.varian?.harga ?? it.produk?.harga ?? 0);
+      const attrs = getVariantAttributesFromDb(it.varian);
+      const varText = attrs.map(a => `${escapeHtml(a.label)}: ${escapeHtml(a.value)}`).join(" | ");
+      const gambar = it.produk?.gambarUtama ? toAbsoluteUrl(it.produk.gambarUtama) : "";
+      return `
+        <div class="prod-row">
+          <div class="prod-img">${gambar ? `<img src="${gambar}" alt="${nama}">` : "📦"}</div>
+          <div class="prod-info">
+            <div class="prod-name">${nama}</div>
+            ${varText ? `<div class="prod-var">${varText}</div>` : ""}
+            <div><span class="prod-price">${rupiah(harga)}</span><span class="prod-qty">x${qty}</span></div>
           </div>
-        `;
-      })
-      .join("");
+        </div>`;
+    }).join("");
   }
 
   function renderAddress(pesanan) {
-    document.getElementById("receiverName").textContent = pesanan.namaPenerima || "-";
+    document.getElementById("receiverName").textContent  = pesanan.namaPenerima || "-";
     document.getElementById("receiverPhone").textContent = pesanan.noTelp || "-";
-
-    const addrHtml = [
+    document.getElementById("addressFull").innerHTML = [
       escapeHtml(pesanan.alamat || ""),
-      `Kelurahan ${escapeHtml(pesanan.kelurahan || "-")}, Kecamatan ${escapeHtml(pesanan.kecamatan || "-")}`,
-      `${escapeHtml(pesanan.kota || "-")}, ${escapeHtml(pesanan.provinsi || "-")} ${escapeHtml(pesanan.kodePos || "")}`,
-    ]
-      .filter(Boolean)
-      .join("<br>");
-
-    document.getElementById("addressFull").innerHTML = addrHtml || "-";
+      `Kelurahan ${escapeHtml(pesanan.kelurahan||"-")}, Kecamatan ${escapeHtml(pesanan.kecamatan||"-")}`,
+      `${escapeHtml(pesanan.kota||"-")}, ${escapeHtml(pesanan.provinsi||"-")} ${escapeHtml(pesanan.kodePos||"")}`,
+    ].filter(Boolean).join("<br>") || "-";
   }
 
   function renderSummary(pesanan) {
     document.getElementById("subtotalValue").textContent = rupiah(pesanan.subtotal ?? 0);
     document.getElementById("discountValue").textContent = "Rp 0";
-
     document.getElementById("shippingValue").textContent = (pesanan.ongkir ?? 0) > 0 ? rupiah(pesanan.ongkir) : "GRATIS";
-
-    const voucher = Number(pesanan.diskon ?? 0);
-    document.getElementById("voucherValue").textContent = voucher > 0 ? "-" + rupiah(voucher) : "Rp 0";
-
-    document.getElementById("totalValue").textContent = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
+    const v = Number(pesanan.diskon ?? 0);
+    document.getElementById("voucherValue").textContent  = v > 0 ? "-" + rupiah(v) : "Rp 0";
+    document.getElementById("totalValue").textContent    = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
   }
 
   let currentPesanan = null;
 
   function renderActionButtons(pesanan) {
-    const container = document.getElementById("actionButtons");
+    const el     = document.getElementById("actionButtons");
     const status = pesanan.status || "MENUNGGU_PEMBAYARAN";
-    let buttons = "";
+    const metode = String(pesanan.pembayaran?.metode || "").toUpperCase();
+    const pg     = pesanan.pengembalian;
+    let html     = "";
+
+    // ── Info pengembalian (jika ada) ──
+    if (pg) {
+      const pgMap = {
+        DIAJUKAN:             { bg: "#e6f4ff", border: "#91caff", color: "#0958d9", icon: "📋", title: "Pengembalian Sedang Ditinjau",     sub: "Tim kami sedang meninjau pengajuan Anda" },
+        DISETUJUI:            { bg: "#f0fdf4", border: "#86efac", color: "#15803d", icon: "✅", title: "Pengembalian Disetujui",           sub: "Silakan kirim barang kembali ke alamat kami" },
+        DITOLAK:              { bg: "#fef2f2", border: "#fca5a5", color: "#b91c1c", icon: "❌", title: "Pengembalian Ditolak",            sub: "Lihat catatan admin untuk detail penolakan" },
+        BARANG_DIKIRIM_BALIK: { bg: "#fff7ed", border: "#fdba74", color: "#c2410c", icon: "📦", title: "Barang Sedang Dikirim Kembali",   sub: "Menunggu barang tiba di gudang" },
+        SELESAI:              { bg: "#f0fdf4", border: "#86efac", color: "#15803d", icon: "🎉", title: "Pengembalian Selesai",            sub: "Proses pengembalian telah selesai" },
+      };
+      const c = pgMap[pg.status] || pgMap.DIAJUKAN;
+      html += `
+        <div class="pg-info-card" style="background:${c.bg};border-color:${c.border};color:${c.color};">
+          <div class="pg-title">${c.icon} ${c.title}</div>
+          <div class="pg-sub">${c.sub}</div>
+          <div class="pg-meta">
+            <span>${pg.jenis === "REFUND" ? "💰 Refund" : "🔄 Tukar Barang"}</span>
+            <span>Alasan: ${escapeHtml(pg.alasan || "-")}</span>
+          </div>
+        </div>`;
+    }
 
     if (status === "MENUNGGU_PEMBAYARAN") {
-      buttons = `
-        <button class="btn btn-primary" onclick="goToPayment()">
-          <i class="fas fa-credit-card"></i>
-          Bayar Sekarang
-        </button>
-        <button class="btn btn-danger" onclick="cancelOrder()">Batalkan Pesanan</button>
-      `;
+      html += `
+        <button class="btn btn-primary" onclick="goToPayment()"><i class="fas fa-credit-card"></i> Bayar Sekarang</button>
+        <button class="btn btn-danger"  onclick="cancelOrder()"><i class="fas fa-times"></i> Batalkan Pesanan</button>`;
+    } else if (status === "MENUNGGU_KONFIRMASI") {
+      html += `
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:13px;color:#1d4ed8;text-align:center;line-height:1.6;">
+          <i class="fas fa-clock"></i> <strong>Menunggu konfirmasi admin</strong><br>
+          <span style="font-size:11px;color:#6b7280;">Biasanya selesai dalam 1×24 jam</span>
+        </div>`;
+    } else if (status === "DIPROSES" && metode === "COD") {
+      html += `<button class="btn btn-danger" onclick="cancelOrder()"><i class="fas fa-times"></i> Batalkan Pesanan</button>`;
     } else if (status === "DIKIRIM") {
-      buttons = `
-        <button class="btn btn-primary" onclick="trackShipment()">
-          <i class="fas fa-truck"></i>
-          Lacak Paket
-        </button>
-        <button class="btn btn-secondary" onclick="confirmReceived()">
-          <i class="fas fa-check"></i>
-          Pesanan Diterima
-        </button>
-      `;
+      html += `
+        <button class="btn btn-outline" onclick="trackShipment()"><i class="fas fa-truck"></i> Lacak Paket</button>
+        <button class="btn btn-success" onclick="confirmReceived()"><i class="fas fa-check"></i> Pesanan Diterima</button>`;
     } else if (status === "SELESAI") {
-      buttons = `
-        <button class="btn btn-secondary" onclick="buyAgain()">
-          <i class="fas fa-redo"></i>
-          Beli Lagi
-        </button>
-      `;
-    } else {
-      buttons = "";
+      const orderId = getOrderIdFromUrl();
+      if (!pg) {
+        // Belum pernah ajukan pengembalian
+        html += `
+          <button class="btn btn-outline" onclick="buyAgain()"><i class="fas fa-redo"></i> Beli Lagi</button>
+          <button class="btn btn-return"  onclick="goToReturn('${orderId}')"><i class="fas fa-undo"></i> Ajukan Pengembalian</button>`;
+      } else {
+        // Sudah ada pengembalian — tombol menuju detail
+        html += `
+          <a class="btn btn-return" href="/pengembalian-detail.html?id=${encodeURIComponent(pg.id)}">
+            <i class="fas fa-undo"></i> Detail Pengembalian
+          </a>
+          <button class="btn btn-outline" onclick="buyAgain()"><i class="fas fa-redo"></i> Beli Lagi</button>`;
+      }
     }
 
-    container.innerHTML = buttons;
+    el.innerHTML = html;
   }
 
-  // ===== ACTION FUNCTIONS =====
+  // ── ACTIONS ──
+  window.goToReturn = function(orderId) {
+    if (!orderId) {
+      showAlert("Order ID tidak ditemukan", "error");
+      return;
+    }
+    window.location.href = `/pengembalian.html?orderId=${encodeURIComponent(orderId)}`;
+  };
   window.copyTrackingNumber = function () {
     const resi = document.getElementById("trackingNumber").textContent;
-    if (!resi || resi === "Belum tersedia" || resi === "-") {
-      return showAlert("Resi belum tersedia", "warning");
-    }
-
-    navigator.clipboard
-      .writeText(resi)
-      .then(() => showAlert("Nomor resi berhasil disalin!", "success"))
-      .catch(() => showAlert("Gagal menyalin nomor resi", "error"));
+    if (!resi || resi === "Belum tersedia" || resi === "-") return showAlert("Resi belum tersedia", "warning");
+    navigator.clipboard.writeText(resi).then(() => showAlert("Nomor resi berhasil disalin!", "success")).catch(() => showAlert("Gagal menyalin", "error"));
   };
 
   function getOrderIdFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("orderId") || urlParams.get("pesananId");
+    const p = new URLSearchParams(window.location.search);
+    return p.get("orderId") || p.get("pesananId");
   }
 
-  window.goToPayment = function () {
-    const orderId = getOrderIdFromUrl();
-    window.location.href = `/pembayaran.html?orderId=${encodeURIComponent(orderId)}`;
-  };
+  window.goToPayment = function () { window.location.href = `/pembayaran.html?orderId=${encodeURIComponent(getOrderIdFromUrl())}`; };
 
   window.trackShipment = function () {
     const resi = document.getElementById("trackingNumber").textContent;
-    if (!resi || resi === "Belum tersedia" || resi === "-") {
-      return showAlert("Resi belum tersedia", "warning");
-    }
-
-    showAlert(`Tracking (stub): buka tracking kurir untuk resi: ${resi}`, "info", { timeout: 9876 });
+    if (!resi || resi === "Belum tersedia" || resi === "-") return showAlert("Resi belum tersedia", "warning");
+    showAlert(`Resi: ${resi} — cek di website kurir.`, "info");
   };
 
   window.confirmReceived = async function () {
-    const orderId = getOrderIdFromUrl(); // ambil dari query params
+    const orderId = getOrderIdFromUrl();
     if (!orderId) return showAlert("Order ID tidak ditemukan", "error");
-
     const ok = await showConfirm("Konfirmasi bahwa Anda sudah menerima pesanan?");
     if (!ok) return;
-
     try {
-        const res = await apiAuth(`/api/pesanan/${orderId}/terima`, { method: "PATCH" });
-        showAlert("✅ Pesanan berhasil dikonfirmasi diterima", "success", { timeout: 3000 });
-
-        // Optional: reload halaman / data pesanan
-        // loadPesananDetail(orderId);        
-        window.location.reload();
-    } catch (err) {
-        showAlert(err.message || "Gagal konfirmasi penerimaan", "error");
-    }
+      await apiAuth(`/api/pesanan/${orderId}/terima`, { method: "PATCH" });
+      showAlert("✅ Pesanan berhasil dikonfirmasi diterima", "success");
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) { showAlert(err.message || "Gagal konfirmasi", "error"); }
   };
 
-  window.buyAgain = function () {
-    showAlert("Stub: Beli lagi (bisa implement: masukkan item pesanan ke keranjang).", "info", { timeout: 9876 });
-  };
+  window.buyAgain = function () { showAlert("Fitur beli lagi akan segera hadir.", "info"); };
 
   window.contactWhatsApp = function () {
-    const orderId = getOrderIdFromUrl() || "-";
-    const message = `Halo, saya butuh bantuan terkait pesanan Order ID: ${orderId}`;
-    window.open(`https://wa.me/628123456789?text=${encodeURIComponent(message)}`, "_blank");
+    const id = getOrderIdFromUrl() || "-";
+    window.open(`https://wa.me/628123456789?text=${encodeURIComponent(`Halo, saya butuh bantuan terkait pesanan Order ID: ${id}`)}`, "_blank");
   };
-
   window.contactEmail = function () {
-    const orderId = getOrderIdFromUrl() || "-";
-    window.location.href = `mailto:support@Ashanum.com?subject=Bantuan Pesanan - ${encodeURIComponent(orderId)}`;
+    window.location.href = `mailto:support@ashanum.com?subject=Bantuan Pesanan - ${getOrderIdFromUrl() || "-"}`;
   };
 
-  // ===== LOAD DATA =====
+  window.cancelOrder = async function () {
+    const ok = await showConfirm({
+      title: "Batalkan Pesanan", message: "Yakin ingin membatalkan pesanan ini? Item akan dikembalikan ke keranjang.",
+      confirmText: "Ya, Batalkan", cancelText: "Tidak", type: "danger",
+    });
+    if (!ok) return;
+    try {
+      await apiAuth(`/api/pesanan/${getOrderIdFromUrl()}/batal`, { method: "PATCH" });
+      showAlert("Pesanan berhasil dibatalkan. Item dikembalikan ke keranjang.", "success");
+      setTimeout(() => window.location.href = "/keranjang.html", 1500);
+    } catch (err) { showAlert(err.message || "Gagal membatalkan pesanan", "error"); }
+  };
+
+  // ── LOAD DATA ──
   async function loadOrderStatus() {
     const orderId = getOrderIdFromUrl();
-    if (!orderId) {
-      showAlert("Order ID tidak ditemukan", "error", { timeout: 3500 });
-      window.location.href = "/";
-      return;
-    }
-
+    if (!orderId) { showAlert("Order ID tidak ditemukan", "error"); window.location.href = "/"; return; }
     try {
       const pesanan = await apiAuth(`/api/pesanan/${encodeURIComponent(orderId)}`, { method: "GET" });
-
       currentPesanan = pesanan;
-
       renderStatusHeader(pesanan);
       renderTimeline(pesanan);
       renderShippingInfo(pesanan);
@@ -1174,43 +863,14 @@
     } catch (err) {
       if (String(err.message) === "NO_LOGIN") return;
       console.error(err);
-      showAlert(err.message || "Gagal memuat status pesanan", "error", { timeout: 9876 });
+      showAlert(err.message || "Gagal memuat status pesanan", "error");
     }
   }
-  
-  window.cancelOrder = async function () {
-    const ok = await showConfirm({
-      title: "Batalkan Pesanan",
-      message: "Yakin ingin membatalkan pesanan ini?",
-      confirmText: "Ya, Batalkan",
-      cancelText: "Tidak",
-      type: "danger",
-    });
-
-    if (!ok) return;
-
-    const orderId = getOrderIdFromUrl();
-
-    try {
-      await apiAuth(`/api/pesanan/${orderId}/batalkan`, {
-        method: "PATCH",
-      });
-
-      showAlert("Pesanan berhasil dibatalkan", "success");
-      location.reload();
-    } catch (err) {
-      showAlert(err.message || "Gagal membatalkan pesanan", "error");
-    }
-  };
 
   document.addEventListener("DOMContentLoaded", () => {
-    if (typeof showAlert !== "function") {
-      window.showAlert = (msg) => alert(msg);
-    }
-
+    if (typeof showAlert !== "function") window.showAlert = (msg) => alert(msg);
     loadOrderStatus();
   });
 </script>
-
 </body>
 </html>

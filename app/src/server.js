@@ -18,6 +18,7 @@ import checkoutRoutes from "./routes/checkout.js";
 import pengguna from "./routes/pengguna.js";
 import wilayahRouter from "./routes/wilayah.js";
 import ulasan from "./routes/ulasan.js";
+import pengembalian from "./routes/pengembalian.js";
 
 // FRONT END
 
@@ -30,6 +31,7 @@ import adminKategori from "./routes/admin/kategori.js";
 import adminPembayaran from "./routes/admin/pembayaran.js";
 import adminSetting from "./routes/admin/setting.js";
 import laporanRouter from "./routes/admin/laporan.js";
+import adminPengembalian from "./routes/admin/pengembalian.js";
 // ADMIN END
 
 import authJWT from "./middleware/auth.js";
@@ -80,6 +82,7 @@ app.use("/api/pesanan", authJWT, pesanan);
 app.use("/api/pembayaran", authJWT, pembayaran);
 app.use("/api/pengguna", authJWT, pengguna);
 app.use("/api/ulasan", authJWT, ulasan);
+app.use("/api/pengembalian", authJWT, pengembalian);
 
 
 
@@ -91,6 +94,7 @@ app.use("/api/admin/kategori", authJWT, adminOnly, adminKategori);
 app.use("/api/admin/pembayaran", authJWT, adminOnly, adminPembayaran);
 app.use("/api/admin/setting", authJWT, adminOnly, adminSetting);
 app.use("/api/admin/laporan",    authJWT, adminOnly, laporanRouter); 
+app.use("/api/admin/pengembalian", authJWT, adminOnly, adminPengembalian);
 
 
 

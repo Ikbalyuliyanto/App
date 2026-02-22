@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajukan Pengembalian - Ashanum</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary:       #EE4D2D;
+      --primary-dark:  #d43f20;
+      --primary-light: #fff3f0;
+      --primary-mid:   #ffd8cc;
+      --green:         #26aa99;
+      --green-light:   #f0faf9;
+      --orange:        #f57224;
+      --blue:          #1890ff;
+      --bg:            #f5f5f5;
+      --white:         #ffffff;
+      --border:        #e8e8e8;
+      --gray-50:  #fafafa;
+      --gray-100: #f5f5f5;
+      --gray-200: #eeeeee;
+      --gray-300: #e0e0e0;
+      --gray-500: #9e9e9e;
+      --gray-600: #757575;
+      --gray-700: #616161;
+      --gray-900: #212121;
+      --text:       #333333;
+      --text-light: #757575;
+      --radius-sm:  6px;
+      --radius:     10px;
+      --radius-lg:  14px;
+      --shadow-sm:  0 2px 8px rgba(0,0,0,0.07);
+      --shadow:     0 4px 16px rgba(0,0,0,0.10);
+      --shadow-primary: 0 4px 16px rgba(238,77,45,0.22);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    /* ── TOP NAV ── */
+    .top-nav {
+      background: var(--white);
+      border-bottom: 2px solid var(--primary-mid);
+      padding: 0 20px;
+    }
+    .top-nav-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .back-link {
+      display: flex; align-items: center; gap: 7px;
+      color: var(--text); text-decoration: none;
+      font-size: 13px; font-weight: 700;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: white;
+      transition: all 0.2s;
+    }
+    .back-link:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .nav-divider { width: 1px; height: 24px; background: var(--border); }
+    .nav-title { font-size: 15px; font-weight: 800; color: var(--gray-900); }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 760px;
+      margin: 24px auto 48px;
+      padding: 0 16px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      background: var(--gray-50);
+    }
+    .card-header-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 14px;
+    }
+    .card-header h2 { font-size: 15px; font-weight: 800; color: var(--gray-900); }
+    .card-body { padding: 20px; }
+
+    /* ── PESANAN INFO ── */
+    .order-info-bar {
+      background: var(--gray-50);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .order-info-icon {
+      width: 42px; height: 42px; border-radius: var(--radius-sm);
+      background: var(--primary-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .order-info-text { flex: 1; }
+    .order-info-text h4 { font-size: 14px; font-weight: 800; color: var(--gray-900); margin-bottom: 2px; }
+    .order-info-text p  { font-size: 12px; color: var(--text-light); }
+    .order-info-total { font-size: 16px; font-weight: 900; color: var(--primary); }
+
+    /* ── PRODUCT LIST (mini) ── */
+    .product-mini {
+      display: flex; gap: 10px; align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .product-mini:last-child { border-bottom: none; }
+    .prod-thumb {
+      width: 52px; height: 52px; min-width: 52px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      overflow: hidden; background: var(--gray-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .prod-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .prod-mini-info { flex: 1; }
+    .prod-mini-name { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+    .prod-mini-variant { font-size: 11px; color: var(--text-light); }
+    .prod-mini-price { font-size: 13px; font-weight: 800; color: var(--primary); white-space: nowrap; }
+
+    /* ── JENIS PENGEMBALIAN ── */
+    .jenis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    .jenis-card {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; flex-direction: column; gap: 8px;
+      position: relative;
+    }
+    .jenis-card:hover { border-color: var(--primary-mid); background: var(--primary-light); }
+    .jenis-card.selected { border-color: var(--primary); background: var(--primary-light); }
+    .jenis-card.selected::after {
+      content: '✓';
+      position: absolute; top: 10px; right: 10px;
+      width: 22px; height: 22px;
+      background: var(--primary); color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800;
+    }
+    .jenis-icon { font-size: 28px; }
+    .jenis-name { font-size: 14px; font-weight: 800; color: var(--gray-900); }
+    .jenis-desc { font-size: 12px; color: var(--text-light); line-height: 1.5; }
+
+    /* ── ALASAN SELECT ── */
+    .alasan-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .alasan-chip {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      text-align: center;
+      background: white;
+    }
+    .alasan-chip:hover   { border-color: var(--primary-mid); color: var(--primary); background: var(--primary-light); }
+    .alasan-chip.selected { border-color: var(--primary); color: var(--primary); background: var(--primary-light); font-weight: 800; }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 13px; font-weight: 700;
+      color: var(--gray-900); margin-bottom: 7px;
+    }
+    .form-label .required { color: var(--primary); }
+    .form-label .optional { color: var(--text-light); font-weight: 500; }
+    .form-textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px; color: var(--text);
+      resize: none; min-height: 88px;
+      outline: none; transition: all 0.2s;
+    }
+    .form-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(238,77,45,0.1); }
+    .char-count { font-size: 11px; color: var(--text-light); text-align: right; margin-top: 4px; }
+
+    /* ── FOTO UPLOAD ── */
+    .foto-area {
+      border: 2px dashed var(--gray-300);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 12px;
+    }
+    .foto-area:hover { border-color: var(--primary); background: var(--primary-light); }
+    .foto-area-icon { font-size: 32px; margin-bottom: 8px; opacity: 0.5; }
+    .foto-area p { font-size: 13px; color: var(--text-light); font-weight: 600; margin-bottom: 4px; }
+    .foto-area small { font-size: 11px; color: var(--gray-500); }
+    .foto-input { display: none; }
+
+    .foto-preview-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .foto-preview-item {
+      width: 80px; height: 80px;
+      border-radius: var(--radius-sm);
+      position: relative;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+    }
+    .foto-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .foto-remove {
+      position: absolute; top: 3px; right: 3px;
+      background: rgba(0,0,0,0.65); color: white;
+      border: none; border-radius: 50%;
+      width: 20px; height: 20px; font-size: 9px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── WARNING BOX ── */
+    .warn-box {
+      background: #fffbe6;
+      border-left: 3px solid #faad14;
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 13px; color: #7c5800;
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .warn-box i { color: #faad14; margin-top: 1px; flex-shrink: 0; }
+
+    .info-box {
+      background: #e6f4ff;
+      border-left: 3px solid var(--blue);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 13px; color: #003a8c;
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .info-box i { color: var(--blue); margin-top: 1px; flex-shrink: 0; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px; font-weight: 800;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all 0.2s;
+      box-shadow: var(--shadow-primary);
+    }
+    .btn-submit:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ── SUCCESS STATE ── */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .success-screen.show { display: block; }
+    .success-anim { font-size: 72px; margin-bottom: 16px; animation: bounce 0.5s ease; }
+    @keyframes bounce {
+      0%   { transform: scale(0) rotate(-10deg); }
+      60%  { transform: scale(1.15) rotate(4deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+    .success-screen h2 { font-size: 22px; font-weight: 900; color: var(--gray-900); margin-bottom: 8px; }
+    .success-screen p  { font-size: 14px; color: var(--text-light); margin-bottom: 24px; line-height: 1.7; }
+    .btn-back-order {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 28px;
+      background: var(--primary); color: white;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 800;
+      cursor: pointer; text-decoration: none;
+      box-shadow: var(--shadow-primary);
+      transition: all 0.2s;
+    }
+    .btn-back-order:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+    /* ── LOADING ── */
+    .page-loading {
+      text-align: center; padding: 80px 20px;
+    }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid var(--gray-200);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .jenis-grid   { grid-template-columns: 1fr; }
+      .alasan-grid  { grid-template-columns: 1fr; }
+      .container    { padding: 0 12px; margin-top: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="header-container"></div>
+
+  <!-- Top Nav -->
+  <div class="top-nav">
+    <div class="top-nav-inner">
+      <a id="backLink" href="/pesanan.html" class="back-link"><i class="fas fa-arrow-left"></i> Kembali</a>
+      <div class="nav-divider"></div>
+      <span class="nav-title">Ajukan Pengembalian</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Loading State -->
+    <div class="page-loading" id="pageLoading">
+      <div class="spinner"></div>
+      <p style="color:var(--text-light);font-weight:600;">Memuat data pesanan...</p>
+    </div>
+
+    <!-- Form Content -->
+    <div id="formContent" style="display:none;">
+
+      <!-- Info Pesanan -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><i class="fas fa-receipt"></i></div>
+          <h2>Informasi Pesanan</h2>
+        </div>
+        <div class="card-body">
+          <div class="order-info-bar">
+            <div class="order-info-icon">🛍️</div>
+            <div class="order-info-text">
+              <h4 id="orderNumber">-</h4>
+              <p id="orderDate">-</p>
+            </div>
+            <div class="order-info-total" id="orderTotal">Rp 0</div>
+          </div>
+          <div id="productListMini"></div>
+        </div>
+      </div>
+
+      <!-- Jenis Pengembalian -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><i class="fas fa-exchange-alt"></i></div>
+          <h2>Jenis Pengembalian <span style="color:var(--primary);">*</span></h2>
+        </div>
+        <div class="card-body">
+          <div class="jenis-grid">
+            <div class="jenis-card" data-jenis="REFUND" onclick="pilihJenis('REFUND')">
+              <div class="jenis-icon">💰</div>
+              <div class="jenis-name">Refund (Uang Kembali)</div>
+              <div class="jenis-desc">Dana dikembalikan ke metode pembayaran asal dalam 3-7 hari kerja</div>
+            </div>
+            <div class="jenis-card" data-jenis="TUKAR" onclick="pilihJenis('TUKAR')">
+              <div class="jenis-icon">🔄</div>
+              <div class="jenis-name">Tukar Barang</div>
+              <div class="jenis-desc">Kirim barang kembali, kami kirim barang pengganti yang sama</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alasan -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><i class="fas fa-question-circle"></i></div>
+          <h2>Alasan Pengembalian <span style="color:var(--primary);">*</span></h2>
+        </div>
+        <div class="card-body">
+          <div class="alasan-grid" id="alasanGrid">
+            <!-- dirender JS -->
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">
+              Deskripsi Tambahan <span class="optional">(opsional)</span>
+            </label>
+            <textarea class="form-textarea" id="deskripsiInput"
+              placeholder="Ceritakan detail masalah yang Anda alami..."
+              maxlength="500"
+              oninput="document.getElementById('charCount').textContent = this.value.length"></textarea>
+            <div class="char-count"><span id="charCount">0</span>/500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Foto Bukti -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon"><i class="fas fa-camera"></i></div>
+          <h2>Foto Bukti <span style="color:var(--primary);">*</span></h2>
+        </div>
+        <div class="card-body">
+          <div class="warn-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Upload foto yang jelas menunjukkan kondisi barang / kerusakan. Minimal 1 foto, maksimal 5 foto.</span>
+          </div>
+
+          <div id="fotoPreviewGrid" class="foto-preview-grid" style="margin-bottom:12px;"></div>
+
+          <div class="foto-area" id="fotoArea" onclick="document.getElementById('fotoInput').click()">
+            <div class="foto-area-icon">📷</div>
+            <p>Klik untuk upload foto</p>
+            <small>JPG, PNG, WEBP · Maks. 5MB per file · Maks. 5 foto</small>
+          </div>
+          <input type="file" class="foto-input" id="fotoInput" accept="image/*" multiple>
+        </div>
+      </div>
+
+      <!-- Info proses -->
+      <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>Proses Pengembalian:</strong><br>
+          Admin akan meninjau pengajuan Anda dalam 1×24 jam. Setelah disetujui, Anda akan diminta untuk mengirim barang kembali ke alamat kami.
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button class="btn-submit" id="btnSubmit" onclick="submitPengembalian()">
+        <i class="fas fa-paper-plane"></i> Ajukan Pengembalian
+      </button>
+
+    </div>
+
+    <!-- Success Screen -->
+    <div class="card" id="successScreen" style="display:none;">
+      <div class="success-screen show">
+        <div class="success-anim">✅</div>
+        <h2>Pengajuan Berhasil!</h2>
+        <p>Pengembalian Anda telah diajukan.<br>Admin akan meninjau dalam 1×24 jam.<br>Pantau statusnya di halaman detail pesanan.</p>
+        <a id="btnBackOrder" href="/pesanan.html" class="btn-back-order">
+          <i class="fas fa-shopping-bag"></i> Lihat Pesanan Saya
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="assets/js/alert.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+
+  <script>
+    const ALASAN_LIST = [
+      "Barang tidak sesuai deskripsi",
+      "Barang rusak / cacat",
+      "Barang salah kirim",
+      "Ukuran tidak sesuai",
+      "Kualitas di bawah ekspektasi",
+      "Barang tidak lengkap",
+      "Barang palsu / tidak ori",
+      "Lainnya",
+    ];
+
+    let selectedJenis  = null;
+    let selectedAlasan = null;
+    let fotoFiles      = [];
+    let fotoPreviews   = [];
+    let currentOrderId = null;
+    let pesananData    = null;
+
+    // ── Init ──
+    function getOrderIdFromUrl() {
+      return new URLSearchParams(window.location.search).get("orderId") || new URLSearchParams(window.location.search).get("pesananId");
+    }
+
+    function makeOrderNumber(pesanan) {
+      const d  = new Date(pesanan.dibuatPada || pesanan.createdAt || Date.now());
+      const yy = String(d.getFullYear()).slice(2);
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `INV-${yy}${mm}${dd}-${String(pesanan.id ?? "").padStart(5,"0")}`;
+    }
+
+    function getVariantAttr(varian) {
+      const out = [], maps = varian?.atribut || [];
+      for (const m of maps) {
+        const label = m?.nilai?.atribut?.nama, value = m?.nilai?.nilai;
+        if (label && value) out.push(`${label}: ${value}`);
+      }
+      return out;
+    }
+
+    async function loadPesanan() {
+      currentOrderId = getOrderIdFromUrl();
+      if (!currentOrderId) { showAlert("Order ID tidak ditemukan", "error"); return; }
+
+      // Update back link
+      document.getElementById("backLink").href = `/pesanan-detail.html?orderId=${encodeURIComponent(currentOrderId)}`;
+      document.getElementById("btnBackOrder").href = `/pesanan-detail.html?orderId=${encodeURIComponent(currentOrderId)}`;
+
+      try {
+        pesananData = await apiAuth(`/api/pesanan/${encodeURIComponent(currentOrderId)}`, { method: "GET" });
+
+        // Validasi status
+        if (pesananData.status !== "SELESAI") {
+          showAlert("Pengembalian hanya bisa diajukan untuk pesanan yang sudah selesai.", "error");
+          setTimeout(() => window.location.href = `/pesanan-detail.html?orderId=${encodeURIComponent(currentOrderId)}`, 2000);
+          return;
+        }
+
+        // Cek sudah pernah diajukan
+        if (pesananData.pengembalian) {
+          showAlert("Pengembalian sudah pernah diajukan untuk pesanan ini.", "warning");
+          setTimeout(() => window.location.href = `/pesanan-detail.html?orderId=${encodeURIComponent(currentOrderId)}`, 2000);
+          return;
+        }
+
+        renderPesananInfo(pesananData);
+        renderAlasan();
+
+        document.getElementById("pageLoading").style.display = "none";
+        document.getElementById("formContent").style.display = "block";
+
+      } catch (err) {
+        if (String(err.message) === "NO_LOGIN") return;
+        showAlert(err.message || "Gagal memuat pesanan", "error");
+      }
+    }
+
+    function renderPesananInfo(pesanan) {
+      document.getElementById("orderNumber").textContent = makeOrderNumber(pesanan);
+      document.getElementById("orderDate").textContent   = `Dipesan ${formatDate(pesanan.dibuatPada || pesanan.createdAt)}`;
+      document.getElementById("orderTotal").textContent  = rupiah(pesanan.totalAkhir ?? pesanan.total ?? 0);
+
+      const items     = pesanan.item || [];
+      const container = document.getElementById("productListMini");
+      container.innerHTML = items.map(it => {
+        const nama  = escapeHtml(it.produk?.nama || "Produk");
+        const qty   = Number(it.jumlah || 1);
+        const harga = Number(it.harga ?? it.varian?.harga ?? it.produk?.harga ?? 0);
+        const attrs = getVariantAttr(it.varian);
+        const gambar = it.produk?.gambarUtama ? toAbsoluteUrl(it.produk.gambarUtama) : "";
+        return `
+          <div class="product-mini">
+            <div class="prod-thumb">
+              ${gambar ? `<img src="${gambar}" alt="${nama}">` : "📦"}
+            </div>
+            <div class="prod-mini-info">
+              <div class="prod-mini-name">${nama}</div>
+              ${attrs.length ? `<div class="prod-mini-variant">${escapeHtml(attrs.join(" | "))}</div>` : ""}
+              <div style="font-size:12px;color:var(--text-light);">x${qty}</div>
+            </div>
+            <div class="prod-mini-price">${rupiah(harga * qty)}</div>
+          </div>`;
+      }).join("");
+    }
+
+    function renderAlasan() {
+      const grid = document.getElementById("alasanGrid");
+      grid.innerHTML = ALASAN_LIST.map(a => `
+        <div class="alasan-chip" data-alasan="${escapeHtml(a)}" onclick="pilihAlasan('${escapeHtml(a)}')">
+          ${escapeHtml(a)}
+        </div>`).join("");
+    }
+
+    // ── Pilih jenis ──
+    window.pilihJenis = function(jenis) {
+      selectedJenis = jenis;
+      document.querySelectorAll(".jenis-card").forEach(el => {
+        el.classList.toggle("selected", el.dataset.jenis === jenis);
+      });
+    };
+
+    // ── Pilih alasan ──
+    window.pilihAlasan = function(alasan) {
+      selectedAlasan = alasan;
+      document.querySelectorAll(".alasan-chip").forEach(el => {
+        el.classList.toggle("selected", el.dataset.alasan === alasan);
+      });
+    };
+
+    // ── Foto Upload ──
+    document.getElementById("fotoInput").addEventListener("change", function() {
+      const remaining = 5 - fotoFiles.length;
+      const toAdd = Array.from(this.files).slice(0, remaining);
+      toAdd.forEach(f => {
+        fotoFiles.push(f);
+        const reader = new FileReader();
+        reader.onload = e => {
+          fotoPreviews.push(e.target.result);
+          renderFotoPreviews();
+        };
+        reader.readAsDataURL(f);
+      });
+      this.value = "";
+    });
+
+    function renderFotoPreviews() {
+      const grid = document.getElementById("fotoPreviewGrid");
+      grid.innerHTML = fotoPreviews.map((src, i) => `
+        <div class="foto-preview-item">
+          <img src="${src}" alt="Foto ${i+1}">
+          <button class="foto-remove" onclick="removeFoto(${i})">✕</button>
+        </div>`).join("");
+
+      // Sembunyikan area upload kalau sudah 5
+      document.getElementById("fotoArea").style.display = fotoFiles.length >= 5 ? "none" : "block";
+    }
+
+    window.removeFoto = function(index) {
+      fotoFiles.splice(index, 1);
+      fotoPreviews.splice(index, 1);
+      renderFotoPreviews();
+    };
+
+    // ── Submit ──
+    window.submitPengembalian = async function() {
+      if (!selectedJenis) return showAlert("Pilih jenis pengembalian terlebih dahulu", "warning");
+      if (!selectedAlasan) return showAlert("Pilih alasan pengembalian", "warning");
+      if (fotoFiles.length === 0) return showAlert("Upload minimal 1 foto bukti", "warning");
+
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled  = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+      try {
+        const fd = new FormData();
+        fd.append("pesananId",  currentOrderId);
+        fd.append("jenis",      selectedJenis);
+        fd.append("alasan",     selectedAlasan);
+        fd.append("deskripsi",  document.getElementById("deskripsiInput").value.trim());
+        fotoFiles.forEach((f, i) => fd.append("foto", f));
+
+        await apiAuth("/api/pengembalian", { method: "POST", body: fd });
+
+        document.getElementById("formContent").style.display  = "none";
+        document.getElementById("successScreen").style.display = "block";
+
+      } catch (err) {
+        showAlert(err.message || "Gagal mengajukan pengembalian", "error");
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Ajukan Pengembalian';
+      }
+    };
+
+    // ── Init ──
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof showAlert !== "function") window.showAlert = msg => alert(msg);
+      loadPesanan();
+    });
+  </script>
+</body>
+</html>
