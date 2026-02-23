@@ -5,12 +5,6 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-const snap = new midtransClient.Snap({
-  isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
-  serverKey: process.env.MIDTRANS_SERVER_KEY,
-  clientKey: process.env.MIDTRANS_CLIENT_KEY,
-});
-
 function computeExpiredAt(metode) {
   const now = Date.now();
   const m = String(metode || "").toUpperCase();

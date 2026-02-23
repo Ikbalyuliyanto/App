@@ -4,8 +4,7 @@ import auth from "../middleware/auth.js";
 import midtransClient from "midtrans-client";
 import crypto from "crypto";
 
-const snap = new midtransClient.Snap({  
-  isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
+const snap = new midtransClient.Snap({
   serverKey: process.env.MIDTRANS_SERVER_KEY,
 });
 
@@ -66,6 +65,43 @@ router.post("/:id/bayar", auth, async (req, res) => {
     return res.status(400).json({ message: "Pesanan tidak bisa dibayar pada status ini" });
   }
 
+  // ✅ Cek apakah sudah dibayar di Midtrans (walau DB belum update)
+  if (pesanan.pembayaran?.midtransOrderId) {
+    try {
+      const statusRes = await fetch(
+        `https://api.sandbox.midtrans.com/v2/${pesanan.pembayaran.midtransOrderId}/status`,
+        {
+          headers: {
+            Authorization: "Basic " + Buffer.from(process.env.MIDTRANS_SERVER_KEY + ":").toString("base64"),
+          },
+        }
+      );
+      const statusData = await statusRes.json();
+      const txStatus = statusData.transaction_status;
+
+      console.log(`🔍 Cek sebelum bayar pesanan #${id}: ${txStatus}`);
+
+      // Kalau sudah settlement/capture → update DB dan return berhasil
+      if (txStatus === "settlement" || (txStatus === "capture" && statusData.fraud_status !== "challenge")) {
+        await prisma.$transaction(async (tx) => {
+          await tx.pembayaran.update({
+            where: { id: pesanan.pembayaran.id },
+            data: { status: "BERHASIL", paidAt: new Date() },
+          });
+          await tx.pesanan.update({
+            where: { id: pesanan.id },
+            data: { status: "DIPROSES" },
+          });
+        });
+        console.log(`✅ Pesanan #${id} sudah dibayar, DB diupdate`);
+        return res.json({ alreadyPaid: true });
+      }
+    } catch (e) {
+      console.warn("Gagal cek status sebelum bayar:", e.message);
+    }
+  }
+
+  // Buat transaksi baru (logika awal)
   try {
     const grossAmount     = pesanan.totalAkhir ?? pesanan.subtotal ?? 0;
     const midtransOrderId = `ORDER-${pesanan.id}-${Date.now()}`;
@@ -78,7 +114,6 @@ router.post("/:id/bayar", auth, async (req, res) => {
       },
     });
 
-    // ✅ Simpan snapToken DAN midtransOrderId sekaligus dalam satu update
     await prisma.pembayaran.update({
       where: { id: pesanan.pembayaran.id },
       data: {
@@ -88,12 +123,55 @@ router.post("/:id/bayar", auth, async (req, res) => {
       },
     });
 
+    console.log(`✅ Transaksi baru dibuat: ${midtransOrderId}`);
     res.json({ snapToken: transaction.token });
   } catch (error) {
     console.error("Midtrans error:", error);
     res.status(500).json({ message: "Gagal membuat transaksi Midtrans" });
   }
 });
+// router.post("/:id/bayar", auth, async (req, res) => {
+//   const penggunaId = req.user.id;
+//   const id = Number(req.params.id);
+
+//   const pesanan = await prisma.pesanan.findFirst({
+//     where: { id, penggunaId },
+//     include: { pembayaran: true },
+//   });
+
+//   if (!pesanan) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
+//   if (pesanan.status !== "MENUNGGU_PEMBAYARAN") {
+//     return res.status(400).json({ message: "Pesanan tidak bisa dibayar pada status ini" });
+//   }
+
+//   try {
+//     const grossAmount     = pesanan.totalAkhir ?? pesanan.subtotal ?? 0;
+//     const midtransOrderId = `ORDER-${pesanan.id}-${Date.now()}`;
+
+//     const transaction = await snap.createTransaction({
+//       transaction_details: { order_id: midtransOrderId, gross_amount: grossAmount },
+//       customer_details: {
+//         first_name: pesanan.namaPenerima || req.user.nama || "Customer",
+//         email:      req.user.email || "",
+//       },
+//     });
+
+//     // ✅ Simpan snapToken DAN midtransOrderId sekaligus dalam satu update
+//     await prisma.pembayaran.update({
+//       where: { id: pesanan.pembayaran.id },
+//       data: {
+//         snapToken:       transaction.token,
+//         midtransOrderId: midtransOrderId,
+//         status:          "MENUNGGU",
+//       },
+//     });
+
+//     res.json({ snapToken: transaction.token });
+//   } catch (error) {
+//     console.error("Midtrans error:", error);
+//     res.status(500).json({ message: "Gagal membuat transaksi Midtrans" });
+//   }
+// });
 
 // ─── KONFIRMASI SETELAH onSuccess ─────────────────────────────────────────────
 // Frontend panggil ini setelah Snap popup onSuccess
@@ -128,7 +206,7 @@ router.post("/:id/konfirmasi", auth, async (req, res) => {
     const statusData = await statusRes.json();
     const newStatus  = mapMidtransStatus(statusData.transaction_status, statusData.fraud_status);
 
-    console.log(`🔍 Konfirmasi #${id}: ${statusData.transaction_status} → ${newStatus}`);
+    // console.log(`🔍 Konfirmasi #${id}: ${statusData.transaction_status} → ${newStatus}`);
 
     if (newStatus === "BERHASIL") {
       await prisma.$transaction(async (tx) => {

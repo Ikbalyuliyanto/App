@@ -203,10 +203,41 @@
     .help-btn { flex: 1; padding: 8px 6px; border: 1px solid var(--border); background: #fff; border-radius: 6px; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--gray-700); }
     .help-btn:hover { border-color: var(--primary); color: var(--primary); }
 
+    /* ===== PAYMENT LOADING OVERLAY ===== */
+    .payment-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    .payment-overlay-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 52px;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      min-width: 260px;
+    }
+    .payment-overlay-spinner {
+      width: 52px; height: 52px;
+      border: 5px solid #f0f0f0;
+      border-top: 5px solid var(--primary);
+      border-radius: 50%;
+      animation: overlaySpinAnim 0.8s linear infinite;
+      margin: 0 auto 18px;
+    }
+    @keyframes overlaySpinAnim { to { transform: rotate(360deg); } }
+    .payment-overlay-icon { font-size: 48px; margin-bottom: 14px; }
+    .payment-overlay-title { font-size: 16px; font-weight: 800; color: var(--gray-900); margin-bottom: 6px; }
+    .payment-overlay-sub   { font-size: 13px; color: var(--text-light); }
+
     @media (max-width: 768px) {
       .page-wrapper { grid-template-columns: 1fr; }
       .sidebar-card { position: static; order: -1; }
       .top-bar-steps { display: none; }
+      .payment-overlay-box { padding: 32px 28px; margin: 0 20px; }
     }
   </style>
 </head>
@@ -224,6 +255,16 @@
         <i class="fas fa-chevron-right" style="color:#ccc;font-size:11px;"></i>
         <span class="step active"><i class="fas fa-circle"></i> Pembayaran</span>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== PAYMENT LOADING OVERLAY ===== -->
+  <div class="payment-overlay" id="paymentOverlay" style="display:none;">
+    <div class="payment-overlay-box">
+      <div id="overlaySpinner" class="payment-overlay-spinner"></div>
+      <div id="overlayIcon" class="payment-overlay-icon" style="display:none;"></div>
+      <div class="payment-overlay-title" id="overlayTitle">Memuat Pembayaran...</div>
+      <div class="payment-overlay-sub"   id="overlaySub">Mohon tunggu sebentar</div>
     </div>
   </div>
 
@@ -411,13 +452,23 @@
 
   <div id="footer-container"></div>
 
-  <!-- ✅ config.js HARUS paling atas — ini yang load Midtrans SDK secara dinamis -->
   <script src="assets/js/alert.js"></script>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/helpers.js"></script>
-  <!-- ❌ JANGAN ada tag <script src="...snap.js"> di sini — sudah dihandle config.js -->
 
   <script>
+    // ===== PAYMENT OVERLAY HELPERS =====
+    function showPaymentLoading(title = "Memuat Pembayaran...", sub = "Mohon tunggu sebentar") {
+      document.getElementById("overlaySpinner").style.display = "block";
+      document.getElementById("overlayIcon").style.display    = "none";
+      document.getElementById("overlayTitle").textContent = title;
+      document.getElementById("overlaySub").textContent   = sub;
+      document.getElementById("paymentOverlay").style.display = "flex";
+    }
+    function hidePaymentLoading() {
+      document.getElementById("paymentOverlay").style.display = "none";
+    }
+
     // ===== HELPERS =====
     function getVariantAttributesFromDb(varian) {
       const out = [], maps = varian?.atribut || [];
@@ -641,54 +692,113 @@
     }
 
     // ===== SNAP POPUP =====
-    // ✅ Tunggu window.snap tersedia (karena SDK dimuat async via config.js)
     function triggerSnapPopup(snapToken) {
-  const doPay = () => {
-    window.snap.pay(snapToken, {
-      onSuccess: async function (result) {
-        console.log("✅ Snap onSuccess:", result);
-        try {
-          await apiAuth(`/api/pembayaran/${currentOrderId}/konfirmasi`, { method: "POST" });
-        } catch (e) {
-          console.warn("⚠️ Konfirmasi gagal:", e.message);
-        }
-        await loadOrderData();
-      },
-      onPending: function () { loadOrderData(); },
-      onError:   function () { alert("Pembayaran gagal. Silakan coba lagi."); },
-      onClose:   function () { console.log("Popup ditutup"); },
-    });
-  };
+      let pollingInterval = null;
 
-  if (window.snap) {
-    // SDK sudah siap, langsung buka
-    doPay();
-  } else {
-    // Tunggu event snapReady dari config.js
-    console.log("⏳ Menunggu snapReady event...");
-    window.addEventListener("snapReady", doPay, { once: true });
-    // Fallback: kalau 15 detik tidak ada, berarti SDK benar-benar gagal
-    setTimeout(() => {
-      if (!window.snap) {
-        window.removeEventListener("snapReady", doPay);
-        alert("Midtrans SDK gagal dimuat. Pastikan koneksi internet aktif lalu refresh.");
+      function startPolling() {
+        pollingInterval = setInterval(async () => {
+          try {
+            const res = await apiAuth(`/api/pembayaran/${currentOrderId}/konfirmasi`, { method: "POST" });
+            if (res?.status === "BERHASIL") {
+              clearInterval(pollingInterval);
+              const overlay = document.getElementById("snap-midtrans")
+                || document.querySelector("iframe[src*='midtrans']")?.closest("div");
+              if (overlay) overlay.style.display = "none";
+              await loadOrderData();
+              showAlert("✅ Pembayaran berhasil! Pesanan sedang diproses.", "success");
+            }
+          } catch (e) { /* abaikan error polling */ }
+        }, 5000);
       }
-    }, 15000);
-  }
-}
+
+      function stopPolling() {
+        if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
+      }
+
+      const doPay = () => {
+        hidePaymentLoading(); // ✅ Sembunyikan loading tepat sebelum popup muncul
+        startPolling();
+
+        window.snap.pay(snapToken, {
+          onSuccess: async function (result) {
+            stopPolling();
+            console.log("✅ Snap onSuccess:", result);
+            showPaymentLoading("Memverifikasi Pembayaran...", "Mohon tunggu sebentar");
+            try {
+              await apiAuth(`/api/pembayaran/${currentOrderId}/konfirmasi`, { method: "POST" });
+            } catch (e) {
+              console.warn("⚠️ Konfirmasi gagal:", e.message);
+            }
+            await loadOrderData();
+            hidePaymentLoading();
+          },
+          onPending: function () {
+            stopPolling();
+            loadOrderData();
+          },
+          onError: function () {
+            stopPolling();
+            hidePaymentLoading();
+            alert("Pembayaran gagal. Silakan coba lagi.");
+          },
+          onClose: async function () {
+            stopPolling();
+            try {
+              const res = await apiAuth(`/api/pembayaran/${currentOrderId}/konfirmasi`, { method: "POST" });
+              await loadOrderData();
+              if (res?.status === "BERHASIL") {
+                showAlert("✅ Pembayaran berhasil!", "success");
+              }
+            } catch (e) {
+              console.warn("Cek status setelah close gagal:", e.message);
+              await loadOrderData();
+            }
+          },
+        });
+      };
+
+      if (window.snap) {
+        doPay();
+      } else {
+        // SDK belum siap — tunggu event snapReady
+        window.addEventListener("snapReady", doPay, { once: true });
+        setTimeout(() => {
+          if (!window.snap) {
+            window.removeEventListener("snapReady", doPay);
+            hidePaymentLoading();
+            alert("Midtrans SDK gagal dimuat. Refresh halaman.");
+          }
+        }, 15000);
+      }
+    }
+
     // ===== OPEN MIDTRANS =====
     window.openMidtrans = async function () {
       const btn = document.getElementById("btnPayNow");
       try {
         btn.disabled  = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat...';
+        showPaymentLoading("Memuat Pembayaran...", "Menghubungkan ke Midtrans");
+
         const res = await apiAuth(`/api/pembayaran/${encodeURIComponent(currentOrderId)}/bayar`, { method: "POST" });
+
+        if (res.alreadyPaid) {
+          hidePaymentLoading();
+          await loadOrderData();
+          showAlert("✅ Pembayaran sudah berhasil!", "success");
+          return;
+        }
+
         if (res.snapToken) {
+          showPaymentLoading("Membuka Halaman Pembayaran...", "Popup akan muncul sebentar lagi");
+          // triggerSnapPopup akan memanggil hidePaymentLoading() saat popup siap
           triggerSnapPopup(res.snapToken);
         } else {
+          hidePaymentLoading();
           alert("Gagal mendapatkan token pembayaran.");
         }
       } catch (e) {
+        hidePaymentLoading();
         alert(e.message || "Gagal");
       } finally {
         btn.disabled  = false;
@@ -696,20 +806,43 @@
       }
     };
 
-    // ===== LOAD ORDER =====
+    // ===== STATE =====
     let currentOrderId = null;
+    let autoTriggered  = false;
 
     function getOrderIdFromUrl() {
       const p = new URLSearchParams(window.location.search);
       return p.get("orderId") || p.get("pesananId");
     }
 
+    // ===== LOAD ORDER =====
     async function loadOrderData() {
       const orderId = getOrderIdFromUrl();
       if (!orderId) { alert("Order ID tidak ditemukan"); window.location.href = "/"; return; }
       currentOrderId = orderId;
+
+      // Hapus ?auto dari URL SEBELUM apapun agar polling tidak re-trigger
+      const params     = new URLSearchParams(window.location.search);
+      const shouldAuto = !autoTriggered && params.get("auto") === "1";
+      if (shouldAuto) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("auto");
+        window.history.replaceState({}, "", newUrl.toString());
+        autoTriggered = true;
+      }
+
       const pesanan = await apiAuth(`/api/pesanan/${encodeURIComponent(orderId)}`, { method: "GET" });
       renderOrderData(pesanan);
+
+      const isOnline       = String(pesanan?.pembayaran?.metode  || "").toUpperCase() === "ONLINE";
+      const statusBelumBayar = String(pesanan?.pembayaran?.status || "").toUpperCase() === "MENUNGGU";
+
+      if (shouldAuto && isOnline && statusBelumBayar) {
+        // Tampilkan loading saat auto-open dari checkout
+        showPaymentLoading("Memuat Pembayaran...", "Menghubungkan ke Midtrans");
+        setTimeout(() => openMidtrans(), 600);
+      }
+
       return pesanan;
     }
 
@@ -739,32 +872,6 @@
     window.contactEmail  = function () { window.location.href = `mailto:support@ashanum.com?subject=Bantuan Pembayaran - ${currentOrderId||"-"}`; };
     window.openLiveChat  = function () { alert("Live chat akan segera dibuka"); };
 
-    // ===== INIT =====
-    document.addEventListener("DOMContentLoaded", () => {
-      loadOrderData().catch((err) => {
-        if (String(err.message) === "NO_LOGIN") return;
-        console.error(err);
-        alert(err.message || "Gagal memuat data pesanan");
-      });
-    });
-    
-    async function loadOrderData() {
-      const orderId = getOrderIdFromUrl();
-      if (!orderId) { alert("Order ID tidak ditemukan"); window.location.href = "/"; return; }
-      currentOrderId = orderId;
-      const pesanan = await apiAuth(`/api/pesanan/${encodeURIComponent(orderId)}`, { method: "GET" });
-      renderOrderData(pesanan);
-
-      // ── Auto buka Midtrans jika dari checkout ──
-      const params = new URLSearchParams(window.location.search);
-      const isOnline = String(pesanan?.pembayaran?.metode || "").toUpperCase() === "ONLINE";
-      const statusBelumBayar = String(pesanan?.pembayaran?.status || "").toUpperCase() === "MENUNGGU";
-      if (params.get("auto") === "1" && isOnline && statusBelumBayar) {
-        setTimeout(() => openMidtrans(), 800); // delay sedikit agar halaman render dulu
-      }
-
-      return pesanan;
-    }
     // ===== BATAL & GANTI =====
     window.cancelAndReorder = async function () {
       if (!confirm("Pesanan ini akan dibatalkan dan Anda kembali ke keranjang.\n\nLanjutkan?")) return;
@@ -777,6 +884,15 @@
         setTimeout(() => window.location.href = "/keranjang.html", 1500);
       }
     };
+
+    // ===== INIT =====
+    document.addEventListener("DOMContentLoaded", () => {
+      loadOrderData().catch((err) => {
+        if (String(err.message) === "NO_LOGIN") return;
+        console.error(err);
+        alert(err.message || "Gagal memuat data pesanan");
+      });
+    });
   </script>
 
 </body>
