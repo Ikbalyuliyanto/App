@@ -5,22 +5,16 @@ import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// ===============================
-// Midtrans Snap Instance
-// ===============================
 const snap = new midtransClient.Snap({
   isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
   serverKey: process.env.MIDTRANS_SERVER_KEY,
   clientKey: process.env.MIDTRANS_CLIENT_KEY,
 });
 
-// ===============================
-// Helpers
-// ===============================
 function computeExpiredAt(metode) {
   const now = Date.now();
   const m = String(metode || "").toUpperCase();
-  if (m === "VA") return new Date(now + 24 * 60 * 60 * 1000);
+  if (m === "VA")     return new Date(now + 24 * 60 * 60 * 1000);
   if (m === "EWALLET") return new Date(now + 30 * 60 * 1000);
   return null;
 }
@@ -39,7 +33,6 @@ function mapPaymentMethod(paymentMethod) {
     metode = "VA";
     provider = `${pm.toUpperCase()}_VA`;
   } else if (pm === "online") {
-    // Midtrans Snap (semua metode)
     metode = "ONLINE";
     provider = "MIDTRANS";
   } else {
@@ -128,10 +121,10 @@ router.post("/alamat", auth, async (req, res) => {
     data: {
       penggunaId, label, namaPenerima, noTelp,
       provinsi, kota, kecamatan, kelurahan, kodePos, alamat,
-      latitude: latitude !== null ? Number(latitude) : null,
+      latitude:  latitude  !== null ? Number(latitude)  : null,
       longitude: longitude !== null ? Number(longitude) : null,
-      mapsUrl: mapsUrl ? String(mapsUrl) : null,
-      isUtama: Boolean(isUtama),
+      mapsUrl:   mapsUrl   ? String(mapsUrl) : null,
+      isUtama:   Boolean(isUtama),
     },
   });
 
@@ -155,9 +148,7 @@ router.patch("/alamat/:id", auth, async (req, res) => {
 
     if (!id) return res.status(400).json({ message: "ID alamat tidak valid" });
 
-    const existing = await prisma.alamatPengguna.findFirst({
-      where: { id, penggunaId },
-    });
+    const existing = await prisma.alamatPengguna.findFirst({ where: { id, penggunaId } });
     if (!existing) return res.status(404).json({ message: "Alamat tidak ditemukan" });
 
     if (!label || !namaPenerima || !noTelp || !provinsi || !kota ||
@@ -218,7 +209,6 @@ router.post("/", auth, async (req, res) => {
       voucherCode = null, paymentMethod,
     } = req.body || {};
 
-    // Validasi input
     if (!Array.isArray(itemIds) || !itemIds.length)
       return res.status(400).json({ message: "itemIds wajib diisi" });
     if (!addressId)
@@ -230,7 +220,6 @@ router.post("/", auth, async (req, res) => {
 
     const { metode, provider } = mapPaymentMethod(paymentMethod);
 
-    // Ambil data yang dibutuhkan
     const [alamat, layanan, keranjang] = await Promise.all([
       prisma.alamatPengguna.findFirst({ where: { id: Number(addressId), penggunaId } }),
       prisma.layananPengiriman.findFirst({
@@ -247,7 +236,6 @@ router.post("/", auth, async (req, res) => {
     if (!layanan)   return res.status(404).json({ message: "Layanan pengiriman tidak ditemukan" });
     if (!keranjang) return res.status(400).json({ message: "Keranjang aktif tidak ditemukan" });
 
-    // Ambil item keranjang
     const items = await prisma.itemKeranjang.findMany({
       where: { keranjangId: keranjang.id, id: { in: itemIds.map(Number) } },
       include: { produk: true, varian: true },
@@ -256,14 +244,12 @@ router.post("/", auth, async (req, res) => {
     if (!items.length)
       return res.status(400).json({ message: "Item keranjang tidak ditemukan" });
 
-    // Hitung subtotal
     let subtotal = 0;
     for (const it of items) {
       const harga = Number(it.varian?.harga ?? it.produk?.harga ?? 0);
       subtotal += harga * Number(it.jumlah || 1);
     }
 
-    // Voucher
     let diskonVoucher = 0;
     const code = String(voucherCode || "").trim().toUpperCase();
     if (code === "ZAWA50K")  diskonVoucher = 50000;
@@ -274,7 +260,6 @@ router.post("/", auth, async (req, res) => {
     const statusAwal = metode === "COD" ? "DIPROSES" : "MENUNGGU_PEMBAYARAN";
     const expiredAt  = computeExpiredAt(metode);
 
-    // Buat pesanan dalam transaksi
     const result = await prisma.$transaction(async (tx) => {
       const pesanan = await tx.pesanan.create({
         data: {
@@ -326,123 +311,23 @@ router.post("/", auth, async (req, res) => {
       return { pesanan, pembayaran };
     });
 
-    // ─── Jika ONLINE → generate Midtrans Snap Token ───────────────────
-    let snapToken = null;
-    let snapRedirectUrl = null;
-
-    if (metode === "ONLINE") {
-      try {
-        const orderId = `ORDER-${result.pesanan.id}-${Date.now()}`;
-
-        // Siapkan item details untuk Midtrans
-        const itemDetails = result.pesanan.item.map((it) => ({
-          id:       String(it.produkId),
-          price:    Number(it.varian?.harga ?? it.produk?.harga ?? 0),
-          quantity: Number(it.jumlah),
-          name:     String(it.produk?.nama || "Produk").slice(0, 50),
-        }));
-
-        // Tambah ongkir jika ada
-        if (ongkir > 0) {
-          itemDetails.push({
-            id:       "ONGKIR",
-            price:    ongkir,
-            quantity: 1,
-            name:     `Ongkos Kirim (${layanan.nama})`,
-          });
-        }
-
-        // Kurangi voucher jika ada
-        if (diskonVoucher > 0) {
-          itemDetails.push({
-            id:       "VOUCHER",
-            price:    -diskonVoucher,
-            quantity: 1,
-            name:     `Diskon Voucher (${code})`,
-          });
-        }
-
-        const snapParameter = {
-          transaction_details: {
-            order_id:    orderId,
-            gross_amount: totalAkhir,
-          },
-          customer_details: {
-            first_name: alamat.namaPenerima,
-            phone:      alamat.noTelp,
-            email:      req.user.email || "",
-            billing_address: {
-              first_name: alamat.namaPenerima,
-              phone:      alamat.noTelp,
-              address:    alamat.alamat,
-              city:       alamat.kota,
-              postal_code: alamat.kodePos,
-              country_code: "IDN",
-            },
-            shipping_address: {
-              first_name: alamat.namaPenerima,
-              phone:      alamat.noTelp,
-              address:    alamat.alamat,
-              city:       alamat.kota,
-              postal_code: alamat.kodePos,
-              country_code: "IDN",
-            },
-          },
-          item_details: itemDetails,
-          // Aktifkan semua metode pembayaran yang diinginkan
-          enabled_payments: [
-            "credit_card",
-            "bca_va", "bni_va", "bri_va", "mandiri_bill", "permata_va", "other_va",
-            "gopay", "shopeepay", "dana", "ovo",
-            "qris",
-            "indomaret", "alfamart",
-          ],
-          callbacks: {
-            finish: `${process.env.APP_URL}/pembayaran.html?orderId=${result.pesanan.id}`,
-          },
-        };
-
-        const transaction = await snap.createTransaction(snapParameter);
-        snapToken       = transaction.token;
-        snapRedirectUrl = transaction.redirect_url;
-
-        // Simpan snap token ke DB
-        await prisma.pembayaran.update({
-          where: { id: result.pembayaran.id },
-          data: {
-            snapToken:  snapToken,
-            // Simpan orderId Midtrans agar bisa dipakai untuk cek status
-            provider:   orderId,
-          },
-        });
-      } catch (midtransErr) {
-        console.error("Midtrans error:", midtransErr);
-        // Pesanan tetap dibuat, tapi token gagal → kasih tahu frontend
-        return res.status(502).json({
-          message: "Pesanan dibuat tapi gagal generate token pembayaran. Coba bayar ulang.",
-          pesananId: result.pesanan.id,
-        });
-      }
-    }
-
-    // ─── Response ─────────────────────────────────────────────────────
+    // ── Redirect URL: tambah &auto=1 untuk ONLINE agar popup otomatis terbuka ──
     const redirectUrl =
       metode === "COD"
         ? `/pesanan-detail.html?orderId=${result.pesanan.id}`
-        : `/pembayaran.html?orderId=${result.pesanan.id}`;
+        : `/pembayaran.html?orderId=${result.pesanan.id}&auto=1`;
 
     res.json({
-      message:     "Checkout berhasil",
-      pesananId:   result.pesanan.id,
+      message:    "Checkout berhasil",
+      pesananId:  result.pesanan.id,
       metode,
       provider,
-      expiredAt:   result.pembayaran.expiredAt,
+      expiredAt:  result.pembayaran.expiredAt,
       redirectUrl,
-      snapToken,        // ← untuk Midtrans Snap popup
-      snapRedirectUrl,  // ← fallback redirect ke halaman Midtrans
-      pesanan:     result.pesanan,
-      pembayaran:  result.pembayaran,
+      pesanan:    result.pesanan,
+      pembayaran: result.pembayaran,
     });
+
   } catch (e) {
     console.error("POST /api/checkout error:", e);
     res.status(500).json({ message: "Checkout gagal" });
@@ -451,9 +336,9 @@ router.post("/", auth, async (req, res) => {
 
 // ===============================
 // POST /api/checkout/:id/bayar
-// (Bayar ulang / generate snap token lagi)
 // ===============================
 router.post("/:id/bayar", auth, async (req, res) => {
+  const appUrl = req.headers.origin || `${req.protocol}://${req.headers.host}`;
   try {
     const penggunaId = req.user.id;
     const id = Number(req.params.id);
@@ -513,7 +398,7 @@ router.post("/:id/bayar", auth, async (req, res) => {
       },
       item_details: itemDetails,
       callbacks: {
-        finish: `${process.env.APP_URL}/pembayaran.html?orderId=${pesanan.id}`,
+        finish: `${appUrl}/pembayaran.html?orderId=${pesanan.id}`,
       },
     });
 
@@ -531,49 +416,37 @@ router.post("/:id/bayar", auth, async (req, res) => {
 
 // ===============================
 // POST /api/checkout/midtrans/notification
-// (Webhook dari Midtrans)
 // ===============================
 router.post("/midtrans/notification", async (req, res) => {
   try {
     const notification = req.body;
-
-    // Verifikasi signature dari Midtrans
     const statusResponse = await snap.transaction.notification(notification);
 
-    const orderId         = statusResponse.order_id;          // FORMAT: ORDER-{pesananId}-{timestamp}
+    const orderId           = statusResponse.order_id;
     const transactionStatus = statusResponse.transaction_status;
-    const fraudStatus     = statusResponse.fraud_status;
-    const paymentType     = statusResponse.payment_type;
+    const fraudStatus       = statusResponse.fraud_status;
+    const paymentType       = statusResponse.payment_type;
 
-    // Ekstrak pesananId dari orderId
     const pesananId = Number(String(orderId).split("-")[1]);
     if (!pesananId) return res.status(400).json({ message: "orderId tidak valid" });
 
-    const pembayaran = await prisma.pembayaran.findFirst({
-      where: { pesananId },
-    });
+    const pembayaran = await prisma.pembayaran.findFirst({ where: { pesananId } });
     if (!pembayaran) return res.status(404).json({ message: "Pembayaran tidak ditemukan" });
 
-    // Tentukan status baru
-    let statusBaru       = null;
+    let statusBaru        = null;
     let pesananStatusBaru = null;
-    let paidAt           = null;
+    let paidAt            = null;
 
     if (transactionStatus === "capture") {
       if (fraudStatus === "accept") {
-        statusBaru       = "BERHASIL";
-        pesananStatusBaru = "DIPROSES";
-        paidAt           = new Date();
+        statusBaru = "BERHASIL"; pesananStatusBaru = "DIPROSES"; paidAt = new Date();
       } else if (fraudStatus === "challenge") {
         statusBaru = "PENDING";
       }
     } else if (transactionStatus === "settlement") {
-      statusBaru       = "BERHASIL";
-      pesananStatusBaru = "DIPROSES";
-      paidAt           = new Date();
+      statusBaru = "BERHASIL"; pesananStatusBaru = "DIPROSES"; paidAt = new Date();
     } else if (["cancel", "deny", "expire"].includes(transactionStatus)) {
-      statusBaru       = "GAGAL";
-      pesananStatusBaru = "DIBATALKAN";
+      statusBaru = "GAGAL"; pesananStatusBaru = "DIBATALKAN";
     } else if (transactionStatus === "pending") {
       statusBaru = "MENUNGGU";
     }
@@ -582,13 +455,8 @@ router.post("/midtrans/notification", async (req, res) => {
       await prisma.$transaction(async (tx) => {
         await tx.pembayaran.update({
           where: { id: pembayaran.id },
-          data: {
-            status:      statusBaru,
-            paidAt:      paidAt,
-            metode:      paymentType || pembayaran.metode,
-          },
+          data: { status: statusBaru, paidAt, metode: paymentType || pembayaran.metode },
         });
-
         if (pesananStatusBaru) {
           await tx.pesanan.update({
             where: { id: pesananId },

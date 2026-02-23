@@ -1047,11 +1047,10 @@
 
       try {
         const result = await apiAuth("/api/checkout", { method: "POST", body: JSON.stringify(payload) });
-        const pesananId = result?.pesanan?.id;
-        if (!pesananId) { showAlert("Checkout berhasil, tapi pesananId tidak ditemukan.", "warning"); return; }
-        if (result.snapToken) sessionStorage.setItem("snapToken", result.snapToken);
-        else sessionStorage.removeItem("snapToken");
-        const redirectTo = result.redirectUrl || `/pembayaran.html?orderId=${encodeURIComponent(result.pesanan.id)}`;
+        if (!result?.pesanan?.id) { showAlert("Checkout berhasil, tapi pesananId tidak ditemukan.", "warning"); return; }
+
+        // redirectUrl dari backend sudah mengandung &auto=1 untuk ONLINE
+        const redirectTo = result.redirectUrl || `/pembayaran.html?orderId=${result.pesanan.id}&auto=1`;
         window.location.href = redirectTo;
       } catch (e) {
         console.error(e); showAlert(e.message || "Checkout gagal", "error");
@@ -1059,7 +1058,6 @@
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Bayar Sekarang'; }
       }
     };
-
     // Modal Events
     openAddressModalBtn.addEventListener("click", async () => {
       setModalModeAdd(); openModal(); setWilayahMode(getWilayahMode());

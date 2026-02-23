@@ -447,7 +447,8 @@ model Pembayaran {
 
   amount    Int
   fee       Int       @default(0)
-  snapToken String? // ← tambah ini
+  snapToken String? // ← tambah ini midtarns
+  midtransOrderId String?
   vaNumber  String?
   refId     String?   @unique
   expiredAt DateTime?

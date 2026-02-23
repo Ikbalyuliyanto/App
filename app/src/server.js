@@ -59,7 +59,16 @@ const uploadsPath = process.env.UPLOAD_ENV === "lokal" ? devUploads : prodUpload
 app.use("/uploads", express.static(uploadsPath));
 console.log("Menggunakan folder uploads:", uploadsPath);
 
-
+// Endpoint config — HARUS sebelum 404 handler
+app.get("/api/config", (req, res) => {
+  res.json({
+    googleClientId:    process.env.GOOGLE_CLIENT_ID    || null,
+    midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || null,
+    midtransSnapUrl:   process.env.UPLOAD_ENV === "lokal"
+      ? "https://app.sandbox.midtrans.com/snap/snap.js"
+      : "https://app.midtrans.com/snap/snap.js",
+  });
+});
 
 // ===== Route Auth (login/register)
 app.use("/api/auth", authRoutes);
