@@ -14,7 +14,7 @@ window.API_BASE = API_BASE;
 
 window.apiRequest = async (endpoint, options = {}) => {
   const url = `${window.API_BASE}${endpoint}`;
-  const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+  const token = localStorage.getItem("admintoken") || sessionStorage.getItem("admintoken");
 
   const headers = { ...(options.headers || {}) };
 
@@ -38,9 +38,9 @@ window.apiRequest = async (endpoint, options = {}) => {
   const data = contentType.includes("application/json") ? await res.json() : await res.text();
 
   if (res.status === 401) {
-    localStorage.removeItem("token");
+    localStorage.removeItem("admintoken");
     localStorage.removeItem("user");
-    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("admintoken");
     sessionStorage.removeItem("user");
     window.location.href = "login.html";
     return;

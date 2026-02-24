@@ -64,6 +64,17 @@ const pesananInclude = {
       layanan: { include: { kurir: true } },
     },
   },
+  // ✅ TAMBAHKAN INI
+  pengembalian: {
+    select: {
+      id: true,
+      jenis: true,
+      status: true,
+      alasan: true,
+      resiKembali: true,
+      dibuatPada: true,
+    },
+  },
 };
 
 /**
@@ -99,7 +110,6 @@ router.get("/", auth, async (req, res) => {
             amount: true,
           },
         },
-        // ⚠️ jangan select field yang belum tentu ada di schema Pengiriman
         pengiriman: {
           select: {
             id: true,
@@ -115,15 +125,175 @@ router.get("/", auth, async (req, res) => {
             },
           },
         },
+        pengembalian: {
+          select: {
+            id: true,
+            jenis: true,
+            status: true,
+            alasan: true,
+            dibuatPada: true,
+          },
+        },
       },
     });
 
-    res.json(data);
+    const selesaiIds = data
+      .filter(p => p.status === "SELESAI")
+      .map(p => p.id);
+
+    const ulasanAda = selesaiIds.length
+      ? await prisma.ulasan.findMany({
+          where: {
+            pesananId: { in: selesaiIds },
+            penggunaId,
+          },
+          select: { pesananId: true },
+          distinct: ["pesananId"],
+        })
+      : [];
+
+    const ulasanSet = new Set(ulasanAda.map(u => u.pesananId));
+
+    const result = data.map(p => ({
+      ...p,
+      sudahDiulas: ulasanSet.has(p.id),
+    }));
+
+    res.json(result);
   } catch (e) {
     console.error("GET /api/pesanan error:", e);
     res.status(500).json({ message: "Gagal mengambil pesanan" });
   }
 });
+// router.get("/", auth, async (req, res) => {
+//   try {
+//     const penggunaId = req.user.id;
+
+//     await prisma.$transaction(async (tx) => {
+//       await autoExpirePayments(tx, penggunaId);
+//     });
+
+//     const data = await prisma.pesanan.findMany({
+//       where: { penggunaId },
+//       orderBy: { dibuatPada: "desc" },
+//       select: {
+//         id: true,
+//         dibuatPada: true,
+//         status: true,
+//         subtotal: true,
+//         ongkir: true,
+//         diskon: true,
+//         totalAkhir: true,
+//         pembayaran: {
+//           select: {
+//             status: true,
+//             metode: true,
+//             provider: true,
+//             expiredAt: true,
+//             paidAt: true,
+//             amount: true,
+//           },
+//         },
+//         pengiriman: {
+//           select: {
+//             id: true,
+//             layananId: true,
+//             dibuatPada: true,
+//             diubahPada: true,
+//             layanan: {
+//               select: {
+//                 nama: true,
+//                 estimasiHari: true,
+//                 kurir: { select: { nama: true, kode: true } },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     const selesaiIds = data
+//       .filter(p => p.status === "SELESAI")
+//       .map(p => p.id);
+
+//     const ulasanAda = selesaiIds.length
+//       ? await prisma.ulasan.findMany({
+//           where: {
+//             pesananId: { in: selesaiIds },
+//             penggunaId,
+//           },
+//           select: { pesananId: true },
+//           distinct: ["pesananId"],
+//         })
+//       : [];
+
+//     const ulasanSet = new Set(ulasanAda.map(u => u.pesananId));
+
+//     const result = data.map(p => ({
+//       ...p,
+//       sudahDiulas: ulasanSet.has(p.id),
+//     }));
+
+//     res.json(result);
+//   } catch (e) {
+//     console.error("GET /api/pesanan error:", e);
+//     res.status(500).json({ message: "Gagal mengambil pesanan" });
+//   }
+// });
+// router.get("/", auth, async (req, res) => {
+//   try {
+//     const penggunaId = req.user.id;
+
+//     await prisma.$transaction(async (tx) => {
+//       await autoExpirePayments(tx, penggunaId);
+//     });
+
+//     const data = await prisma.pesanan.findMany({
+//       where: { penggunaId },
+//       orderBy: { dibuatPada: "desc" },
+//       select: {
+//         id: true,
+//         dibuatPada: true,
+//         status: true,
+//         subtotal: true,
+//         ongkir: true,
+//         diskon: true,
+//         totalAkhir: true,
+//         pembayaran: {
+//           select: {
+//             status: true,
+//             metode: true,
+//             provider: true,
+//             expiredAt: true,
+//             paidAt: true,
+//             amount: true,
+//           },
+//         },
+//         // ⚠️ jangan select field yang belum tentu ada di schema Pengiriman
+//         pengiriman: {
+//           select: {
+//             id: true,
+//             layananId: true,
+//             dibuatPada: true,
+//             diubahPada: true,
+//             layanan: {
+//               select: {
+//                 nama: true,
+//                 estimasiHari: true,
+//                 kurir: { select: { nama: true, kode: true } },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     res.json(data);
+//   } catch (e) {
+//     console.error("GET /api/pesanan error:", e);
+//     res.status(500).json({ message: "Gagal mengambil pesanan" });
+//   }
+// });
 
 /**
  * GET /api/pesanan/:id
@@ -153,52 +323,92 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-/**
- * PATCH /api/pesanan/:id/batalkan
- * Hanya bisa jika MENUNGGU_PEMBAYARAN
- */
-router.patch("/:id/batalkan", auth, async (req, res) => {
+router.patch("/:id/batal", auth, async (req, res) => {
   try {
     const penggunaId = req.user.id;
     const id = Number(req.params.id);
     if (!id) return res.status(400).json({ message: "ID pesanan tidak valid" });
 
     await prisma.$transaction(async (tx) => {
+      // Auto expire pembayaran
       await autoExpirePayments(tx, penggunaId);
-    });
 
-    const latest = await prisma.pesanan.findFirst({
-      where: { id, penggunaId },
-      select: { status: true },
-    });
-
-    if (!latest) return res.status(404).json({ message: "Pesanan tidak ditemukan" });
-
-    if (latest.status !== "MENUNGGU_PEMBAYARAN") {
-      return res.status(400).json({ message: "Pesanan tidak bisa dibatalkan pada status ini" });
-    }
-
-    const updated = await prisma.$transaction(async (tx) => {
-      const up = await tx.pesanan.update({
-        where: { id },
-        data: { status: "DIBATALKAN" },
+      // Ambil pesanan beserta item & pembayaran
+      const pesanan = await tx.pesanan.findFirst({
+        where: { id, penggunaId },
+        include: { pembayaran: true, item: true },
       });
 
-      const pay = await tx.pembayaran.findUnique({ where: { pesananId: id } });
-      if (pay && pay.status === "MENUNGGU") {
+      if (!pesanan) throw { status: 404, message: "Pesanan tidak ditemukan" };
+
+      // Simpan data item pesanan
+      const itemsPesanan = pesanan.item.map((i) => ({
+        produkId: i.produkId,
+        varianId: i.varianId ?? null,
+        jumlah: i.jumlah,
+      }));
+
+      // Ambil keranjang aktif pengguna
+      const keranjang = await tx.keranjang.findFirst({ where: { penggunaId, aktif: true } });
+
+      // ✅ Hanya kembalikan item jika status MENUNGGU_PEMBAYARAN / DIPROSES
+      if (["MENUNGGU_PEMBAYARAN", "DIPROSES"].includes(pesanan.status) && keranjang) {
+        for (const item of itemsPesanan) {
+          const existing = await tx.itemKeranjang.findFirst({
+            where: {
+              keranjangId: keranjang.id,
+              produkId: item.produkId,
+              varianId: item.varianId,
+            },
+          });
+
+          if (existing) {
+            await tx.itemKeranjang.update({
+              where: { id: existing.id },
+              data: { jumlah: existing.jumlah + item.jumlah },
+            });
+          } else {
+            await tx.itemKeranjang.create({
+              data: {
+                keranjangId: keranjang.id,
+                produkId: item.produkId,
+                varianId: item.varianId,
+                jumlah: item.jumlah,
+              },
+            });
+          }
+        }
+      }
+
+      // Hapus pesanan, pengiriman, pembayaran jika status MENUNGGU_PEMBAYARAN / DIPROSES
+      if (["MENUNGGU_PEMBAYARAN", "DIPROSES"].includes(pesanan.status)) {
+        await tx.pengiriman.deleteMany({ where: { pesananId: id } });
+        if (pesanan.pembayaran) {
+          await tx.pembayaran.delete({ where: { id: pesanan.pembayaran.id } });
+        }
+        await tx.itemPesanan.deleteMany({ where: { pesananId: id } });
+        await tx.pesanan.delete({ where: { id } });
+
+        res.json({ message: "Pesanan dibatalkan, item dikembalikan ke keranjang" });
+        return;
+      }
+
+      // Untuk status lain → batalkan pesanan & pembayaran
+      await tx.pesanan.update({ where: { id }, data: { status: "DIBATALKAN" } });
+      if (pesanan.pembayaran) {
         await tx.pembayaran.update({
-          where: { id: pay.id },
+          where: { id: pesanan.pembayaran.id },
           data: { status: "DIBATALKAN" },
         });
       }
 
-      return up;
+      res.json({ message: "Pesanan dibatalkan" });
     });
-
-    res.json({ message: "Pesanan berhasil dibatalkan", pesanan: updated });
   } catch (e) {
-    console.error("PATCH /api/pesanan/:id/batalkan error:", e);
-    res.status(500).json({ message: "Gagal membatalkan pesanan" });
+    console.error("PATCH /:id/batal error:", e);
+    const status = e.status || 500;
+    const message = e.message || "Gagal membatalkan pesanan";
+    res.status(status).json({ message });
   }
 });
 
@@ -234,5 +444,6 @@ router.patch("/:id/terima", auth, async (req, res) => {
     res.status(500).json({ message: "Gagal konfirmasi pesanan diterima" });
   }
 });
+
 
 export default router;

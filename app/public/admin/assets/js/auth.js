@@ -2,7 +2,7 @@
 const Auth = {
     // Get token
     getToken: function() {
-        return localStorage.getItem('token') || sessionStorage.getItem('token');
+        return localStorage.getItem('admintoken') || sessionStorage.getItem('admintoken');
     },
     
     // Get user data
@@ -24,9 +24,9 @@ const Auth = {
     
     // Logout
     logout: function() {
-        localStorage.removeItem('token');
+        localStorage.removeItem('admintoken');
         localStorage.removeItem('user');
-        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('admintoken');
         sessionStorage.removeItem('user');
         window.location.href = 'login.html';
     },

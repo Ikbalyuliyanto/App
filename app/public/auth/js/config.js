@@ -8,4 +8,3 @@ if (window.location.hostname === "localhost") {
   API_BASE = "https://ashanum.com";
 }
 window.API_BASE = API_BASE;
-

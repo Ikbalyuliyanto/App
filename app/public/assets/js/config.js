@@ -4,15 +4,44 @@
 // =========================
 (() => {
 
-let API_BASE;
-if (window.location.hostname === "localhost") {
-  // DEV
-  API_BASE = "http://localhost:9876";
-} else {
-  // PROD
-  API_BASE = "https://ashanum.com";
-}
+// ─── API Base URL ──────────────────────────────────────────────────────────────
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:9876"
+  : "https://ashanum.com";
+
 window.API_BASE = API_BASE;
+
+// ─── Fetch semua config dari backend ──────────────────────────────────────────
+(async function initConfig() {
+  try {
+    const res    = await fetch(`${API_BASE}/api/config`);
+    const config = await res.json();
+
+    // Google OAuth
+    window.GOOGLE_CLIENT_ID = config.googleClientId;
+
+    // Midtrans Snap SDK
+    const script = document.createElement("script");
+    script.src   = config.midtransSnapUrl;
+    script.setAttribute("data-client-key", config.midtransClientKey);
+    script.async  = true;
+    // SESUDAH
+    script.onload = () => {
+      console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
+      window.dispatchEvent(new Event("snapReady")); // ← wajib ada
+    };
+    script.onerror = () => {
+      console.error("❌ Gagal memuat SDK — URL:", script.src, "| Key:", config.midtransClientKey);
+    };
+    // Debug — pastikan ini muncul di console
+    console.log("🔗 Snap URL:", config.midtransSnapUrl);
+    console.log("🔑 Client Key:", config.midtransClientKey);
+    document.head.appendChild(script);
+
+  } catch (err) {
+    console.error("❌ Gagal fetch config dari server:", err);
+  }
+})();
 
   // =========================
   // STORAGE HELPERS
@@ -147,3 +176,36 @@ if (measurementId) {
   gtag('js', new Date());
   gtag('config', measurementId);
 }
+
+// =========================
+// META PIXEL CONFIG
+// =========================
+(() => {
+  let PIXEL_ID;
+
+  if (window.location.hostname === "localhost") {
+    // DEV / testing
+    PIXEL_ID = "PIXEL_ID_DEV"; 
+  } else {
+    // PROD
+    PIXEL_ID = "1717028676374534"; // ganti dengan Pixel ID sebenarnya
+  }
+
+  window.PIXEL_ID = PIXEL_ID;
+})();
+
+// (function() {
+//   var PIXEL_ID = window.PIXEL_ID || "REPLACE_WITH_PIXEL_ID";
+
+//   !function(f,b,e,v,n,t,s)
+//   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+//   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+//   if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+//   n.queue=[];t=b.createElement(e);t.async=!0;
+//   t.src=v;s=b.getElementsByTagName(e)[0];
+//   s.parentNode.insertBefore(t,s)}(window, document,'script',
+//   'https://connect.facebook.net/en_US/fbevents.js');
+
+//   fbq('init', PIXEL_ID); 
+//   fbq('track', 'PageView'); 
+// })();

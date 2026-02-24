@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kelola Pengembalian - Ashanum Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    /* ===== MODAL OVERRIDE — paksa tampil di atas segalanya ===== */
+    .modal-fixed-overlay {
+      display: none;
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 20px;
+      box-sizing: border-box;
+      backdrop-filter: blur(3px);
+    }
+    .modal-fixed-overlay.show { display: flex !important; animation: fadeInOverlay .18s ease; }
+    @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
+
+    .modal-fixed-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 25px 60px rgba(0,0,0,.25);
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUpModal .2s ease;
+    }
+    @keyframes slideUpModal { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .modal-fixed-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff; flex-shrink: 0;
+    }
+    .modal-fixed-header h2 { margin:0; font-size:18px; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .modal-fixed-close {
+      background: rgba(255,255,255,.2); border:none; color:#fff;
+      width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:16px;
+      display:flex; align-items:center; justify-content:center; transition:background .15s;
+    }
+    .modal-fixed-close:hover { background: rgba(255,255,255,.35); }
+
+    .modal-fixed-body { padding:24px; overflow-y:auto; flex:1; }
+
+    .modal-fixed-footer {
+      padding:16px 24px; border-top:1px solid #e5e7eb;
+      display:flex; justify-content:flex-end; gap:10px;
+      flex-shrink:0; background:#f9fafb;
+    }
+
+    .modal-info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:4px; }
+    .modal-info-grid.col2 { grid-template-columns:repeat(2,1fr); }
+    .info-item label { display:block; font-size:11px; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .info-item .val { font-size:14px; color:#111827; font-weight:500; }
+    .info-item .val.muted { color:#6b7280; font-weight:400; }
+    .modal-divider { border:none; border-top:1px solid #f0f0f0; margin:16px 0; }
+
+    .foto-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+    .foto-grid a img { width:80px; height:80px; object-fit:cover; border-radius:10px; border:2px solid #e5e7eb; transition:transform .15s,border-color .15s; display:block; }
+    .foto-grid a:hover img { transform:scale(1.07); border-color:#667eea; }
+
+    .item-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .item-table thead tr { background:#f8fafc; }
+    .item-table th { padding:8px 12px; text-align:left; font-weight:600; color:#6b7280; border-bottom:1px solid #e5e7eb; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+    .item-table th:last-child, .item-table td:last-child { text-align:right; }
+    .item-table th:nth-child(2), .item-table td:nth-child(2) { text-align:center; }
+    .item-table td { padding:8px 12px; border-bottom:1px solid #f3f4f6; color:#374151; }
+    .item-table tr:last-child td { border-bottom:none; }
+
+    .modal-textarea { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; resize:vertical; font-size:14px; font-family:inherit; color:#374151; transition:border-color .15s; box-sizing:border-box; }
+    .modal-textarea:focus { outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.15); }
+    .modal-select { width:100%; padding:10px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit; color:#374151; background:#fff; cursor:pointer; transition:border-color .15s; box-sizing:border-box; }
+    .modal-select:focus { outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,.15); }
+    .modal-label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; }
+
+    .resi-badge { display:inline-flex; align-items:center; gap:6px; background:#eff6ff; color:#1d4ed8; font-weight:700; font-size:14px; padding:6px 12px; border-radius:8px; border:1px solid #bfdbfe; }
+
+    .btn-eye { display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:8px; border:none; cursor:pointer; font-size:14px; transition:all .15s; background:#eff6ff; color:#1d4ed8; }
+    .btn-eye:hover { background:#1d4ed8; color:#fff; transform:scale(1.08); }
+  </style>
+</head>
+<body>
+  <div class="admin-wrapper">
+    <div id="sidebar-container"></div>
+    <div class="main-content">
+      <div id="header-container"></div>
+      <div class="content-wrapper">
+
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div>
+            <h1 class="page-title">Kelola Pengembalian</h1>
+            <p class="page-subtitle">Tinjau & proses pengajuan refund dan tukar barang dari pelanggan</p>
+          </div>
+          <button class="btn btn-secondary" id="btnRefresh"><i class="fas fa-rotate"></i> Refresh</button>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- STATS -->
+        <div class="form-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px;">
+          <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:#6b7280;font-size:12px;">Total</div><div id="statTotal" style="font-weight:800;font-size:22px;">0</div></div><div style="font-size:26px;">📦</div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:#6b7280;font-size:12px;">Diajukan</div><div id="statDiajukan" style="font-weight:800;font-size:22px;">0</div></div><div style="font-size:26px;">⏳</div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:#6b7280;font-size:12px;">Disetujui</div><div id="statDisetujui" style="font-weight:800;font-size:22px;">0</div></div><div style="font-size:26px;">✅</div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:#6b7280;font-size:12px;">Ditolak</div><div id="statDitolak" style="font-weight:800;font-size:22px;">0</div></div><div style="font-size:26px;">❌</div></div></div></div>
+          <div class="card"><div class="card-body"><div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="color:#6b7280;font-size:12px;">Selesai</div><div id="statSelesai" style="font-weight:800;font-size:22px;">0</div></div><div style="font-size:26px;">🎉</div></div></div></div>
+        </div>
+
+        <!-- FILTER -->
+        <div class="filter-section">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cari ID / Order ID / Email</label>
+              <input type="text" id="searchQ" placeholder="Contoh: 12 atau user@email.com">
+            </div>
+            <div class="form-group">
+              <label>Filter Status</label>
+              <select id="filterStatus">
+                <option value="">Semua Status</option>
+                <option value="DIAJUKAN">DIAJUKAN</option>
+                <option value="DISETUJUI">DISETUJUI</option>
+                <option value="DITOLAK">DITOLAK</option>
+                <option value="BARANG_DIKIRIM_BALIK">BARANG DIKIRIM BALIK</option>
+                <option value="SELESAI">SELESAI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Filter Jenis</label>
+              <select id="filterJenis">
+                <option value="">Semua Jenis</option>
+                <option value="REFUND">REFUND</option>
+                <option value="TUKAR">TUKAR BARANG</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Dari Tanggal</label>
+              <input type="date" id="filterDari">
+            </div>
+            <div class="form-group">
+              <label>Sampai Tanggal</label>
+              <input type="date" id="filterSampai">
+            </div>
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-primary" id="btnApply"><i class="fas fa-search"></i> Cari</button>
+            <button class="btn btn-secondary" id="btnReset"><i class="fas fa-redo"></i> Reset</button>
+          </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="card">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 class="card-title">Daftar Pengajuan Pengembalian</h3>
+            <small style="color:#6b7280;">Klik 👁 untuk meninjau & memproses pengajuan</small>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Order</th><th>Pengguna</th><th>Jenis</th>
+                    <th>Alasan</th><th>Status</th><th>Resi Kembali</th><th>Tanggal</th><th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody">
+                  <tr><td colspan="9"><div class="loading"><div class="spinner"></div><p>Memuat data...</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL — di LUAR .admin-wrapper ===== -->
+  <div class="modal-fixed-overlay" id="detailModal">
+    <div class="modal-fixed-box">
+
+      <div class="modal-fixed-header">
+        <h2><i class="fas fa-undo-alt"></i> Detail Pengembalian</h2>
+        <button class="modal-fixed-close" id="btnCloseModal" type="button"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="modal-fixed-body">
+
+        <div class="modal-info-grid">
+          <div class="info-item"><label>ID Pengembalian</label><div class="val" id="mId">-</div></div>
+          <div class="info-item"><label>Order ID</label><div class="val" id="mOrderId">-</div></div>
+          <div class="info-item"><label>Status</label><div id="mStatus">-</div></div>
+          <div class="info-item"><label>Jenis</label><div id="mJenis">-</div></div>
+          <div class="info-item"><label>Pengguna</label><div class="val" id="mPengguna">-</div></div>
+          <div class="info-item"><label>Tanggal Pengajuan</label><div class="val" id="mTanggal">-</div></div>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="modal-info-grid col2">
+          <div class="info-item"><label>Alasan</label><div class="val" id="mAlasan">-</div></div>
+          <div class="info-item"><label>Deskripsi Tambahan</label><div class="val muted" id="mDeskripsi">-</div></div>
+        </div>
+
+        <div class="info-item" style="margin-top:12px;">
+          <label>Nomor Resi Pengiriman Balik</label>
+          <div id="mResiKembali" style="margin-top:4px;">-</div>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="info-item">
+          <label>Foto Bukti</label>
+          <div class="foto-grid" id="mFotoContainer">
+            <span style="color:#9ca3af;font-size:13px;">Tidak ada foto</span>
+          </div>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div class="info-item">
+          <label>Item Pesanan</label>
+          <div id="mItemContainer" style="margin-top:6px;">-</div>
+        </div>
+
+        <hr class="modal-divider">
+
+        <div style="margin-bottom:14px;">
+          <label class="modal-label" for="inputCatatan">
+            <i class="fas fa-comment-dots" style="color:#667eea;margin-right:4px;"></i>Catatan Admin
+          </label>
+          <textarea id="inputCatatan" class="modal-textarea" rows="3"
+            placeholder="Tambahkan catatan untuk pelanggan (opsional)..."></textarea>
+        </div>
+
+        <div>
+          <label class="modal-label" for="selectStatus">
+            <i class="fas fa-exchange-alt" style="color:#667eea;margin-right:4px;"></i>Update Status Pengembalian
+          </label>
+          <select id="selectStatus" class="modal-select">
+            <option value="">-- Pilih Status Baru --</option>
+            <option value="DISETUJUI">✅ DISETUJUI</option>
+            <option value="DITOLAK">❌ DITOLAK</option>
+            <option value="BARANG_DIKIRIM_BALIK">📦 BARANG DIKIRIM BALIK</option>
+            <option value="SELESAI">🎉 SELESAI</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-fixed-footer">
+        <button class="btn btn-secondary" id="btnModalClose2" type="button"><i class="fas fa-times"></i> Tutup</button>
+        <button class="btn btn-primary" id="btnSimpan" type="button"><i class="fas fa-save"></i> Simpan Perubahan</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="../assets/js/alert.js"></script>
+
+  <script>
+    let allData=[], filteredData=[], pagination=null, currentItem=null;
+    let searchQ='', filterStatus='', filterJenis='', filterDari='', filterSampai='';
+
+    function formatDate(d) {
+      if(!d) return '-';
+      const dt=new Date(d);
+      if(isNaN(dt)) return '-';
+      return dt.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    }
+
+    function statusBadge(s) {
+      s = String(s||'').toUpperCase();
+      const m={DIAJUKAN:{cls:'badge-warning',text:'Diajukan'},DISETUJUI:{cls:'badge-success',text:'Disetujui'},DITOLAK:{cls:'badge-danger',text:'Ditolak'},BARANG_DIKIRIM_BALIK:{cls:'badge-info',text:'Barang Dikirim Balik'},SELESAI:{cls:'badge-secondary',text:'Selesai'}};
+      return m[s]||{cls:'badge-secondary',text:s||'-'};
+    }
+
+    function jenisBadge(j) {
+      j=String(j||'').toUpperCase();
+      if(j==='REFUND') return '<span class="badge badge-danger">💸 REFUND</span>';
+      if(j==='TUKAR')  return '<span class="badge badge-info">🔄 TUKAR BARANG</span>';
+      return `<span class="badge badge-secondary">${j||'-'}</span>`;
+    }
+
+    function computeStats(list) {
+      document.getElementById('statTotal').textContent=list.length;
+      document.getElementById('statDiajukan').textContent=list.filter(x=>x.status==='DIAJUKAN').length;
+      document.getElementById('statDisetujui').textContent=list.filter(x=>x.status==='DISETUJUI').length;
+      document.getElementById('statDitolak').textContent=list.filter(x=>x.status==='DITOLAK').length;
+      document.getElementById('statSelesai').textContent=list.filter(x=>x.status==='SELESAI').length;
+    }
+
+    async function loadData() {
+      try {
+        const data = await apiRequest('/api/admin/pengembalian');
+        allData=(data||[]).sort((a,b)=>new Date(b.dibuatPada)-new Date(a.dibuatPada));
+        computeStats(allData);
+        applyFilters();
+      } catch(e) {
+        console.error(e);
+        showAlert('Gagal memuat data pengembalian','error');
+        document.getElementById('tableBody').innerHTML=`<tr><td colspan="9" class="text-center" style="padding:30px;color:#6b7280;">Gagal memuat data. Coba refresh.</td></tr>`;
+      }
+    }
+
+    function applyFilters() {
+      filteredData=allData.filter(r=>{
+        if(searchQ){const q=searchQ.toLowerCase();const m=[String(r.id||''),String(r.pesananId||''),String(r.pengguna?.email||'').toLowerCase(),String(r.pengguna?.nama||'').toLowerCase()];if(!m.some(x=>x.includes(q)))return false;}
+        if(filterStatus&&r.status!==filterStatus)return false;
+        if(filterJenis&&r.jenis!==filterJenis)return false;
+        if(filterDari||filterSampai){const d=new Date(r.dibuatPada);if(filterDari){const f=new Date(filterDari);f.setHours(0,0,0,0);if(d<f)return false;}if(filterSampai){const t=new Date(filterSampai);t.setHours(23,59,59,999);if(d>t)return false;}}
+        return true;
+      });
+      renderTable();
+    }
+
+    function resetFilters(){
+      searchQ=filterStatus=filterJenis=filterDari=filterSampai='';
+      ['searchQ','filterStatus','filterJenis','filterDari','filterSampai'].forEach(id=>document.getElementById(id).value='');
+      applyFilters();
+    }
+
+    function renderTable(){
+      if(typeof Pagination==='function'){pagination=new Pagination(filteredData,10);renderCurrentPage();}
+      else{renderRows(filteredData);document.getElementById('pagination').innerHTML='';}
+    }
+
+    function renderCurrentPage(){renderRows(pagination.getCurrentItems());pagination.renderPagination('pagination',renderCurrentPage);}
+
+    function renderRows(items){
+      const tbody=document.getElementById('tableBody');
+      tbody.innerHTML='';
+      if(!items.length){tbody.innerHTML=`<tr><td colspan="9" class="text-center" style="padding:40px;"><i class="fas fa-inbox" style="font-size:48px;color:var(--gray-300);display:block;margin-bottom:12px;"></i>Tidak ada data pengembalian</td></tr>`;return;}
+      items.forEach(r=>{
+        const st=statusBadge(r.status);
+        const resiHtml=r.resiKembali?`<span style="font-weight:700;color:#1d4ed8;font-size:13px;">${r.resiKembali}</span>`:`<span style="color:#9ca3af;">-</span>`;
+        tbody.innerHTML+=`<tr>
+          <td><strong>#${r.id}</strong></td>
+          <td><a href="pesanan-detail.html?orderId=${encodeURIComponent(r.pesananId)}" style="font-weight:700;color:#1d4ed8;">#${r.pesananId}</a></td>
+          <td><div style="font-weight:600;font-size:13px;">${r.pengguna?.nama||'-'}</div><div style="font-size:11px;color:#9ca3af;">${r.pengguna?.email||'-'}</div></td>
+          <td>${jenisBadge(r.jenis)}</td>
+          <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${r.alasan||''}">${r.alasan||'-'}</td>
+          <td><span class="badge ${st.cls}">${st.text}</span></td>
+          <td>${resiHtml}</td>
+          <td style="font-size:13px;">${formatDate(r.dibuatPada)}</td>
+          <td><button class="btn-eye" onclick="openDetail(${r.id})" title="Lihat Detail & Proses"><i class="fas fa-eye"></i></button></td>
+        </tr>`;
+      });
+    }
+
+    function setModalVisible(v){
+      document.getElementById('detailModal').classList.toggle('show',v);
+      document.body.style.overflow=v?'hidden':'';
+    }
+
+    window.openDetail=function(id){
+      const r=allData.find(x=>Number(x.id)===Number(id));
+      if(!r)return showAlert('Data tidak ditemukan','error');
+      currentItem=r;
+
+      const st=statusBadge(r.status);
+      document.getElementById('mId').textContent='#'+r.id;
+      document.getElementById('mOrderId').innerHTML=`<a href="pesanan-detail.html?orderId=${r.pesananId}" style="color:#1d4ed8;font-weight:700;">#${r.pesananId}</a>`;
+      document.getElementById('mStatus').innerHTML=`<span class="badge ${st.cls}">${st.text}</span>`;
+      document.getElementById('mJenis').innerHTML=jenisBadge(r.jenis);
+      document.getElementById('mPengguna').innerHTML=`<span style="font-weight:600;">${r.pengguna?.nama||'-'}</span><span style="color:#6b7280;font-size:12px;display:block;">${r.pengguna?.email||'-'}</span>`;
+      document.getElementById('mTanggal').textContent=formatDate(r.dibuatPada);
+      document.getElementById('mAlasan').textContent=r.alasan||'-';
+      document.getElementById('mDeskripsi').textContent=r.deskripsi||'Tidak ada deskripsi tambahan.';
+
+      const resiEl=document.getElementById('mResiKembali');
+      resiEl.innerHTML=r.resiKembali
+        ?`<span class="resi-badge"><i class="fas fa-truck"></i>${r.resiKembali}</span>`
+        :`<span style="color:#9ca3af;font-size:13px;">Belum ada resi pengiriman balik</span>`;
+
+      const fotoEl=document.getElementById('mFotoContainer');
+      fotoEl.innerHTML=(r.foto&&r.foto.length>0)
+        ?r.foto.map(url=>`<a href="${url}" target="_blank"><img src="${url}" alt="bukti" onerror="this.parentElement.style.display='none'"></a>`).join('')
+        :`<span style="color:#9ca3af;font-size:13px;">Tidak ada foto bukti</span>`;
+
+      const itemEl=document.getElementById('mItemContainer');
+      const its=r.pesanan?.item;
+      itemEl.innerHTML=(its&&its.length>0)
+        ?`<table class="item-table"><thead><tr><th>Produk</th><th>Qty</th><th>Harga</th></tr></thead><tbody>${its.map(it=>`<tr><td style="font-weight:600;">${it.produk?.nama||'-'}</td><td>${it.jumlah}</td><td>Rp ${Number(it.harga||0).toLocaleString('id-ID')}</td></tr>`).join('')}</tbody></table>`
+        :`<span style="color:#9ca3af;font-size:13px;">Data item tidak tersedia</span>`;
+
+      document.getElementById('inputCatatan').value=r.catatanAdmin||'';
+      document.getElementById('selectStatus').value='';
+      setModalVisible(true);
+    };
+
+    document.getElementById('btnSimpan').addEventListener('click',async()=>{
+      if(!currentItem)return;
+      const status=document.getElementById('selectStatus').value;
+      const catatan=document.getElementById('inputCatatan').value.trim();
+      if(!status&&!catatan)return showAlert('Pilih status baru atau isi catatan admin terlebih dahulu.','warning');
+      const body={};
+      if(status)body.status=status;
+      if(catatan)body.catatanAdmin=catatan;
+      try{
+        await apiRequest(`/api/admin/pengembalian/${currentItem.id}`,{method:'PATCH',body:JSON.stringify(body)});
+        showAlert('Pengembalian berhasil diperbarui!','success');
+        setModalVisible(false);
+        await loadData();
+      }catch(e){console.error(e);showAlert(e.message||'Gagal memperbarui pengembalian','error');}
+    });
+
+    document.addEventListener('DOMContentLoaded',()=>{
+      document.getElementById('searchQ').addEventListener('input',e=>{searchQ=e.target.value||'';});
+      document.getElementById('filterStatus').addEventListener('change',e=>{filterStatus=e.target.value||'';});
+      document.getElementById('filterJenis').addEventListener('change',e=>{filterJenis=e.target.value||'';});
+      document.getElementById('filterDari').addEventListener('change',e=>{filterDari=e.target.value||'';});
+      document.getElementById('filterSampai').addEventListener('change',e=>{filterSampai=e.target.value||'';});
+      document.getElementById('btnApply').addEventListener('click',applyFilters);
+      document.getElementById('btnReset').addEventListener('click',resetFilters);
+      document.getElementById('btnRefresh').addEventListener('click',loadData);
+      document.getElementById('btnCloseModal').addEventListener('click',()=>setModalVisible(false));
+      document.getElementById('btnModalClose2').addEventListener('click',()=>setModalVisible(false));
+      document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))setModalVisible(false);});
+      document.addEventListener('keydown',e=>{if(e.key==='Escape')setModalVisible(false);});
+      loadData();
+    });
+  </script>
+</body>
+</html>

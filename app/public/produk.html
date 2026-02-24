@@ -605,6 +605,7 @@
           method: 'POST',
           body  : JSON.stringify({ produkId: produk.id, varianId: currentVarianId, jumlah }),
         });
+        trackPixel({ event: 'AddToCart', produk, quantity: parseInt(qtyInput.value || 1) });
         showAlert('Berhasil ditambahkan ke keranjang!', 'success');
         setTimeout(() => { if (window.refreshHeader) window.refreshHeader(); }, 500);
       } catch (err) {
@@ -762,6 +763,23 @@
         v.harga != null ? `Rp ${formatRupiah(v.harga)}` : `Rp ${formatRupiah(p.harga)}`;
     }
 
+    // setelah produk berhasil load dan render PIXEL
+    function trackPixel({ event, produk, quantity = 1, value }) {
+      if (!window.fbq || !produk?.id) return;
+
+      // default value: harga produk dikali quantity
+      const totalValue = value ?? (produk.harga || 0) * quantity;
+
+      fbq('track', event, {
+        content_ids: [produk.id],
+        content_name: produk.nama,
+        content_type: 'product',
+        value: totalValue,
+        currency: 'IDR',
+        quantity: quantity
+      });
+    }
+
     // ─── Load produk ─────────────────────────
     async function loadProduk() {
       const id = getQueryId();
@@ -779,7 +797,8 @@
         renderHargaUtama(p);
         renderGaleri(p);
         renderVarianDanSetupLogic(p);
-
+        // Pixel
+        trackPixel({ event: 'ViewContent', produk });
         document.getElementById('btnKeranjang').onclick = tambahKeKeranjang;
 
         // Beli Sekarang
@@ -801,6 +820,8 @@
               });
               if (!target?.id) throw new Error('Item keranjang tidak ditemukan');
               sessionStorage.setItem('checkout_selected_item_ids', JSON.stringify([Number(target.id)]));
+              // Pixel
+              trackPixel({ event: 'Purchase', produk, quantity: parseInt(qtyInput.value || 1)});
               window.location.href = '/checkout.html';
             } catch (err) {
               if (err.message === 'NO_LOGIN') return;
@@ -816,7 +837,6 @@
 
       loadRelatedProducts(id);
     }
-
     // ─── Produk terkait ──────────────────────
     async function loadRelatedProducts(productId) {
       const grid = document.getElementById('relatedProductsGrid');

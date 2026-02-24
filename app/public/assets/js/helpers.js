@@ -158,10 +158,6 @@
         subEl.textContent = 'Member';
 
         itemsEl.innerHTML = `
-          <a href="/index.html" class="user-dropdown__item">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-          </a>
           <a href="/profil.html" class="user-dropdown__item">
             <i class="far fa-user"></i>
             <span>Profil Saya</span>
@@ -181,10 +177,6 @@
         subEl.textContent = 'Belum login';
 
         itemsEl.innerHTML = `
-          <a href="/index.html" class="user-dropdown__item">
-            <i class="fas fa-home"></i>
-            <span>Home</span>
-          </a>
           <a href="auth/login.html" class="user-dropdown__item">
             <i class="fas fa-sign-in-alt"></i>
             <span>Masuk</span>

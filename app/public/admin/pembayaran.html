@@ -4,16 +4,196 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kelola Pembayaran - Ashanum Admin</title>
-
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    /* ===== MODAL OVERRIDE — paksa tampil di atas segalanya ===== */
+    .modal-fixed-overlay {
+      display: none;
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 20px;
+      box-sizing: border-box;
+      backdrop-filter: blur(3px);
+      animation: fadeInOverlay .18s ease;
+    }
+    .modal-fixed-overlay.show {
+      display: flex !important;
+    }
+    @keyframes fadeInOverlay {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-fixed-box {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 25px 60px rgba(0,0,0,.25);
+      width: 100%;
+      max-width: 860px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUpModal .2s ease;
+      position: relative;
+    }
+    @keyframes slideUpModal {
+      from { transform: translateY(30px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-fixed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .modal-fixed-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-fixed-close {
+      background: rgba(255,255,255,.2);
+      border: none;
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+    }
+    .modal-fixed-close:hover { background: rgba(255,255,255,.35); }
+
+    .modal-fixed-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-fixed-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #f9fafb;
+    }
+
+    /* Info grid di dalam modal */
+    .modal-info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .modal-info-grid.col2 { grid-template-columns: repeat(2, 1fr); }
+    @media (max-width: 640px) {
+      .modal-info-grid, .modal-info-grid.col2 { grid-template-columns: 1fr 1fr; }
+    }
+
+    .info-item label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+    .info-item .val {
+      font-size: 14px;
+      color: #111827;
+      font-weight: 500;
+    }
+    .info-item .val.big {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1d4ed8;
+    }
+
+    .modal-divider {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin: 16px 0;
+    }
+
+    /* Raw response */
+    #mRaw {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 14px;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 180px;
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* Tombol aksi di tabel */
+    .btn-eye {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .15s;
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .btn-eye:hover { background: #1d4ed8; color: #fff; transform: scale(1.08); }
+
+    .btn-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all .15s;
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+    .btn-check:hover { background: #16a34a; color: #fff; transform: scale(1.08); }
+    .btn-check:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  </style>
 </head>
 <body>
   <div class="admin-wrapper">
-    <!-- SIDEBAR -->
     <div id="sidebar-container"></div>
 
-    <!-- MAIN -->
     <div class="main-content">
       <div id="header-container"></div>
 
@@ -23,59 +203,56 @@
             <h1 class="page-title">Kelola Pembayaran</h1>
             <p class="page-subtitle">Monitoring pembayaran, konfirmasi manual, dan audit transaksi</p>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-secondary" id="btnRefresh"><i class="fas fa-rotate"></i> Refresh</button>
-          </div>
+          <button class="btn btn-secondary" id="btnRefresh">
+            <i class="fas fa-rotate"></i> Refresh
+          </button>
         </div>
 
         <div id="alertContainer"></div>
 
         <!-- STATS -->
-        <div class="form-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 16px;">
+        <div class="form-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
           <div class="card">
             <div class="card-body">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
                   <div style="color:#6b7280;font-size:12px;">Total Pembayaran</div>
-                  <div id="statTotal" style="font-weight:800;font-size:20px;">0</div>
+                  <div id="statTotal" style="font-weight:800;font-size:22px;">0</div>
                 </div>
-                <div style="font-size:22px;">💳</div>
+                <div style="font-size:26px;">💳</div>
               </div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-body">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
                   <div style="color:#6b7280;font-size:12px;">Menunggu</div>
-                  <div id="statMenunggu" style="font-weight:800;font-size:20px;">0</div>
+                  <div id="statMenunggu" style="font-weight:800;font-size:22px;">0</div>
                 </div>
-                <div style="font-size:22px;">⏳</div>
+                <div style="font-size:26px;">⏳</div>
               </div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-body">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
                   <div style="color:#6b7280;font-size:12px;">Berhasil</div>
-                  <div id="statBerhasil" style="font-weight:800;font-size:20px;">0</div>
+                  <div id="statBerhasil" style="font-weight:800;font-size:22px;">0</div>
                 </div>
-                <div style="font-size:22px;">✅</div>
+                <div style="font-size:26px;">✅</div>
               </div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-body">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
                   <div style="color:#6b7280;font-size:12px;">Kadaluarsa / Gagal</div>
-                  <div id="statProblem" style="font-weight:800;font-size:20px;">0</div>
+                  <div id="statProblem" style="font-weight:800;font-size:22px;">0</div>
                 </div>
-                <div style="font-size:22px;">⚠️</div>
+                <div style="font-size:26px;">⚠️</div>
               </div>
             </div>
           </div>
@@ -118,7 +295,7 @@
         <div class="card">
           <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
             <h3 class="card-title">Daftar Pembayaran</h3>
-            <small style="color:#6b7280;">Klik detail untuk melihat informasi lengkap</small>
+            <small style="color:#6b7280;">Klik 👁 untuk melihat detail lengkap</small>
           </div>
           <div class="card-body">
             <div class="table-responsive">
@@ -148,7 +325,6 @@
                 </tbody>
               </table>
             </div>
-
             <div class="pagination" id="pagination"></div>
           </div>
         </div>
@@ -156,142 +332,148 @@
     </div>
   </div>
 
-  <!-- MODAL DETAIL -->
-  <div class="modal-overlay" id="detailModal" style="display:none;">
-    <div class="modal-content" style="max-width:860px;">
-      <div class="modal-header">
-        <h2 class="modal-title"><i class="fas fa-receipt"></i> Detail Pembayaran</h2>
-        <button class="close-btn" id="btnCloseModal" type="button"><i class="fas fa-times"></i></button>
+  <!-- ===== MODAL DETAIL — di LUAR admin-wrapper ===== -->
+  <div class="modal-fixed-overlay" id="detailModal">
+    <div class="modal-fixed-box">
+
+      <div class="modal-fixed-header">
+        <h2><i class="fas fa-receipt"></i> Detail Pembayaran</h2>
+        <button class="modal-fixed-close" id="btnCloseModal" type="button">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
 
-      <div class="modal-body">
-        <div class="form-grid" style="grid-template-columns: repeat(3, 1fr);">
-          <div class="form-group">
+      <div class="modal-fixed-body">
+
+        <!-- Baris 1: ID, Order, Status, Amount -->
+        <div class="modal-info-grid">
+          <div class="info-item">
             <label>ID Pembayaran</label>
-            <div id="mPayId" style="font-weight:700;">-</div>
+            <div class="val" id="mPayId">-</div>
           </div>
-          <div class="form-group">
+          <div class="info-item">
             <label>Order ID</label>
-            <div id="mOrderId" style="font-weight:700;">-</div>
+            <div class="val" id="mOrderId">-</div>
           </div>
-          <div class="form-group">
-            <label>Status</label>
+          <div class="info-item">
+            <label>Status Pembayaran</label>
             <div id="mStatus">-</div>
           </div>
-          <div class="form-group">
+          <div class="info-item">
             <label>Metode</label>
-            <div id="mMetode">-</div>
+            <div class="val" id="mMetode">-</div>
           </div>
-          <div class="form-group">
+          <div class="info-item">
             <label>Provider</label>
-            <div id="mProvider">-</div>
+            <div class="val" id="mProvider">-</div>
           </div>
-          <div class="form-group">
-            <label>Amount</label>
-            <div id="mAmount" style="font-weight:800;">-</div>
+          <div class="info-item">
+            <label>Total Pembayaran</label>
+            <div class="val big" id="mAmount">-</div>
           </div>
-          <div class="form-group">
+        </div>
+
+        <hr class="modal-divider">
+
+        <!-- Baris 2: Waktu -->
+        <div class="modal-info-grid">
+          <div class="info-item">
             <label>Expired At</label>
-            <div id="mExpiredAt">-</div>
+            <div class="val" id="mExpiredAt">-</div>
           </div>
-          <div class="form-group">
+          <div class="info-item">
             <label>Paid At</label>
-            <div id="mPaidAt">-</div>
+            <div class="val" id="mPaidAt">-</div>
           </div>
-          <div class="form-group">
-            <label>Created</label>
-            <div id="mCreatedAt">-</div>
+          <div class="info-item">
+            <label>Dibuat Pada</label>
+            <div class="val" id="mCreatedAt">-</div>
           </div>
         </div>
 
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0;">
+        <hr class="modal-divider">
 
-        <div class="form-grid" style="grid-template-columns: repeat(2, 1fr);">
-          <div class="form-group">
-            <label>User</label>
-            <div id="mUser">-</div>
+        <!-- Baris 3: User & Status Pesanan -->
+        <div class="modal-info-grid col2">
+          <div class="info-item">
+            <label>Email User</label>
+            <div class="val" id="mUser">-</div>
           </div>
-          <div class="form-group">
+          <div class="info-item">
             <label>Status Pesanan</label>
-            <div id="mOrderStatus">-</div>
+            <div class="val" id="mOrderStatus">-</div>
           </div>
         </div>
 
-        <div class="form-group" style="margin-top:10px;">
-          <label>Raw Response (opsional)</label>
-          <pre id="mRaw" style="background:#0b1220;color:#e5e7eb;padding:12px;border-radius:10px;overflow:auto;max-height:220px;">-</pre>
-        </div>
-      </div>
+        <hr class="modal-divider">
 
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="btnModalClose2" type="button">Tutup</button>
+        <!-- Raw Response -->
+        <div class="info-item">
+          <label>Raw Response</label>
+          <pre id="mRaw">-</pre>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-fixed-footer">
+        <button class="btn btn-secondary" id="btnModalClose2" type="button">
+          <i class="fas fa-times"></i> Tutup
+        </button>
         <button class="btn btn-success" id="btnConfirmPaid" type="button">
           <i class="fas fa-check"></i> Tandai BERHASIL
         </button>
       </div>
+
     </div>
   </div>
+  <!-- /MODAL -->
 
-  <!-- Scripts (wajib ada di project kamu) -->
   <script src="assets/js/config.js"></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/main.js"></script>
   <script src="assets/js/helpers.js"></script>
   <script src="../assets/js/alert.js"></script>
-  <script>
-    /**
-     * BUTUH:
-     * - apiRequest(url, options?) dari assets/js/config.js atau helpers.js (punya kamu)
-     * - showAlert(msg,type) dari assets/js/main.js (punya kamu)
-     * - Pagination class kalau kamu pakai (kalau belum ada, pakai render tanpa pagination)
-     */
 
+  <script>
     let allPayments = [];
     let filteredPayments = [];
     let pagination = null;
-
     let searchId = '';
     let filterStatus = '';
     let filterTanggalDari = '';
     let filterTanggalSampai = '';
-
-    // modal state
     let currentModalPayment = null;
 
-    // ===== helpers local =====
+    /* ─── Helpers ─── */
     function formatRupiah(n) {
       return "Rp " + Number(n || 0).toLocaleString("id-ID");
     }
 
-    function formatDate(dateString) {
-      if (!dateString) return "-";
-      const d = new Date(dateString);
-      if (Number.isNaN(d.getTime())) return "-";
-      return d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
+    function formatDate(d) {
+      if (!d) return "-";
+      const dt = new Date(d);
+      if (isNaN(dt)) return "-";
+      return dt.toLocaleDateString("id-ID", {
+        day: "numeric", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
       });
     }
 
     function statusBadge(status) {
       const s = String(status || "").toUpperCase();
       const map = {
-        MENUNGGU: { class: "badge-warning", text: "MENUNGGU" },
-        BERHASIL: { class: "badge-success", text: "BERHASIL" },
-        GAGAL: { class: "badge-danger", text: "GAGAL" },
-        KADALUARSA: { class: "badge-info", text: "KADALUARSA" },
-        DIBATALKAN: { class: "badge-danger", text: "DIBATALKAN" },
+        MENUNGGU:   { cls: "badge-warning",   text: "MENUNGGU" },
+        BERHASIL:   { cls: "badge-success",   text: "BERHASIL" },
+        GAGAL:      { cls: "badge-danger",    text: "GAGAL" },
+        KADALUARSA: { cls: "badge-info",      text: "KADALUARSA" },
+        DIBATALKAN: { cls: "badge-danger",    text: "DIBATALKAN" },
       };
-      return map[s] || { class: "badge-secondary", text: s || "-" };
+      return map[s] || { cls: "badge-secondary", text: s || "-" };
     }
 
     function metodeLabel(p) {
       const m = String(p.metode || "-").toUpperCase();
-      const prov = p.provider ? ` • ${p.provider}` : "";
-      return `${m}${prov}`;
+      return p.provider ? `${m} · ${p.provider}` : m;
     }
 
     function isExpired(p) {
@@ -301,104 +483,70 @@
     }
 
     function computeStats(list) {
-      const total = list.length;
-      const menunggu = list.filter(x => String(x.status||"").toUpperCase() === "MENUNGGU").length;
-      const berhasil = list.filter(x => String(x.status||"").toUpperCase() === "BERHASIL").length;
-      const problem = list.filter(x => ["GAGAL","KADALUARSA","DIBATALKAN"].includes(String(x.status||"").toUpperCase())).length;
-
-      document.getElementById("statTotal").textContent = total;
-      document.getElementById("statMenunggu").textContent = menunggu;
-      document.getElementById("statBerhasil").textContent = berhasil;
-      document.getElementById("statProblem").textContent = problem;
+      document.getElementById("statTotal").textContent = list.length;
+      document.getElementById("statMenunggu").textContent =
+        list.filter(x => String(x.status||"").toUpperCase() === "MENUNGGU").length;
+      document.getElementById("statBerhasil").textContent =
+        list.filter(x => String(x.status||"").toUpperCase() === "BERHASIL").length;
+      document.getElementById("statProblem").textContent =
+        list.filter(x => ["GAGAL","KADALUARSA","DIBATALKAN"].includes(String(x.status||"").toUpperCase())).length;
     }
 
-    // ===== load =====
+    /* ─── Load ─── */
     async function loadPayments() {
       try {
-        // endpoint admin:
-        // GET /api/admin/pembayaran
         const data = await apiRequest("/api/admin/pembayaran");
-
-        allPayments = (data || []).slice();
-        // newest first
-        allPayments.sort((a,b) => new Date(b.dibuatPada) - new Date(a.dibuatPada));
-
+        allPayments = (data || []).slice().sort((a,b) => new Date(b.dibuatPada) - new Date(a.dibuatPada));
         computeStats(allPayments);
         applyFilters();
       } catch (e) {
         console.error(e);
         showAlert("Gagal memuat data pembayaran", "error");
-        document.getElementById("tableBody").innerHTML = `
-          <tr><td colspan="9" class="text-center" style="padding:30px;color:#6b7280;">
-            Gagal memuat data. Coba refresh.
-          </td></tr>
-        `;
+        document.getElementById("tableBody").innerHTML =
+          `<tr><td colspan="9" class="text-center" style="padding:30px;color:#6b7280;">Gagal memuat data. Coba refresh.</td></tr>`;
       }
     }
 
+    /* ─── Filter ─── */
     function applyFilters() {
       filteredPayments = allPayments.filter(p => {
-        // search by payment id or order id
         if (searchId) {
           const s = String(searchId).trim();
-          const pid = String(p.id || "");
-          const oid = String(p.pesananId || p.pesanan?.id || "");
-          if (!pid.includes(s) && !oid.includes(s)) return false;
+          if (!String(p.id||"").includes(s) && !String(p.pesananId||p.pesanan?.id||"").includes(s)) return false;
         }
-
-        if (filterStatus) {
-          if (String(p.status||"").toUpperCase() !== String(filterStatus).toUpperCase()) return false;
-        }
-
+        if (filterStatus && String(p.status||"").toUpperCase() !== filterStatus.toUpperCase()) return false;
         if (filterTanggalDari || filterTanggalSampai) {
           const d = new Date(p.dibuatPada);
-          if (filterTanggalDari) {
-            const from = new Date(filterTanggalDari);
-            from.setHours(0,0,0,0);
-            if (d < from) return false;
-          }
-          if (filterTanggalSampai) {
-            const to = new Date(filterTanggalSampai);
-            to.setHours(23,59,59,999);
-            if (d > to) return false;
-          }
+          if (filterTanggalDari) { const f=new Date(filterTanggalDari); f.setHours(0,0,0,0); if(d<f) return false; }
+          if (filterTanggalSampai) { const t=new Date(filterTanggalSampai); t.setHours(23,59,59,999); if(d>t) return false; }
         }
-
         return true;
       });
-
       renderTable();
     }
 
     function resetFilters() {
-      document.getElementById("searchId").value = "";
-      document.getElementById("filterStatus").value = "";
-      document.getElementById("filterTanggalDari").value = "";
-      document.getElementById("filterTanggalSampai").value = "";
-
-      searchId = "";
-      filterStatus = "";
-      filterTanggalDari = "";
-      filterTanggalSampai = "";
-
+      searchId = filterStatus = filterTanggalDari = filterTanggalSampai = '';
+      document.getElementById("searchId").value = '';
+      document.getElementById("filterStatus").value = '';
+      document.getElementById("filterTanggalDari").value = '';
+      document.getElementById("filterTanggalSampai").value = '';
       applyFilters();
     }
 
+    /* ─── Render ─── */
     function renderTable() {
-      // kalau project kamu punya Pagination class seperti di pesanan.js
       if (typeof Pagination === "function") {
         pagination = new Pagination(filteredPayments, 10);
         renderCurrentPage();
       } else {
-        // fallback no pagination
         renderRows(filteredPayments);
         document.getElementById("pagination").innerHTML = "";
       }
     }
 
     function renderCurrentPage() {
-      const items = pagination.getCurrentItems();
-      renderRows(items);
+      renderRows(pagination.getCurrentItems());
       pagination.renderPagination("pagination", renderCurrentPage);
     }
 
@@ -408,13 +556,10 @@
 
       if (!items.length) {
         tbody.innerHTML = `
-          <tr>
-            <td colspan="9" class="text-center" style="padding: 40px;">
-              <i class="fas fa-inbox" style="font-size: 48px; color: var(--gray-300); display: block; margin-bottom: 15px;"></i>
-              Tidak ada data pembayaran
-            </td>
-          </tr>
-        `;
+          <tr><td colspan="9" class="text-center" style="padding:40px;">
+            <i class="fas fa-inbox" style="font-size:48px;color:var(--gray-300);display:block;margin-bottom:12px;"></i>
+            Tidak ada data pembayaran
+          </td></tr>`;
         return;
       }
 
@@ -423,42 +568,39 @@
         const orderId = p.pesananId || p.pesanan?.id || "-";
         const userEmail = p.pesanan?.pengguna?.email || "-";
         const expiredText = p.expiredAt ? formatDate(p.expiredAt) : "-";
-        const warnExpired = isExpired(p) ? `<span style="color:#f59e0b;font-weight:700;">(EXPIRED)</span>` : "";
+        const warnExp = isExpired(p) ? `<span style="color:#f59e0b;font-size:11px;font-weight:700;display:block;">⚠ EXPIRED</span>` : "";
+        const isMenunggu = String(p.status||"").toUpperCase() === "MENUNGGU";
 
         tbody.innerHTML += `
           <tr>
             <td><strong>#${p.id}</strong></td>
-            <td><a href="pesanan-detail.html?orderId=${encodeURIComponent(orderId)}" style="font-weight:700;">#${orderId}</a></td>
+            <td><a href="pesanan-detail.html?orderId=${encodeURIComponent(orderId)}" style="font-weight:700;color:#1d4ed8;">#${orderId}</a></td>
             <td>${userEmail}</td>
-            <td>${metodeLabel(p)}</td>
+            <td><span style="font-size:13px;">${metodeLabel(p)}</span></td>
             <td><strong>${formatRupiah(p.amount)}</strong></td>
-            <td><span class="badge ${st.class}">${st.text}</span></td>
-            <td>${expiredText} ${warnExpired}</td>
+            <td><span class="badge ${st.cls}">${st.text}</span></td>
+            <td>${expiredText}${warnExp}</td>
             <td>${formatDate(p.dibuatPada)}</td>
             <td>
-              <div class="action-buttons">
-                <button class="btn-icon btn-primary" onclick="openDetail(${p.id})" title="Detail">
+              <div style="display:flex;gap:6px;align-items:center;">
+                <button class="btn-eye" onclick="openDetail(${p.id})" title="Lihat Detail">
                   <i class="fas fa-eye"></i>
                 </button>
-                ${
-                  String(p.status||"").toUpperCase() === "MENUNGGU"
-                    ? `<button class="btn-icon btn-success" onclick="confirmPaid(${p.id})" title="Tandai Berhasil">
-                         <i class="fas fa-check"></i>
-                       </button>`
-                    : `<button class="btn-icon" disabled style="opacity:.45;cursor:not-allowed;" title="Tidak tersedia">
-                         <i class="fas fa-ban"></i>
-                       </button>`
-                }
+                <button class="btn-check" onclick="confirmPaid(${p.id})" title="Tandai Berhasil"
+                  ${!isMenunggu ? "disabled" : ""}>
+                  <i class="fas fa-check"></i>
+                </button>
               </div>
             </td>
-          </tr>
-        `;
+          </tr>`;
       });
     }
 
-    // ===== modal =====
-    function setModalVisible(visible) {
-      document.getElementById("detailModal").style.display = visible ? "flex" : "none";
+    /* ─── Modal ─── */
+    function setModalVisible(v) {
+      const el = document.getElementById("detailModal");
+      el.classList.toggle("show", v);
+      document.body.style.overflow = v ? "hidden" : "";
     }
 
     window.openDetail = function(id) {
@@ -468,27 +610,24 @@
 
       const st = statusBadge(p.status);
       const orderId = p.pesananId || p.pesanan?.id || "-";
-      const userEmail = p.pesanan?.pengguna?.email || "-";
-      const orderStatus = p.pesanan?.status || "-";
 
       document.getElementById("mPayId").textContent = "#" + (p.id || "-");
-      document.getElementById("mOrderId").textContent = "#" + orderId;
-      document.getElementById("mStatus").innerHTML = `<span class="badge ${st.class}">${st.text}</span>`;
+      document.getElementById("mOrderId").innerHTML =
+        `<a href="pesanan-detail.html?orderId=${encodeURIComponent(orderId)}" style="color:#1d4ed8;font-weight:700;">#${orderId}</a>`;
+      document.getElementById("mStatus").innerHTML = `<span class="badge ${st.cls}">${st.text}</span>`;
       document.getElementById("mMetode").textContent = String(p.metode || "-");
       document.getElementById("mProvider").textContent = p.provider || "-";
       document.getElementById("mAmount").textContent = formatRupiah(p.amount);
       document.getElementById("mExpiredAt").textContent = formatDate(p.expiredAt);
       document.getElementById("mPaidAt").textContent = formatDate(p.paidAt);
       document.getElementById("mCreatedAt").textContent = formatDate(p.dibuatPada);
-      document.getElementById("mUser").textContent = userEmail;
-      document.getElementById("mOrderStatus").textContent = orderStatus;
-
+      document.getElementById("mUser").textContent = p.pesanan?.pengguna?.email || "-";
+      document.getElementById("mOrderStatus").textContent = p.pesanan?.status || "-";
       document.getElementById("mRaw").textContent =
-        p.rawResponse ? JSON.stringify(p.rawResponse, null, 2) : "-";
+        p.rawResponse ? JSON.stringify(p.rawResponse, null, 2) : "Tidak ada data raw response";
 
       const btnConfirm = document.getElementById("btnConfirmPaid");
       const isMenunggu = String(p.status||"").toUpperCase() === "MENUNGGU";
-
       btnConfirm.disabled = !isMenunggu;
       btnConfirm.style.opacity = isMenunggu ? "1" : ".5";
       btnConfirm.style.cursor = isMenunggu ? "pointer" : "not-allowed";
@@ -496,9 +635,9 @@
       setModalVisible(true);
     };
 
-    // ===== actions =====
+    /* ─── Actions ─── */
     window.confirmPaid = async function(id) {
-      if (!confirm("Konfirmasi pembayaran ini sebagai BERHASIL? (Pesanan akan otomatis menjadi DIPROSES)")) return;
+      if (!confirm("Konfirmasi pembayaran ini sebagai BERHASIL?\nPesanan akan otomatis menjadi DIPROSES.")) return;
       try {
         await apiRequest(`/api/admin/pembayaran/${id}/berhasil`, { method: "PATCH" });
         showAlert("Pembayaran dikonfirmasi. Pesanan masuk DIPROSES.", "success");
@@ -510,41 +649,32 @@
       }
     };
 
-    // modal confirm button
     document.getElementById("btnConfirmPaid").addEventListener("click", () => {
-      if (!currentModalPayment) return;
-      confirmPaid(currentModalPayment.id);
+      if (currentModalPayment) confirmPaid(currentModalPayment.id);
     });
 
-    // ===== wire events =====
+    /* ─── Wire up events ─── */
     document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("searchId").addEventListener("input", e => {
-        searchId = e.target.value || "";
-      });
-
-      document.getElementById("filterStatus").addEventListener("change", e => {
-        filterStatus = e.target.value || "";
-      });
-
-      document.getElementById("filterTanggalDari").addEventListener("change", e => {
-        filterTanggalDari = e.target.value || "";
-      });
-
-      document.getElementById("filterTanggalSampai").addEventListener("change", e => {
-        filterTanggalSampai = e.target.value || "";
-      });
+      document.getElementById("searchId").addEventListener("input", e => { searchId = e.target.value || ""; });
+      document.getElementById("filterStatus").addEventListener("change", e => { filterStatus = e.target.value || ""; });
+      document.getElementById("filterTanggalDari").addEventListener("change", e => { filterTanggalDari = e.target.value || ""; });
+      document.getElementById("filterTanggalSampai").addEventListener("change", e => { filterTanggalSampai = e.target.value || ""; });
 
       document.getElementById("btnApply").addEventListener("click", applyFilters);
       document.getElementById("btnReset").addEventListener("click", resetFilters);
-
       document.getElementById("btnRefresh").addEventListener("click", loadPayments);
 
       document.getElementById("btnCloseModal").addEventListener("click", () => setModalVisible(false));
       document.getElementById("btnModalClose2").addEventListener("click", () => setModalVisible(false));
 
-      // close modal when click overlay
-      document.getElementById("detailModal").addEventListener("click", (e) => {
-        if (e.target.id === "detailModal") setModalVisible(false);
+      // Klik di luar box = tutup
+      document.getElementById("detailModal").addEventListener("click", e => {
+        if (e.target === document.getElementById("detailModal")) setModalVisible(false);
+      });
+
+      // ESC = tutup
+      document.addEventListener("keydown", e => {
+        if (e.key === "Escape") setModalVisible(false);
       });
 
       loadPayments();

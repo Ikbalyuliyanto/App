@@ -5,7 +5,7 @@
 (() => {
 const host = window.location.hostname;
 
-if (host === "localhost" || host === "127.0.0.1") {
+if (host === "localhost") {
   API_BASE = "http://localhost:9876";
 } else {
   API_BASE = "https://ashanum.com";

@@ -22,14 +22,6 @@ enum JenisKelamin {
   PEREMPUAN
 }
 
-enum StatusPesanan {
-  MENUNGGU_PEMBAYARAN
-  DIPROSES
-  DIKIRIM
-  SELESAI
-  DIBATALKAN
-}
-
 enum StatusPembayaran {
   MENUNGGU
   BERHASIL
@@ -42,8 +34,58 @@ enum MetodePembayaran {
   VA
   EWALLET
   COD
+  ONLINE // ← tambah ini
 }
 
+// schema.prisma
+
+enum StatusPesanan {
+  MENUNGGU_PEMBAYARAN
+  MENUNGGU_KONFIRMASI // ✅ BARU — setelah bayar, tunggu admin
+  DIPROSES
+  DIKIRIM
+  SELESAI
+  DIBATALKAN
+}
+
+enum StatusPengembalian {
+  DIAJUKAN
+  DISETUJUI
+  DITOLAK
+  BARANG_DIKIRIM_BALIK // buyer kirim barang kembali
+  SELESAI // refund/tukar sudah selesai
+}
+
+enum JenisPengembalian {
+  REFUND // uang kembali
+  TUKAR // tukar barang
+}
+
+model Pengembalian {
+  id         Int                @id @default(autoincrement())
+  pesananId  Int                @unique
+  penggunaId Int
+  jenis      JenisPengembalian
+  alasan     String
+  deskripsi  String?
+  foto       String[] // array URL foto bukti
+  status     StatusPengembalian @default(DIAJUKAN)
+
+  // Catatan dari admin
+  catatanAdmin String?
+
+  // Nomor resi pengiriman balik dari buyer
+  resiKembali String?
+
+  dibuatPada DateTime @default(now())
+  diubahPada DateTime @updatedAt
+
+  pesanan  Pesanan  @relation(fields: [pesananId], references: [id])
+  pengguna Pengguna @relation(fields: [penggunaId], references: [id])
+}
+
+// Tambah di model Pesanan:
+// pengembalian Pengembalian?
 //
 // PENGGUNA
 //
@@ -53,10 +95,11 @@ model Pengguna {
   password String
   peran    Peran  @default(USER)
 
-  profil    ProfilPengguna?
-  keranjang Keranjang[]
-  pesanan   Pesanan[]
-  alamat    AlamatPengguna[]
+  profil       ProfilPengguna?
+  keranjang    Keranjang[]
+  pesanan      Pesanan[]
+  alamat       AlamatPengguna[]
+  pengembalian Pengembalian[]
 
   dibuatPada DateTime @default(now())
   diubahPada DateTime @updatedAt
@@ -330,9 +373,10 @@ model Pesanan {
   kodePos      String
 
   // relasi
-  item       ItemPesanan[]
-  pengiriman Pengiriman?
-  pembayaran Pembayaran?
+  item         ItemPesanan[]
+  pengiriman   Pengiriman?
+  pembayaran   Pembayaran?
+  pengembalian Pengembalian?
 
   dibuatPada DateTime @default(now())
   diubahPada DateTime @updatedAt
@@ -359,15 +403,15 @@ model ItemPesanan {
 }
 
 model Ulasan {
-  id        Int      @id @default(autoincrement())
-  produkId  Int
-  penggunaId Int?     // cuma angka, optional
-  email     String?   // simpan email user atau guest
-  nama      String?   // simpan nama user
-  pesananId Int?
-  rating    Int       // 1-5
-  komentar  String?
-  foto      String?
+  id         Int     @id @default(autoincrement())
+  produkId   Int
+  penggunaId Int? // cuma angka, optional
+  email      String? // simpan email user atau guest
+  nama       String? // simpan nama user
+  pesananId  Int?
+  rating     Int // 1-5
+  komentar   String?
+  foto       String?
 
   dibuatPada DateTime @default(now())
   diubahPada DateTime @updatedAt
@@ -403,6 +447,8 @@ model Pembayaran {
 
   amount    Int
   fee       Int       @default(0)
+  snapToken String? // ← tambah ini midtarns
+  midtransOrderId String?
   vaNumber  String?
   refId     String?   @unique
   expiredAt DateTime?
