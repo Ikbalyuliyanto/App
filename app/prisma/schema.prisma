@@ -42,6 +42,7 @@ enum MetodePembayaran {
 enum StatusPesanan {
   MENUNGGU_PEMBAYARAN
   MENUNGGU_KONFIRMASI // ✅ BARU — setelah bayar, tunggu admin
+  MENUNGGU_PEMBATALAN  // ← TAMBAH INI
   DIPROSES
   DIKIRIM
   SELESAI
@@ -361,6 +362,8 @@ model Pesanan {
   totalAkhir Int
 
   status StatusPesanan @default(MENUNGGU_PEMBAYARAN)
+  alasanBatal  String?   // ← TAMBAH INI
+  keterangan   String?   // ← TAMBAH INI
 
   // snapshot alamat pengiriman (biar histori aman walau alamat user diubah)
   namaPenerima String

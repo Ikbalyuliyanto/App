@@ -138,27 +138,56 @@ async function handleLogin(event) {
     // =============================
     // GOOGLE LOGIN
     // =============================
-    window.onload = function () {
+    (async function initApp() {
+  try {
+    // 1️⃣ Ambil config dulu
+    const res = await fetch(`${API_BASE}/api/config`);
+    const config = await res.json();
 
-        google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true
-        });
+    if (!config.googleClientId) {
+      console.error("Google Client ID kosong!");
+      return;
+    }
 
-        google.accounts.id.renderButton(
-            document.getElementById("googleBtn"),
-            {
-                theme: "outline",
-                size: "large",
-                width: 300
-            }
-        );
+    window.GOOGLE_CLIENT_ID = config.googleClientId;
 
-        google.accounts.id.prompt(); // supaya muncul pilihan akun
-    };
+    // 2️⃣ Tunggu sampai object google tersedia
+    function waitForGoogle() {
+      return new Promise((resolve) => {
+        const check = setInterval(() => {
+          if (window.google && google.accounts) {
+            clearInterval(check);
+            resolve();
+          }
+        }, 100);
+      });
+    }
 
+    await waitForGoogle();
+
+    // 3️⃣ Baru initialize Google
+    google.accounts.id.initialize({
+      client_id: window.GOOGLE_CLIENT_ID,
+      callback: handleGoogleResponse,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    google.accounts.id.renderButton(
+      document.getElementById("googleBtn"),
+      {
+        theme: "outline",
+        size: "large",
+        width: 300
+      }
+    );
+
+    google.accounts.id.prompt();
+
+  } catch (err) {
+    console.error("Gagal init app:", err);
+  }
+})();
 
     async function handleGoogleResponse(response) {
 

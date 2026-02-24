@@ -821,15 +821,15 @@
       // Tombol pengembalian
       let btnReturn = "";
       if (isSelesai) {
-        if (!pg) {
-          btnReturn = `<button class="btn btn-return" onclick="window.location.href='/pengembalian.html?orderId=${encodeURIComponent(o.id)}'">
-            <i class="fas fa-undo"></i> Kembalikan
-          </button>`;
-        } else {
-          btnReturn = `<a class="btn btn-return" href="/pengembalian-detail.html?id=${encodeURIComponent(pg.id)}">
-            <i class="fas fa-undo"></i> Lihat Kembali
-          </a>`;
-        }
+        // if (!pg) {
+        //   btnReturn = `<button class="btn btn-return" onclick="window.location.href='/pengembalian.html?orderId=${encodeURIComponent(o.id)}'">
+        //     <i class="fas fa-undo"></i> Kembalikan
+        //   </button>`;
+        // } else {
+        //   btnReturn = `<a class="btn btn-return" href="/pengembalian-detail.html?id=${encodeURIComponent(pg.id)}">
+        //     <i class="fas fa-undo"></i> Lihat Kembali
+        //   </a>`;
+        // }
       }
 
       const prodHTML = items.slice(0, 3).map(it => {
