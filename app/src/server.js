@@ -54,7 +54,9 @@ app.use(cors());
 app.use(express.json());
 
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(path.join(__dirname, "..", "public/pages")));
+app.use("/xadmin", express.static(path.join(__dirname, "..", "public/admin")));
+
 const uploadsPath = process.env.UPLOAD_ENV === "lokal" ? devUploads : prodUploads;
 app.use("/uploads", express.static(uploadsPath));
 console.log("Menggunakan folder uploads:", uploadsPath);
