@@ -449,16 +449,6 @@
     }
     .loc-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
-    .mode-toggle {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 10px 0;
-      font-size: 13px;
-    }
-    .mode-toggle label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
-    .mode-toggle input { accent-color: var(--primary); }
-
     /* Responsive */
     @media (max-width: 900px) {
       .page-wrapper { grid-template-columns: 1fr; }
@@ -624,54 +614,25 @@
             <input type="tel" class="form-input" id="noTelp" required>
           </div>
 
-          <div class="mode-toggle">
-            <label><input type="radio" name="wilayahMode" value="select" checked> Pilih Wilayah</label>
-            <label><input type="radio" name="wilayahMode" value="manual"> Isi Manual</label>
-          </div>
-
-          <div id="wilayahSelectWrap">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Provinsi <span class="required">*</span></label>
-                <select class="form-select" id="provinceSelect"></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
-                <select class="form-select" id="citySelect" disabled></select>
-              </div>
+          <!-- Wilayah Select (hanya mode select, manual dihapus) -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Provinsi <span class="required">*</span></label>
+              <select class="form-select" id="provinceSelect"></select>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Kecamatan <span class="required">*</span></label>
-                <select class="form-select" id="districtSelect" disabled></select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Kelurahan <span class="required">*</span></label>
-                <select class="form-select" id="subdistrictSelect" disabled></select>
-              </div>
+            <div class="form-group">
+              <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
+              <select class="form-select" id="citySelect" disabled></select>
             </div>
           </div>
-
-          <div id="wilayahManualWrap" style="display:none;">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Provinsi <span class="required">*</span></label>
-                <input type="text" class="form-input" id="provinceInput" placeholder="DKI Jakarta">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Kota / Kabupaten <span class="required">*</span></label>
-                <input type="text" class="form-input" id="cityInput" placeholder="Jakarta Pusat">
-              </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Kecamatan <span class="required">*</span></label>
+              <select class="form-select" id="districtSelect" disabled></select>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Kecamatan <span class="required">*</span></label>
-                <input type="text" class="form-input" id="districtInput" placeholder="Menteng">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Kelurahan <span class="required">*</span></label>
-                <input type="text" class="form-input" id="subdistrictInput" placeholder="Menteng">
-              </div>
+            <div class="form-group">
+              <label class="form-label">Kelurahan <span class="required">*</span></label>
+              <select class="form-select" id="subdistrictSelect" disabled></select>
             </div>
           </div>
 
@@ -731,16 +692,10 @@
     const btnGetLocation     = document.getElementById("btnGetLocation");
     const locInfo            = document.getElementById("locInfo");
     const modalTitle         = document.getElementById("modalTitle");
-    const wilayahSelectWrap  = document.getElementById("wilayahSelectWrap");
-    const wilayahManualWrap  = document.getElementById("wilayahManualWrap");
     const provinceSelect     = document.getElementById("provinceSelect");
     const citySelect         = document.getElementById("citySelect");
     const districtSelect     = document.getElementById("districtSelect");
     const subdistrictSelect  = document.getElementById("subdistrictSelect");
-    const provinceInput      = document.getElementById("provinceInput");
-    const cityInput          = document.getElementById("cityInput");
-    const districtInput      = document.getElementById("districtInput");
-    const subdistrictInput   = document.getElementById("subdistrictInput");
 
     // ── STATE ──
     let checkoutItems = [], alamatList = [], layananList = [];
@@ -760,27 +715,6 @@
       const radio = document.querySelector(`input[name="payment"][value="${value}"]`);
       if (radio) { radio.checked = true; radio.closest(".payment-option")?.classList.add("selected"); }
     };
-
-    function getWilayahMode() { return document.querySelector('input[name="wilayahMode"]:checked')?.value || "select"; }
-    function setWilayahMode(mode) {
-      wilayahSelectWrap.style.display = mode === "select" ? "" : "none";
-      wilayahManualWrap.style.display = mode === "select" ? "none" : "";
-    }
-    function copySelectToManual() {
-      provinceInput.value    = provinceSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-      cityInput.value        = citySelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-      districtInput.value    = districtSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-      subdistrictInput.value = subdistrictSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-    }
-    function bindWilayahModeToggle() {
-      document.querySelectorAll('input[name="wilayahMode"]').forEach(r => {
-        r.addEventListener("change", () => {
-          const mode = getWilayahMode();
-          setWilayahMode(mode);
-          if (mode === "manual") copySelectToManual();
-        });
-      });
-    }
 
     function setOptions(el, list, placeholder) {
       el.innerHTML = `<option value="">${placeholder}</option>` +
@@ -847,8 +781,6 @@
       modalTitle.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tambah Alamat Baru`;
       document.getElementById("addressForm")?.reset();
       resetLocationState();
-      setWilayahMode(getWilayahMode());
-      [provinceInput, cityInput, districtInput, subdistrictInput].forEach(el => { if(el) el.value = ""; });
     }
     async function setModalModeEdit(alamat) {
       editingAddressId = alamat.id;
@@ -859,13 +791,7 @@
       document.getElementById("kodePos").value       = alamat.kodePos || "";
       document.getElementById("alamatLengkap").value = alamat.alamat || "";
       document.getElementById("isUtama").checked     = !!alamat.isUtama;
-      if (provinceInput)  provinceInput.value  = alamat.provinsi  || "";
-      if (cityInput)      cityInput.value      = alamat.kota      || "";
-      if (districtInput)  districtInput.value  = alamat.kecamatan || "";
-      if (subdistrictInput) subdistrictInput.value = alamat.kelurahan || "";
-      if (getWilayahMode() === "select") {
-        try { await setWilayahSelectFromAlamat(alamat); } catch(e) { console.warn(e); }
-      }
+      try { await setWilayahSelectFromAlamat(alamat); } catch(e) { console.warn(e); }
       currentLat = alamat.latitude ?? null; currentLng = alamat.longitude ?? null; currentMapsUrl = alamat.mapsUrl ?? null;
       if (currentLat != null) {
         locInfo.innerHTML = `Lokasi: ${Number(currentLat).toFixed(6)}, ${Number(currentLng).toFixed(6)}${currentMapsUrl ? ` · <a href="${currentMapsUrl}" target="_blank">Maps</a>` : ""}`;
@@ -874,7 +800,7 @@
     async function openEditAddress(id) {
       const a = alamatList.find(x => x.id === id);
       if (!a) return alert("Alamat tidak ditemukan");
-      openModal(); setWilayahMode(getWilayahMode());
+      openModal();
       await initWilayahSelects().catch(console.error);
       await setModalModeEdit(a);
     }
@@ -1048,8 +974,6 @@
       try {
         const result = await apiAuth("/api/checkout", { method: "POST", body: JSON.stringify(payload) });
         if (!result?.pesanan?.id) { showAlert("Checkout berhasil, tapi pesananId tidak ditemukan.", "warning"); return; }
-
-        // redirectUrl dari backend sudah mengandung &auto=1 untuk ONLINE
         const redirectTo = result.redirectUrl || `/pembayaran.html?orderId=${result.pesanan.id}&auto=1`;
         window.location.href = redirectTo;
       } catch (e) {
@@ -1058,9 +982,10 @@
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Bayar Sekarang'; }
       }
     };
+
     // Modal Events
     openAddressModalBtn.addEventListener("click", async () => {
-      setModalModeAdd(); openModal(); setWilayahMode(getWilayahMode());
+      setModalModeAdd(); openModal();
       await initWilayahSelects().catch(console.error);
     });
     closeModalBtn.addEventListener("click", closeModal);
@@ -1082,23 +1007,17 @@
     });
 
     saveAddressBtn.addEventListener("click", async () => {
-      const label  = document.getElementById("labelAlamat").value.trim();
+      const label        = document.getElementById("labelAlamat").value.trim();
       const namaPenerima = document.getElementById("namaPenerima").value.trim();
-      const noTelp = document.getElementById("noTelp").value.trim();
-      const mode   = getWilayahMode();
-      let provinsi = "", kota = "", kecamatan = "", kelurahan = "";
-      if (mode === "select") {
-        provinsi  = provinceSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-        kota      = citySelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-        kecamatan = districtSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-        kelurahan = subdistrictSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
-      } else {
-        provinsi  = provinceInput?.value?.trim() || ""; kota = cityInput?.value?.trim() || "";
-        kecamatan = districtInput?.value?.trim() || ""; kelurahan = subdistrictInput?.value?.trim() || "";
-      }
-      const kodePos = document.getElementById("kodePos").value.trim();
-      const alamat  = document.getElementById("alamatLengkap").value.trim();
-      const isUtama = document.getElementById("isUtama").checked;
+      const noTelp       = document.getElementById("noTelp").value.trim();
+      const provinsi     = provinceSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      const kota         = citySelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      const kecamatan    = districtSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      const kelurahan    = subdistrictSelect?.selectedOptions?.[0]?.textContent?.trim() || "";
+      const kodePos      = document.getElementById("kodePos").value.trim();
+      const alamat       = document.getElementById("alamatLengkap").value.trim();
+      const isUtama      = document.getElementById("isUtama").checked;
+
       if (!label || !namaPenerima || !noTelp || !provinsi || !kota || !kecamatan || !kelurahan || !kodePos || !alamat)
         return showAlert("Mohon lengkapi semua field", "warning");
 
@@ -1126,20 +1045,12 @@
     });
 
     document.addEventListener("DOMContentLoaded", () => {
-      bindWilayahModeToggle();
-      setWilayahMode(getWilayahMode());
       selectPayment("ONLINE");
       loadCheckoutPage().catch(e => {
         if (String(e.message) === "NO_LOGIN") return;
         showAlert(e.message || "Gagal load checkout", "error");
       });
     });
-
-    function bindWilayahModeToggle() {
-      document.querySelectorAll('input[name="wilayahMode"]').forEach(r => {
-        r.addEventListener("change", () => { const mode = getWilayahMode(); setWilayahMode(mode); if (mode === "manual") copySelectToManual(); });
-      });
-    }
   </script>
 </body>
 </html>

@@ -5,9 +5,13 @@ import midtransClient from "midtrans-client";
 import crypto from "crypto";
 
 const snap = new midtransClient.Snap({
+  isProduction: process.env.IS_PRODUCTION === "true",
   serverKey: process.env.MIDTRANS_SERVER_KEY,
 });
-
+const midtransSnapUrl = process.env.IS_PRODUCTION === "true"
+  ? "https://api.midtrans.com"
+  : "https://api.sandbox.midtrans.com";
+  
 const router = express.Router();
 
 // ─── GET ALL ───────────────────────────────────────────────────────────────────
@@ -69,7 +73,7 @@ router.post("/:id/bayar", auth, async (req, res) => {
   if (pesanan.pembayaran?.midtransOrderId) {
     try {
       const statusRes = await fetch(
-        `https://api.sandbox.midtrans.com/v2/${pesanan.pembayaran.midtransOrderId}/status`,
+        `${midtransSnapUrl}/v2/${pesanan.pembayaran.midtransOrderId}/status`,
         {
           headers: {
             Authorization: "Basic " + Buffer.from(process.env.MIDTRANS_SERVER_KEY + ":").toString("base64"),
@@ -196,7 +200,7 @@ router.post("/:id/konfirmasi", auth, async (req, res) => {
 
   try {
     const statusRes = await fetch(
-      `https://api.sandbox.midtrans.com/v2/${midtransOrderId}/status`,
+      `${midtransSnapUrl}/v2/${midtransOrderId}/status`,
       {
         headers: {
           Authorization: "Basic " + Buffer.from(process.env.MIDTRANS_SERVER_KEY + ":").toString("base64"),

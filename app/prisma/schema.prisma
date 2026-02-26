@@ -465,3 +465,46 @@ model Pembayaran {
   @@index([metode])
   @@index([provider])
 }
+
+// =======================
+// WILAYAH INDONESIA
+// =======================
+
+model Provinsi {
+  id   String @id   // contoh: "11"
+  nama String
+
+  kabupaten Kabupaten[]
+}
+
+model Kabupaten {
+  id         String @id   // contoh: "1101"
+  nama       String
+  provinsiId String
+
+  provinsi Provinsi @relation(fields: [provinsiId], references: [id])
+  kecamatan Kecamatan[]
+
+  @@index([provinsiId])
+}
+
+model Kecamatan {
+  id          String @id   // contoh: "1101010"
+  nama        String
+  kabupatenId String
+
+  kabupaten Kabupaten @relation(fields: [kabupatenId], references: [id])
+  kelurahan Kelurahan[]
+
+  @@index([kabupatenId])
+}
+
+model Kelurahan {
+  id          String @id   // contoh: "1101010001"
+  nama        String
+  kecamatanId String
+
+  kecamatan Kecamatan @relation(fields: [kecamatanId], references: [id])
+
+  @@index([kecamatanId])
+}

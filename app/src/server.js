@@ -57,7 +57,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public/pages")));
 app.use("/xadmin", express.static(path.join(__dirname, "..", "public/admin")));
 
-const uploadsPath = process.env.UPLOAD_ENV === "lokal" ? devUploads : prodUploads;
+const uploadsPath = process.env.IS_PRODUCTION === "true" ? prodUploads : devUploads;
 app.use("/uploads", express.static(uploadsPath));
 console.log("Menggunakan folder uploads:", uploadsPath);
 
@@ -66,9 +66,9 @@ app.get("/api/config", (req, res) => {
   res.json({
     googleClientId:    process.env.GOOGLE_CLIENT_ID    || null,
     midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || null,
-    midtransSnapUrl:   process.env.UPLOAD_ENV === "lokal"
-      ? "https://app.sandbox.midtrans.com/snap/snap.js"
-      : "https://app.midtrans.com/snap/snap.js",
+    midtransSnapUrl:   process.env.IS_PRODUCTION === "true"
+      ? "https://app.midtrans.com/snap/snap.js"
+      : "https://app.sandbox.midtrans.com/snap/snap.js",
   });
 });
 

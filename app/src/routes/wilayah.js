@@ -1,77 +1,123 @@
 import express from "express";
+import { PrismaClient } from "@prisma/client";
 
 const router = express.Router();
-const BASE = "https://wilayah.web.id/api";
+const prisma = new PrismaClient();
 
-// cache sederhana in-memory
-const cache = new Map();
-const TTL_MS = 24 * 60 * 60 * 1000;
-
-async function cachedFetch(url) {
-  const now = Date.now();
-  const hit = cache.get(url);
-  if (hit && hit.exp > now) return hit.data;
-
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`Upstream error ${res.status}`);
-
-  const data = await res.json();
-  cache.set(url, { exp: now + TTL_MS, data });
-  return data;
+/*
+FORMAT YANG DIKIRIM KE FRONTEND:
+{
+  status: "success",
+  data: [
+    { code: "11", name: "ACEH" }
+  ]
 }
+*/
 
-function normalize(raw) {
-  // wilayah.web.id/api/... => {status,message,data:[...]}
-  if (raw && Array.isArray(raw.data)) return raw.data;
-
-  // kalau ternyata array langsung
-  if (Array.isArray(raw)) return raw;
-
-  // fallback lain kalau struktur beda
-  return raw?.provinces || raw?.regencies || raw?.districts || raw?.villages || [];
-}
-
-// GET /api/wilayah/provinces
+// ============================
+// GET PROVINCES
+// ============================
 router.get("/provinces", async (req, res) => {
   try {
-    const raw = await cachedFetch(`${BASE}/provinces`);
-    res.json({ status: "success", data: normalize(raw) });
+    const result = await prisma.provinsi.findMany({
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true },
+    });
+
+    const data = result.map(p => ({
+      code: p.id,
+      name: p.nama,
+    }));
+
+    res.json({ status: "success", data });
   } catch (e) {
-    console.error(e);
-    res.status(502).json({ status: "error", message: "Gagal ambil provinsi", data: [] });
+    console.error("GET PROVINCES ERROR:", e);
+    res.status(500).json({
+      status: "error",
+      message: "Gagal ambil provinsi",
+      data: [],
+    });
   }
 });
 
-// GET /api/wilayah/regencies/:provinceCode
+// ============================
+// GET KABUPATEN BY PROVINCE
+// ============================
 router.get("/regencies/:provinceCode", async (req, res) => {
   try {
-    const raw = await cachedFetch(`${BASE}/regencies/${encodeURIComponent(req.params.provinceCode)}`);
-    res.json({ status: "success", data: normalize(raw) });
+    const result = await prisma.kabupaten.findMany({
+      where: { provinsiId: req.params.provinceCode },
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true },
+    });
+
+    const data = result.map(k => ({
+      code: k.id,
+      name: k.nama,
+    }));
+
+    res.json({ status: "success", data });
   } catch (e) {
-    console.error(e);
-    res.status(502).json({ status: "error", message: "Gagal ambil kota/kab", data: [] });
+    console.error("GET REGENCIES ERROR:", e);
+    res.status(500).json({
+      status: "error",
+      message: "Gagal ambil kabupaten",
+      data: [],
+    });
   }
 });
 
-// GET /api/wilayah/districts/:regencyCode
+// ============================
+// GET KECAMATAN BY KABUPATEN
+// ============================
 router.get("/districts/:regencyCode", async (req, res) => {
   try {
-    const raw = await cachedFetch(`${BASE}/districts/${encodeURIComponent(req.params.regencyCode)}`);
-    res.json({ status: "success", data: normalize(raw) });
+    const result = await prisma.kecamatan.findMany({
+      where: { kabupatenId: req.params.regencyCode },
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true },
+    });
+
+    const data = result.map(d => ({
+      code: d.id,
+      name: d.nama,
+    }));
+
+    res.json({ status: "success", data });
   } catch (e) {
-    console.error(e);
-    res.status(502).json({ status: "error", message: "Gagal ambil kecamatan", data: [] });
+    console.error("GET DISTRICTS ERROR:", e);
+    res.status(500).json({
+      status: "error",
+      message: "Gagal ambil kecamatan",
+      data: [],
+    });
   }
 });
 
-// GET /api/wilayah/villages/:districtCode
+// ============================
+// GET KELURAHAN BY KECAMATAN
+// ============================
 router.get("/villages/:districtCode", async (req, res) => {
   try {
-    const raw = await cachedFetch(`${BASE}/villages/${encodeURIComponent(req.params.districtCode)}`);
-    res.json({ status: "success", data: normalize(raw) });
+    const result = await prisma.kelurahan.findMany({
+      where: { kecamatanId: req.params.districtCode },
+      orderBy: { nama: "asc" },
+      select: { id: true, nama: true },
+    });
+
+    const data = result.map(v => ({
+      code: v.id,
+      name: v.nama,
+    }));
+
+    res.json({ status: "success", data });
   } catch (e) {
-    console.error(e);
-    res.status(502).json({ status: "error", message: "Gagal ambil kelurahan", data: [] });
+    console.error("GET VILLAGES ERROR:", e);
+    res.status(500).json({
+      status: "error",
+      message: "Gagal ambil kelurahan",
+      data: [],
+    });
   }
 });
 
