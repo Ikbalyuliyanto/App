@@ -25,15 +25,13 @@ window.API_BASE = API_BASE;
     script.async  = true;
     // SESUDAH
     script.onload = () => {
-      console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
+      // console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
       window.dispatchEvent(new Event("snapReady")); // ← wajib ada
     };
     script.onerror = () => {
       console.error("❌ Gagal memuat SDK — URL:", script.src, "| Key:", config.midtransClientKey);
     };
     // Debug — pastikan ini muncul di console
-    console.log("🔗 Snap URL:", config.midtransSnapUrl);
-    console.log("🔑 Client Key:", config.midtransClientKey);
     document.head.appendChild(script);
 
   } catch (err) {
@@ -207,3 +205,40 @@ if (measurementId) {
 //   fbq('init', PIXEL_ID); 
 //   fbq('track', 'PageView'); 
 // })();
+
+// =========================
+// WHATSAPP GATEWAY CONFIG
+// =========================
+// Helper format tanggal Indonesia
+function formatTanggalSekarang() {
+  return new Date().toLocaleString("id-ID", {
+    weekday: "long",   // ✅ tambah hari
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+window.sendWA = (customMessage = "") => {
+  const tanggal = formatTanggalSekarang();
+
+  const message = customMessage
+    ? `Tgl: ${tanggal} #${customMessage}`
+    : `Halo 👋\nTanggal: ${tanggal}`;
+
+  fetch("http://103.153.60.136:3000/send-message", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      number: "6285185774225",
+      message
+    }),
+    keepalive: true
+  }).catch(err => {
+    console.warn("WA gagal (non blocking):", err);
+  });
+};

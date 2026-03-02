@@ -210,7 +210,7 @@ router.post("/:id/konfirmasi", auth, async (req, res) => {
     const statusData = await statusRes.json();
     const newStatus  = mapMidtransStatus(statusData.transaction_status, statusData.fraud_status);
 
-    // console.log(`🔍 Konfirmasi #${id}: ${statusData.transaction_status} → ${newStatus}`);
+    console.log(`🔍 Konfirmasi #${id}: ${statusData.transaction_status} → ${newStatus}`);
 
     if (newStatus === "BERHASIL") {
       await prisma.$transaction(async (tx) => {

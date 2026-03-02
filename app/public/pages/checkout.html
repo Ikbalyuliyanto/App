@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - Ashanum</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -974,7 +975,12 @@
       try {
         const result = await apiAuth("/api/checkout", { method: "POST", body: JSON.stringify(payload) });
         if (!result?.pesanan?.id) { showAlert("Checkout berhasil, tapi pesananId tidak ditemukan.", "warning"); return; }
-        const redirectTo = result.redirectUrl || `/pembayaran.html?orderId=${result.pesanan.id}&auto=1`;
+        const redirectTo = result.redirectUrl || `/pembayaran.html?orderId=${result.pesanan.id}&auto=1`;        
+        try {
+          await window.sendWA(`${result.pesanan.id}`);
+        } catch (waErr) {
+          console.warn("WA gagal dikirim, tapi checkout tetap lanjut:", waErr);
+        }
         window.location.href = redirectTo;
       } catch (e) {
         console.error(e); showAlert(e.message || "Checkout gagal", "error");

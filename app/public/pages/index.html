@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ashanum - Fashion Online Shopping</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; color: #333; background: #f5f5f5; }
@@ -495,7 +496,7 @@ window.addEventListener("headerLoaded", initSearchBar);
     // Ambil semua produk dari endpoint public
     const products = await apiRequest("/api/produk");
 
-  console.log("DATA PRODUK DARI BACKEND:", products); // 👈 tambahkan ini
+    // console.log("DATA PRODUK DARI BACKEND:", products); 
     // hanya produk aktif
     allProducts = (products || []).filter((p) => p.aktif === true);
 
