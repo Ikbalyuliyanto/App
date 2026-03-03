@@ -164,8 +164,8 @@ function renderItems(items) {
           <div style="font-weight:700;">${escapeHtml(nama)}</div>
           ${variantText ? `<div style="color:#6b7280;font-size:13px;margin:4px 0;">${variantText}</div>` : ""}
           <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-            <div style="color:#111827;font-weight:700;">${rupiah(harga)}</div>
-            <div style="color:#6b7280;">x${qty}</div>
+            <div style="color:red;font-weight:700;">${rupiah(harga)}</div>
+            <div style="color:red;">x${qty}</div>
           </div>
         </div>
       </div>

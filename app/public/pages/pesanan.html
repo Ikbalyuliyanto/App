@@ -980,7 +980,7 @@
       const pesanan = await apiAuth(`/api/pesanan/${encodeURIComponent(orderId)}`, { method: 'GET' });
       const items = pesanan.item || [];
       ulasanState = { orderId, items, data: {} };
-      items.forEach(it => { ulasanState.data[it.id] = { rating: 0, komentar: '', fotoFiles: [], fotoPreviews: [] }; });
+      items.forEach(it => { ulasanState.data[it.id] = { rating: 5, komentar: '', fotoFiles: [], fotoPreviews: [] }; });
       document.getElementById('ulasanOrderLabel').textContent = `Order #${orderId} · ${items.length} produk`;
       if (!items.length) {
         document.getElementById('ulasanBody').innerHTML = `<div style="padding:40px;text-align:center;color:var(--gray-400);">Tidak ada produk.</div>`;

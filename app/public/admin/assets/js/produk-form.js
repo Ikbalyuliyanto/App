@@ -34,18 +34,55 @@ function normalizeAttributesForSend(attrs) {
   return (attrs || [])
     .filter(a => a?.nama && Array.isArray(a.nilai) && a.nilai.length > 0)
     .map((a, idx) => ({
-      id: a.id, // angka atau "new_..."
+      id: a.id,
       nama: String(a.nama),
       urutan: Number(a.urutan ?? idx),
       nilai: (a.nilai || [])
         .filter(v => v?.nilai)
         .map((v, j) => ({
-          id: v.id, // angka atau "new_..."
+          id: v.id,
           nilai: String(v.nilai),
           urutan: Number(v.urutan ?? j),
         })),
     }));
 }
+// -------------------------
+// Format angka ribuan
+// -------------------------
+function formatRibuan(val) {
+  if (val === null || val === undefined || val === '') return '';
+  return String(val).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function parseRibuan(str) {
+  if (!str) return null;
+  const clean = String(str).replace(/\./g, '').replace(/,/g, '');
+  const num = parseInt(clean, 10);
+  return isNaN(num) ? null : num;
+}
+
+function initFormatInput(el) {
+  // tampilkan formatted saat load
+  if (el.value) {
+    const num = parseRibuan(el.value);
+    el.value = num !== null ? formatRibuan(num) : '';
+  }
+  el.addEventListener('focus', function() {
+    // strip dots on focus so user can type freely
+    const raw = parseRibuan(this.value);
+    this.value = raw !== null ? String(raw) : '';
+  });
+  el.addEventListener('input', function() {
+    // only allow digits
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+  el.addEventListener('blur', function() {
+    const num = parseRibuan(this.value);
+    this.value = num !== null ? formatRibuan(num) : '';
+  });
+}
+
+
 
 // -------------------------
 // Init
@@ -55,13 +92,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   currentProductId = getProductId();
 
-  // OPTIONAL: kalau kamu punya tombol generate, pastikan ada id="btnGenerateVariants"
   const btnGen = document.getElementById("btnGenerateVariants");
   if (btnGen) btnGen.addEventListener("click", generateVariantsAuto);
 
   if (currentProductId) {
     document.getElementById("pageTitle").textContent = "Edit Produk";
     await loadProduct(currentProductId);
+  } else {
+    // mode tambah baru - pasang format ribuan
+    ['harga','hargaAsli','stokProduk'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('focus', function() {
+        const raw = this.value.replace(/\./g,'');
+        this.value = raw;
+      });
+      el.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g,'');
+      });
+      el.addEventListener('blur', function() {
+        const n = parseInt(this.value, 10);
+        this.value = isNaN(n) ? '' : formatRibuan(n);
+      });
+    });
   }
 
   document.getElementById("productForm").addEventListener("submit", async (e) => {
@@ -96,16 +149,14 @@ async function loadProduct(id) {
   try {
     const product = await apiRequest(`/api/admin/produk/${id}`);
 
-    // Basic info
     document.getElementById("nama").value = product.nama || "";
     document.getElementById("kategoriId").value = product.kategoriId || "";
     document.getElementById("merek").value = product.merek || "";
     document.getElementById("deskripsi").value = product.deskripsi || "";
     document.getElementById("urlproduk").value = product.urlproduk || "";
 
-    // Pricing
-    document.getElementById("harga").value = product.harga ?? "";
-    document.getElementById("hargaAsli").value = product.hargaAsli ?? "";
+    document.getElementById("harga").value = formatRibuan(product.harga) ?? "";
+    document.getElementById("hargaAsli").value = formatRibuan(product.hargaAsli) ?? "";
     document.getElementById("diskonPersen").value = product.diskonPersen ?? "";
     document.getElementById("stokProduk").value = product.stokProduk ?? 0;
 
@@ -115,7 +166,6 @@ async function loadProduct(id) {
     document.getElementById("terlaris").checked = product.terlaris === true;
     document.getElementById("untukmu").checked = product.untukmu === true;
 
-    // Main image
     if (product.gambarUtama) {
       mainImage = product.gambarUtama;
       document.getElementById("mainImagePreview").src = fixImgUrl(mainImage);
@@ -126,7 +176,6 @@ async function loadProduct(id) {
       document.getElementById("mainImagePlaceholder").style.display = "block";
     }
 
-    // Gallery
     galleryFiles = [];
     galleryImages = [];
     if (product.galeri && product.galeri.length) {
@@ -141,7 +190,6 @@ async function loadProduct(id) {
     }
     renderGallery();
 
-    // Attributes
     attributes = [];
     if (product.atributProduk && product.atributProduk.length) {
       attributes = product.atributProduk
@@ -163,7 +211,24 @@ async function loadProduct(id) {
     }
     renderAttributes();
 
-    // Variants
+    // pasang event handler format ribuan
+    ['harga','hargaAsli'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el || el.dataset.fmtInit) return;
+      el.dataset.fmtInit = '1';
+      el.addEventListener('focus', function() {
+        const raw = this.value.replace(/\./g,'');
+        this.value = raw;
+      });
+      el.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g,'');
+      });
+      el.addEventListener('blur', function() {
+        const n = parseInt(this.value, 10);
+        this.value = isNaN(n) ? '' : formatRibuan(n);
+      });
+    });
+
     variants = [];
     if (product.varianProduk && product.varianProduk.length) {
       variants = product.varianProduk.map((v) => ({
@@ -364,7 +429,7 @@ function removeAttribute(attrIndex) {
 }
 
 // -------------------------
-// Variants UI (MANUAL)
+// Variants UI — berjejer horizontal
 // -------------------------
 function addVariant() {
   if (!currentProductId) {
@@ -381,7 +446,7 @@ function addVariant() {
     harga: null,
     stok: 0,
     sku: "",
-    atribut: [], // [{nilaiId}]
+    atribut: [],
   });
   renderVariants();
 }
@@ -392,70 +457,86 @@ function renderVariants() {
 
   if (variants.length === 0) {
     container.innerHTML =
-      '<p style="color: var(--gray-500); text-align: center; padding: 20px;">Belum ada varian. Klik "Tambah Varian" untuk membuat varian baru.</p>';
+      '<p style="color:var(--gray-500);text-align:center;padding:20px;">Belum ada varian. Klik "Tambah Varian" untuk membuat varian baru.</p>';
     return;
   }
 
-  variants.forEach((variant, varIndex) => {
-    const div = document.createElement("div");
-    div.className = "variant-section";
-
-    let atributOptions = "";
-
-    attributes.forEach((attr) => {
+  function buildVariantHTML(variant, varIndex) {
+    let selects = attributes.map((attr) => {
       const selectedRow = (variant.atribut || []).find((a) =>
         (attr.nilai || []).some((v) => String(v.id) === String(a.nilaiId))
       );
+      const options = (attr.nilai || [])
+        .map(val => `<option value="${val.id}" ${
+          selectedRow && String(selectedRow.nilaiId) === String(val.id) ? "selected" : ""
+        }>${val.nilai}</option>`)
+        .join("");
+      return `<select onchange="updateVariantAttribute(${varIndex},'${attr.id}',this)">
+        <option value="">— ${attr.nama} —</option>${options}
+      </select>`;
+    }).join("");
 
-      atributOptions += `
-        <div class="form-group">
-          <label>${attr.nama}</label>
-          <select onchange="updateVariantAttribute(${varIndex}, '${attr.id}', this)">
-            <option value="">Pilih ${attr.nama}</option>
-            ${(attr.nilai || [])
-              .map(
-                (val) => `
-                  <option value="${val.id}" ${
-                    selectedRow && String(selectedRow.nilaiId) === String(val.id) ? "selected" : ""
-                  }>${val.nilai}</option>
-                `
-              )
-              .join("")}
-          </select>
-        </div>
-      `;
-    });
-
-    div.innerHTML = `
-      <div class="attribute-header">
-        <strong>Varian ${varIndex + 1}</strong>
-        <button type="button" class="btn btn-danger btn-sm" onclick="removeVariant(${varIndex})">
+    return `
+      <div class="vr-item">
+        <span class="vr-no">#${varIndex + 1}</span>
+        <div class="vr-attrs">${selects}</div>
+        <input class="vr-harga" type="text" inputmode="numeric"
+               value="${formatRibuan(variant.harga)}" placeholder="Harga"
+               data-idx="${varIndex}" data-field="harga"
+               onblur="syncVariantNum(this,'harga')"
+               onfocus="this.value=variants[${varIndex}].harga??''"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'');syncVariantNum(this,'harga')">
+        <input class="vr-stok" type="text" inputmode="numeric"
+               value="${formatRibuan(variant.stok||0)}" placeholder="Stok"
+               data-idx="${varIndex}" data-field="stok"
+               onblur="syncVariantNum(this,'stok')"
+               onfocus="this.value=variants[${varIndex}].stok??0"
+               oninput="this.value=this.value.replace(/[^0-9]/g,'');syncVariantNum(this,'stok')">
+        <input class="vr-sku" type="text" value="${variant.sku || ""}" placeholder="SKU"
+               onchange="variants[${varIndex}].sku = this.value">
+        <button type="button" class="btn btn-danger btn-sm vr-del" onclick="removeVariant(${varIndex})">
           <i class="fas fa-trash"></i>
         </button>
-      </div>
+      </div>`;
+  }
 
-      <div class="variant-grid">
-        ${atributOptions}
-        <div class="form-group">
-          <label>Harga Varian (Opsional)</label>
-          <input type="number" value="${variant.harga ?? ""}" placeholder="Kosongkan untuk pakai harga default"
-                 onchange="variants[${varIndex}].harga = this.value ? parseInt(this.value,10) : null">
-        </div>
-        <div class="form-group">
-          <label>Stok</label>
-          <input type="number" value="${variant.stok || 0}"
-                 onchange="variants[${varIndex}].stok = parseInt(this.value,10) || 0">
-        </div>
-        <div class="form-group">
-          <label>SKU</label>
-          <input type="text" value="${variant.sku || ""}" placeholder="SKU-001"
-                 onchange="variants[${varIndex}].sku = this.value">
-        </div>
-      </div>
-    `;
+  const half = Math.ceil(variants.length / 2);
+  const leftItems  = variants.slice(0, half).map((v, i) => buildVariantHTML(v, i)).join("");
+  const rightItems = variants.slice(half).map((v, i) => buildVariantHTML(v, half + i)).join("");
 
-    container.appendChild(div);
-  });
+  const attrLabels = attributes.map(a => `<span>${a.nama}</span>`).join("");
+  const headerHTML = `
+    <div class="vr-header">
+      <span class="vr-no"></span>
+      <div class="vr-attrs">${attrLabels}</div>
+      <span class="vr-harga">Harga (Rp)</span>
+      <span class="vr-stok">Stok</span>
+      <span class="vr-sku">SKU</span>
+      <span class="vr-del"></span>
+    </div>`;
+
+  container.innerHTML = `
+    <div class="vr-columns">
+      <div class="vr-col">
+        ${headerHTML}
+        ${leftItems}
+      </div>
+      <div class="vr-col">
+        ${variants.length > 1 ? headerHTML : ""}
+        ${rightItems}
+      </div>
+    </div>`;
+}
+
+function syncVariantNum(el, field) {
+  const idx = parseInt(el.dataset.idx, 10);
+  const raw = el.value.replace(/\./g, '').replace(/,/g, '');
+  const num = raw ? parseInt(raw, 10) : (field === 'stok' ? 0 : null);
+  variants[idx][field] = isNaN(num) ? (field === 'stok' ? 0 : null) : num;
+  // format hanya saat blur (bukan saat oninput — user masih ketik)
+  if (document.activeElement !== el) {
+    el.value = variants[idx][field] !== null ? formatRibuan(variants[idx][field]) : '';
+  }
 }
 
 function updateVariantAttribute(varIndex, atributId, selectEl) {
@@ -483,7 +564,7 @@ function removeVariant(varIndex) {
 }
 
 // -------------------------
-// Generate Variants AUTO (MANUAL BUTTON)
+// Generate Variants AUTO
 // -------------------------
 async function generateVariantsAuto() {
   if (!currentProductId) {
@@ -504,7 +585,10 @@ async function generateVariantsAuto() {
     showAlert(e.message || "Gagal generate varian", "error");
   }
 }
-// Loading
+
+// -------------------------
+// Loading overlay
+// -------------------------
 (function injectLoadingStyle() {
   const css = `
     #loadingOverlay {
@@ -516,7 +600,6 @@ async function generateVariantsAuto() {
       justify-content: center;
       z-index: 9999;
     }
-
     #loadingOverlay .loading-box {
       background: #fff;
       padding: 20px 28px;
@@ -525,7 +608,6 @@ async function generateVariantsAuto() {
       min-width: 220px;
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
-
     #loadingOverlay .spinner {
       width: 42px;
       height: 42px;
@@ -535,18 +617,13 @@ async function generateVariantsAuto() {
       animation: spin 0.8s linear infinite;
       margin: 0 auto;
     }
-
     #loadingOverlay p {
       margin-top: 12px;
       font-size: 14px;
       color: #333;
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   `;
-
   const style = document.createElement("style");
   style.textContent = css;
   document.head.appendChild(style);
@@ -571,15 +648,27 @@ function showLoading() {
 function hideLoading() {
   document.getElementById("loadingOverlay").style.display = "none";
 }
+
 // -------------------------
-// Save Product (create/update + upload + variants)
+// Save Product
 // -------------------------
 async function saveProduct() {
   const nama = document.getElementById("nama").value;
   const kategoriId = document.getElementById("kategoriId").value;
-  const harga = document.getElementById("harga").value;
-  showLoading(); 
+
+  // strip titik ribuan sebelum parse
+  function getInt(id) {
+    const raw = (document.getElementById(id)?.value || '').replace(/\./g, '').replace(/,/g,'');
+    const n = parseInt(raw, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  const harga = getInt("harga");
+
+  showLoading();
+
   if (!nama || !kategoriId || !harga) {
+    hideLoading();
     showAlert("Nama, kategori, dan harga wajib diisi", "error");
     return;
   }
@@ -590,14 +679,10 @@ async function saveProduct() {
     merek: document.getElementById("merek").value || null,
     deskripsi: document.getElementById("deskripsi").value || null,
     urlproduk: document.getElementById("urlproduk").value || null,
-    harga: parseInt(harga, 10),
-    hargaAsli: document.getElementById("hargaAsli").value
-      ? parseInt(document.getElementById("hargaAsli").value, 10)
-      : null,
-    diskonPersen: document.getElementById("diskonPersen").value
-      ? parseInt(document.getElementById("diskonPersen").value, 10)
-      : null,
-    stokProduk: parseInt(document.getElementById("stokProduk").value, 10) || 0,
+    harga: harga,
+    hargaAsli: getInt("hargaAsli"),
+    diskonPersen: getInt("diskonPersen"),
+    stokProduk: getInt("stokProduk") ?? 0,
     gratisOngkir: document.getElementById("gratisOngkir").checked,
     aktif: document.getElementById("aktif").checked,
     flashsale: document.getElementById("flashsale").checked,
@@ -609,13 +694,9 @@ async function saveProduct() {
   try {
     let productId = currentProductId;
 
-    // 1) create dulu kalau baru
-    let isNew = false;
     if (!productId) {
-      isNew = true;
-
       const createData = { ...baseData };
-      delete createData.atributProduk;   // ✅ jangan kirim atribut di POST
+      delete createData.atributProduk;
 
       const created = await apiRequest("/api/admin/produk", {
         method: "POST",
@@ -626,14 +707,11 @@ async function saveProduct() {
       currentProductId = String(created.id);
     }
 
-
-    // 2) upload main jika ada file baru
     let mainPath = null;
     if (mainImageFile) {
       mainPath = await uploadMainImage(productId, mainImageFile);
     }
 
-    // 3) upload gallery baru lalu replace blob->path
     let newFileIdx = 0;
     for (let i = 0; i < galleryImages.length; i++) {
       const img = galleryImages[i];
@@ -650,7 +728,6 @@ async function saveProduct() {
       .filter((g) => g && g.url)
       .map((g, i) => ({ url: g.url, urutan: i + 1 }));
 
-    // 4) PUT produk (update basic + galeri + atribut)
     const updateData = {
       ...baseData,
       ...(mainPath ? { gambarUtama: mainPath } : {}),
@@ -663,7 +740,6 @@ async function saveProduct() {
       body: updateData,
     });
 
-    // 5) GET fresh (ambil nilaiId terbaru jika ada nilai baru)
     const fresh = await apiRequest(`/api/admin/produk/${productId}`);
 
     const validNilaiId = new Set();
@@ -671,33 +747,38 @@ async function saveProduct() {
       (a.nilai || []).forEach(v => validNilaiId.add(String(v.id)));
     });
 
-    // 6) payload varian (manual) -> hanya yang nilaiId valid
-    const varianPayload = (variants || []).map(v => ({
-      sku: v.sku || null,
-      stok: Number(v.stok || 0),
-      harga: v.harga != null ? Number(v.harga) : null,
-      atribut: (v.atribut || [])
-        .map(a => ({ nilaiId: Number(a.nilaiId) }))
-        .filter(x => Number.isInteger(x.nilaiId) && x.nilaiId > 0 && validNilaiId.has(String(x.nilaiId))),
-    }));
+    const varianPayload = (variants || []).map(v => {
+      // kirim id asli agar backend bisa UPDATE, bukan INSERT baru
+      const isExisting = v.id && !String(v.id).startsWith('new_');
+      return {
+        ...(isExisting ? { id: Number(v.id) } : {}),
+        sku: v.sku || null,
+        stok: Number(v.stok || 0),
+        harga: v.harga != null ? Number(v.harga) : null,
+        atribut: (v.atribut || [])
+          .map(a => ({ nilaiId: Number(a.nilaiId) }))
+          .filter(x => Number.isInteger(x.nilaiId) && x.nilaiId > 0 && validNilaiId.has(String(x.nilaiId))),
+      };
+    });
 
-    // validasi: kalau ada varian manual tapi ada yang atribut kosong -> stop
     const anyInvalid = varianPayload.some(v => (v.atribut || []).length === 0);
     if (variants.length > 0 && anyInvalid) {
+      hideLoading();
       showAlert("Ada varian yang belum memilih nilai atribut lengkap.", "error");
       return;
     }
 
-    // 7) SIMPAN VARIAN (INILAH YANG TADI KAMU LUPA)
     await apiRequest(`/api/admin/produk/${productId}/variants`, {
       method: "PUT",
       body: { varianProduk: varianPayload },
     });
-    hideLoading()
+
+    hideLoading();
     showAlert("Produk berhasil disimpan!", "success");
     setTimeout(() => (window.location.href = "produk.html"), 1200);
   } catch (err) {
     console.error(err);
+    hideLoading();
     showAlert(err.message || "Gagal menyimpan produk", "error");
   }
 }

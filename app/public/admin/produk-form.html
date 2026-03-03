@@ -4,138 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Produk - Ashanum Admin</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/favicon.png?v=2">
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
+        /* ─── Ultra-compact global overrides ─── */
+        .content-wrapper { padding: 10px !important; }
+        .page-header     { margin-bottom: 8px !important; padding: 0 !important; }
+        .page-title      { font-size: 16px !important; margin: 0 !important; }
+        .page-subtitle   { font-size: 12px !important; margin: 0 !important; }
+
+        /* card shell */
+        .card            { margin-bottom: 0 !important; border-radius: 6px !important; }
+        .card-header     { padding: 6px 10px !important; min-height: unset !important; }
+        .card-title      { font-size: 12px !important; font-weight: 600; margin: 0 !important; }
+        .card-body       { padding: 8px 10px !important; }
+
+        /* form elements */
+        .form-group      { margin-bottom: 6px !important; }
+        .form-group label{ font-size: 11px !important; margin-bottom: 2px !important; display: block; }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 4px 7px !important;
+            font-size: 12px !important;
+            line-height: 1.4 !important;
+            border-radius: 5px !important;
+            width: 100%;
+        }
+        .form-group textarea { resize: vertical; min-height: 90px; }
+        .form-group small  { font-size: 10px !important; }
+
+        /* checkbox compact */
+        .checkbox-group  { display: inline-flex; align-items: center; gap: 4px;
+                           margin-right: 10px; margin-bottom: 2px; }
+        .checkbox-group label { font-size: 11px !important; margin: 0 !important; }
+        .checkbox-group input { width: auto !important; margin: 0 !important; }
+
+        /* ── ROW LAYOUTS ── */
+        .three-col-row {
+            display: grid;
+            grid-template-columns: 1.1fr 1.4fr 1fr;
+            gap: 8px;
+        }
+        .two-col-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        @media (max-width: 1100px) {
+            .three-col-row { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .three-col-row, .two-col-row { grid-template-columns: 1fr; }
+        }
+
+        /* row spacing */
+        .row-gap { margin-top: 8px; }
+
+        /* card-stretch */
+        .card-stretch { height: 100%; display: flex; flex-direction: column; }
+        .card-stretch .card-body { flex: 1; }
+
+        /* 2-col grid inside harga card */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+
+        /* image upload */
         .image-upload-preview {
-            width: 100%;
-            max-width: 200px;
-            height: 200px;
+            width: 110px; height: 110px;
             border: 2px dashed var(--gray-300);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: border-color 0.2s;
+            position: relative; overflow: hidden;
         }
-        
-        .image-upload-preview:hover {
-            border-color: var(--primary);
-        }
-        
-        .image-upload-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .image-upload-preview .placeholder {
-            text-align: center;
-            color: var(--gray-400);
-        }
-        
-        .image-upload-preview .placeholder i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            display: block;
-        }
-        
+        .image-upload-preview:hover { border-color: var(--primary); }
+        .image-upload-preview img   { width:100%; height:100%; object-fit:cover; }
+        .image-upload-preview .placeholder { text-align:center; color:var(--gray-400); }
+        .image-upload-preview .placeholder i { font-size:26px; margin-bottom:4px; display:block; }
+        .image-upload-preview .placeholder span { font-size:10px; }
+
+        /* gallery */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 5px;
         }
-        
-        .gallery-item {
-            position: relative;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--gray-200);
-        }
-        
-        .gallery-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
+        .gallery-item { position:relative; aspect-ratio:1; border-radius:5px;
+                        overflow:hidden; border:1px solid var(--gray-200); }
+        .gallery-item img { width:100%; height:100%; object-fit:cover; }
         .gallery-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--danger);
-            color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position:absolute; top:3px; right:3px;
+            background:var(--danger); color:white;
+            width:18px; height:18px; border-radius:50%;
+            border:none; cursor:pointer; font-size:9px;
+            display:flex; align-items:center; justify-content:center;
         }
-        
+
+        /* attributes / variants inner sections */
         .attribute-section {
-            background: var(--gray-50);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid var(--gray-200);
+            background:var(--gray-50); padding:8px;
+            border-radius:5px; margin-bottom:6px;
+            border:1px solid var(--gray-200);
         }
-        
         .attribute-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            display:flex; justify-content:space-between;
+            align-items:center; margin-bottom:6px;
         }
-        
-        .value-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
+        .value-tags  { display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+        .value-tag   {
+            background:rgb(43, 40, 201); padding:3px 8px; border-radius:4px;
+            border:1px solid var(--gray-300);
+            display:flex; align-items:center; gap:5px; font-size:11px;
         }
-        
-        .value-tag {
-            background: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--gray-300);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-        
-        .value-tag button {
-            background: none;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-            padding: 0;
-            font-size: 14px;
-        }
-        
-        .variant-section {
-            background: var(--gray-50);
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid var(--gray-200);
-        }
-        
-        .variant-grid {
+        .value-tag button { background:none; border:none; color:var(--danger);
+                            cursor:pointer; padding:0; font-size:12px; }
+
+        /* ── VARIAN: split 2 kolom ── */
+        .vr-columns {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
+        .vr-col { min-width: 0; }
+
+        .vr-header, .vr-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 2px;
+        }
+        .vr-header {
+            border-bottom: 2px solid var(--gray-300);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            margin-bottom: 3px;
+            padding-bottom: 5px;
+        }
+        .vr-item {
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .vr-item:last-child { border-bottom: none; }
+        .vr-item:hover { background: rgba(0,0,0,.025); border-radius: 4px; }
+
+        /* nomor */
+        .vr-no {
+            flex: 0 0 22px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gray-400);
+            text-align: right;
+        }
+        /* atribut dropdown(s) */
+        .vr-attrs {
+            flex: 3;
+            display: flex;
+            gap: 4px;
+            min-width: 0;
+        }
+        .vr-attrs select {
+            flex: 1;
+            min-width: 0;
+            padding: 3px 5px !important;
+            font-size: 11px !important;
+            border-radius: 4px !important;
+            border: 1px solid var(--gray-300);
+        }
+        /* harga, stok, sku — responsif ikut flex */
+        .vr-harga, .vr-stok, .vr-sku {
+            min-width: 0;
+            width: 100%;
+            padding: 3px 5px !important;
+            font-size: 11px !important;
+            border-radius: 4px !important;
+            border: 1px solid var(--gray-300);
+            box-sizing: border-box;
+            text-align: right;
+        }
+        .vr-harga { flex: 2.5; }
+        .vr-stok  { flex: 1.2; }
+        .vr-sku   { flex: 2.5; text-align: left; }
+        /* tombol hapus */
+        .vr-del {
+            flex: 0 0 auto;
+        }
+        .vr-del.btn { padding: 3px 7px !important; font-size: 11px !important; }
+        @media (max-width: 900px) {
+            .vr-columns { grid-template-columns: 1fr; }
+        }
+
+        /* helper text */
+        .hint-text { color:var(--gray-600); font-size:11px; margin-bottom:6px; }
+
+        /* buttons */
+        .btn-sm { padding: 3px 8px !important; font-size: 11px !important; }
+        .btn    { padding: 5px 12px !important; font-size: 12px !important; }
     </style>
 </head>
 <body>
@@ -143,11 +209,10 @@
         <!-- Sidebar -->
         <div id="sidebar-container"></div>
 
-
         <!-- Main Content -->
         <div class="main-content">
             <!-- Top Bar -->
-        <div id="header-container"></div>
+            <div id="header-container"></div>
 
             <!-- Page Content -->
             <div class="content-wrapper">
@@ -165,190 +230,177 @@
                 <!-- Alert Container -->
                 <div id="alertContainer"></div>
 
-                <!-- Form -->
                 <form id="productForm">
                     <input type="hidden" id="productId">
-                    
-                    <!-- Basic Information -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Informasi Dasar</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-grid">
+
+                    <!-- ROW 1 : Info Dasar | Deskripsi & URL | Harga & Stok -->
+                    <div class="three-col-row">
+
+                        <!-- Kolom 1: Info Dasar -->
+                        <div class="card card-stretch">
+                            <div class="card-header">
+                                <h3 class="card-title">Informasi Dasar</h3>
+                            </div>
+                            <div class="card-body">
                                 <div class="form-group">
                                     <label for="nama" class="required">Nama Produk</label>
                                     <input type="text" id="nama" required placeholder="Contoh: Samsung Galaxy S23 Ultra">
                                 </div>
-
                                 <div class="form-group">
                                     <label for="kategoriId" class="required">Kategori</label>
                                     <select id="kategoriId" required>
                                         <option value="">Pilih Kategori</option>
                                     </select>
                                 </div>
-
                                 <div class="form-group">
-                                    <label for="merek">Brand/Merek</label>
+                                    <label for="merek">Brand / Merek</label>
                                     <input type="text" id="merek" placeholder="Contoh: Samsung, Nike, dll">
                                 </div>
+                            </div>
+                        </div>
 
+                        <!-- Kolom 3: Harga & Stok -->
+                        <div class="card card-stretch">
+                            <div class="card-header">
+                                <h3 class="card-title">Harga &amp; Stok</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="harga" class="required">Harga Jual (Rp)</label>
+                                        <input type="text" inputmode="numeric" id="harga" required placeholder="Contoh: 21.500">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="hargaAsli">Harga Coret (Rp)</label>
+                                        <input type="text" inputmode="numeric" id="hargaAsli" placeholder="Contoh: 25.000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="stokProduk">Stok Produk</label>
+                                        <input type="text" inputmode="numeric" id="stokProduk" value="0" placeholder="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="diskonPersen">Diskon (%)</label>
+                                        <input type="number" id="diskonPersen" min="0" max="100" placeholder="20">
+                                    </div>
+                                        
+                                    <div class="form-group" style="margin-top:4px;">
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="aktif" checked><label for="aktif">Aktif</label>
+                                            <input type="checkbox" id="gratisOngkir" checked><label for="gratisOngkir">Gratis_Ongkir</label>
+                                            <input type="checkbox" id="flashsale"><label for="flashsale">FlashSale</label>
+                                            <input type="checkbox" id="terlaris"><label for="terlaris">Terlaris</label>
+                                            <input type="checkbox" id="untukmu" checked><label for="untukmu">Untukmu</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kolom 2: Deskripsi & URL -->
+                        <div class="card card-stretch">
+                            <div class="card-header">
+                                <h3 class="card-title">Deskripsi & URL</h3>
+                            </div>
+                            <div class="card-body">
                                 <div class="form-group">
                                     <label for="deskripsi">Deskripsi Produk</label>
-                                    <textarea id="deskripsi" placeholder="Deskripsikan produk Anda..."></textarea>
+                                    <textarea id="deskripsi" rows="6" placeholder="Deskripsikan produk Anda..."></textarea>
                                 </div>
-                                <div class="form-group full-width">
-                                    <label for="nama" class="required">Url Produk</label>
-                                    <input type="text" id="urlproduk" required placeholder="Contoh: Samsung Galaxy S23 Ultra">
+                                <div class="form-group">
+                                    <label for="urlproduk" class="required">URL Produk</label>
+                                    <input type="text" id="urlproduk" required placeholder="Contoh: samsung-galaxy-s23-ultra">
                                 </div>
                             </div>
                         </div>
-                        <div class="card-header">
-                            <h3 class="card-title">Harga & Stok</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-grid">
-                                <div class="form-group">
-                                    <label for="harga" class="required">Harga Jual (Rp)</label>
-                                    <input type="number" id="harga" required min="0" placeholder="100000">
-                                </div>
 
-                                <div class="form-group">
-                                    <label for="hargaAsli">Harga Coret (Rp)</label>
-                                    <input type="number" id="hargaAsli" min="0" placeholder="150000">
-                                    <small style="color: var(--gray-500);">Isi jika ada diskon</small>
-                                </div>
+                    </div><!-- /ROW 1 -->
 
-                                <div class="form-group">
-                                    <label for="stokProduk">Stok Produk</label>
-                                    <input type="number" id="stokProduk" min="0" value="0" placeholder="100">
-                                    <small style="color: var(--gray-500);">Kosongkan jika pakai varian</small>
-                                </div>
+                    <!-- ROW 2 : Galeri | Atribut -->
+                    <div class="two-col-row row-gap">
 
-                                <div class="form-group">
-                                    <label for="diskonPersen">Diskon (%)</label>
-                                    <input type="number" id="diskonPersen" min="0" max="100" placeholder="20">
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" id="aktif" checked>
-                                        <label for="aktif">Produk Aktif</label>
+                        <!-- Galeri Gambar -->
+                        <div class="card card-stretch">
+                            <div class="card-header">
+                                <h3 class="card-title">Galeri Gambar</h3>
+                            </div>
+                            <div class="card-body">
+                                <div style="display:flex; gap:12px; align-items:flex-start;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:11px;">Gambar Utama</label>
+                                        <div class="image-upload-preview" onclick="document.getElementById('mainImageUpload').click()">
+                                            <div class="placeholder" id="mainImagePlaceholder">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <span>Upload Utama</span>
+                                            </div>
+                                            <img id="mainImagePreview" style="display:none;">
+                                        </div>
+                                        <input type="file" id="mainImageUpload" accept="image/*" style="display:none;" onchange="handleMainImageUpload(event)">
                                     </div>
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" id="gratisOngkir" checked>
-                                        <label for="gratisOngkir">Gratis Ongkir</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" id="flashsale">
-                                        <label for="flashsale">Flash Sale</label>
-                                    </div>
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" id="terlaris" >
-                                        <label for="terlaris">Terlaris</label>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <div class="checkbox-group">
-                                        <input type="checkbox" id="untukmu" checked>
-                                        <label for="untukmu">Untukmu</label>
+                                    <div style="flex:1; min-width:0;">
+                                        <label style="display:block; margin-bottom:5px; font-size:11px;">Gambar Tambahan</label>
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('galleryUpload').click()">
+                                            <i class="fas fa-images"></i> Upload Gambar
+                                        </button>
+                                        <input type="file" id="galleryUpload" accept="image/*" multiple style="display:none;" onchange="handleGalleryUpload(event)">
+                                        <div class="gallery-grid" id="galleryContainer" style="margin-top:8px;"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Gallery -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Galeri Gambar</h3>
-                        </div>
-                        <div class="card-body">
-                            <div style="margin-bottom: 20px;">
-                                <label style="display: block; margin-bottom: 10px;">Gambar Utama</label>
-                                <div class="image-upload-preview" onclick="document.getElementById('mainImageUpload').click()">
-                                    <div class="placeholder" id="mainImagePlaceholder">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <div>Upload Gambar Utama</div>
-                                    </div>
-                                    <img id="mainImagePreview" style="display: none;">
-                                </div>
-                                <input type="file" id="mainImageUpload" accept="image/*" style="display: none;" onchange="handleMainImageUpload(event)">
-                            </div>
-
-                            <div>
-                                <label style="display: block; margin-bottom: 10px;">Gambar Tambahan</label>
-                                <button type="button" class="btn btn-secondary" onclick="document.getElementById('galleryUpload').click()">
-                                    <i class="fas fa-images"></i>
-                                    Upload Gambar
+                        <!-- Atribut Produk -->
+                        <div class="card card-stretch">
+                            <div class="card-header">
+                                <h3 class="card-title">Atribut Produk</h3>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="addAttribute()">
+                                    <i class="fas fa-plus"></i> Tambah Atribut
                                 </button>
-                                <input type="file" id="galleryUpload" accept="image/*" multiple style="display: none;" onchange="handleGalleryUpload(event)">
-                                
-                                <div class="gallery-grid" id="galleryContainer" style="margin-top: 15px;"></div>
+                            </div>
+                            <div class="card-body">
+                                <p class="hint-text">Atribut untuk varian produk (contoh: Warna, Ukuran, Kapasitas)</p>
+                                <div id="attributesContainer"></div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Attributes -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Atribut Produk</h3>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="addAttribute()">
-                                <i class="fas fa-plus"></i>
-                                Tambah Atribut
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <p style="color: var(--gray-600); margin-bottom: 15px;">
-                                Atribut digunakan untuk varian produk (contoh: Warna, Ukuran, Kapasitas)
-                            </p>
-                            <div id="attributesContainer"></div>
-                        </div>
-                    </div>
+                    </div><!-- /ROW 2 -->
 
-                    <!-- Variants -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Varian Produk</h3>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="generateVariantsAuto()">
-                                Generate Otomatis
-                                </button>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="addVariant()">
-                                <i class="fas fa-plus"></i>
-                                Tambah Varian
-                            </button>
+                    <!-- ROW 3 : Varian Produk (full width) -->
+                    <div class="row-gap">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Varian Produk</h3>
+                                <div style="display:flex; gap:6px;">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="generateVariantsAuto()">Generate Otomatis</button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="addVariant()">
+                                        <i class="fas fa-plus"></i> Tambah Varian
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="hint-text">Kombinasikan atribut untuk membuat varian produk dengan harga dan stok berbeda</p>
+                                <div id="variantsContainer"></div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <p style="color: var(--gray-600); margin-bottom: 15px;">
-                                Kombinasikan atribut untuk membuat varian produk dengan harga dan stok berbeda
-                            </p>
-                            <div id="variantsContainer"></div>
-                        </div>
-                    </div>
+                    </div><!-- /ROW 3 -->
 
                     <!-- Action Buttons -->
-                    <div class="card">
+                    <div class="card row-gap">
                         <div class="card-body">
-                            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                            <div style="display:flex; justify-content:flex-end; gap:10px;">
                                 <a href="produk.html" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i>
-                                    Batal
+                                    <i class="fas fa-times"></i> Batal
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i>
-                                    Simpan Produk
+                                    <i class="fas fa-save"></i> Simpan Produk
                                 </button>
                             </div>
                         </div>
                     </div>
+
                 </form>
-            </div>
-        </div>
-    </div>
+            </div><!-- /content-wrapper -->
+        </div><!-- /main-content -->
+    </div><!-- /admin-wrapper -->
 
     <script src="assets/js/config.js"></script>
     <script src="assets/js/auth.js"></script>

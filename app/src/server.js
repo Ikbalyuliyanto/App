@@ -32,6 +32,7 @@ import adminPembayaran from "./routes/admin/pembayaran.js";
 import adminSetting from "./routes/admin/setting.js";
 import laporanRouter from "./routes/admin/laporan.js";
 import adminPengembalian from "./routes/admin/pengembalian.js";
+import adminDataRouter from "./routes/admin/data.js";
 // ADMIN END
 
 import authJWT from "./middleware/auth.js";
@@ -106,7 +107,7 @@ app.use("/api/admin/pembayaran", authJWT, adminOnly, adminPembayaran);
 app.use("/api/admin/setting", authJWT, adminOnly, adminSetting);
 app.use("/api/admin/laporan",    authJWT, adminOnly, laporanRouter); 
 app.use("/api/admin/pengembalian", authJWT, adminOnly, adminPengembalian);
-
+app.use("/api/admin/data", authJWT, adminOnly, adminDataRouter);
 
 
 app.get("/", (req, res) => res.json({ message: "API Bryna jalan 🚀" }));

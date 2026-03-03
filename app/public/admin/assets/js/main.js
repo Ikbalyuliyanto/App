@@ -2,30 +2,67 @@
 if (!window.__ADMIN_MAIN_LOADED__) {
   window.__ADMIN_MAIN_LOADED__ = true;
 
-  // Sidebar Toggle
-  document.addEventListener("DOMContentLoaded", () => {
-    const sidebar = document.getElementById("sidebar");
-    const menuToggle = document.getElementById("menuToggle");
-    const sidebarToggle = document.getElementById("sidebarToggle");
+  // ─── Inisialisasi sidebar setelah elemen ada di DOM ───────────────────────
+  function initSidebar() {
+    const sidebar         = document.getElementById("sidebar");
+    const mainContent     = document.querySelector(".main-content");
+    const menuToggle      = document.getElementById("menuToggle");
+    const sidebarToggle   = document.getElementById("sidebarToggle");
+    const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn");
 
-    if (menuToggle && sidebar) {
-      menuToggle.addEventListener("click", () => sidebar.classList.toggle("active"));
+    if (!sidebar) return;
+
+    // Mobile: buka sidebar
+    if (menuToggle) {
+      menuToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        sidebar.classList.toggle("active");
+      });
     }
 
-    if (sidebarToggle && sidebar) {
+    // Mobile: tutup sidebar (tombol X di dalam sidebar)
+    if (sidebarToggle) {
       sidebarToggle.addEventListener("click", () => sidebar.classList.remove("active"));
     }
 
+    // Desktop: collapse/expand sidebar
+    if (sidebarCollapseBtn) {
+      sidebarCollapseBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("collapsed");
+        if (mainContent) mainContent.classList.toggle("sidebar-collapsed");
+      });
+    }
+
+    // Klik di luar sidebar → tutup (mobile only)
     document.addEventListener("click", (e) => {
-      if (window.innerWidth <= 768 && sidebar && menuToggle) {
+      if (window.innerWidth <= 768 && sidebar) {
         const klikDiSidebar = sidebar.contains(e.target);
-        const klikDiMenu = menuToggle.contains(e.target);
+        const klikDiMenu    = menuToggle && menuToggle.contains(e.target);
         if (!klikDiSidebar && !klikDiMenu) sidebar.classList.remove("active");
       }
     });
+  }
+
+  // Expose supaya bisa dipanggil manual setelah inject
+  window.initSidebar = initSidebar;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("sidebar")) {
+      // Sidebar langsung ada (tidak dynamic)
+      initSidebar();
+    } else {
+      // Tunggu sidebar di-inject ke DOM via fetch
+      const observer = new MutationObserver(() => {
+        if (document.getElementById("sidebar")) {
+          observer.disconnect();
+          initSidebar();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   });
 
-  // Modal Functions (GLOBAL)
+  // ─── Modal Functions (GLOBAL) ──────────────────────────────────────────────
   window.openModal = (modalId) => {
     const modal = document.getElementById(modalId);
     if (!modal) return;
@@ -46,7 +83,7 @@ if (!window.__ADMIN_MAIN_LOADED__) {
     }
   });
 
-  // Pagination Helper (GLOBAL)
+  // ─── Pagination Helper (GLOBAL) ────────────────────────────────────────────
   window.Pagination = class Pagination {
     constructor(items, itemsPerPage = 10) {
       this.items = Array.isArray(items) ? items : [];
@@ -73,13 +110,8 @@ if (!window.__ADMIN_MAIN_LOADED__) {
       return false;
     }
 
-    nextPage() {
-      return this.goToPage(this.currentPage + 1);
-    }
-
-    prevPage() {
-      return this.goToPage(this.currentPage - 1);
-    }
+    nextPage()  { return this.goToPage(this.currentPage + 1); }
+    prevPage()  { return this.goToPage(this.currentPage - 1); }
 
     renderPagination(containerId, onPageChange) {
       const container = document.getElementById(containerId);
@@ -92,9 +124,7 @@ if (!window.__ADMIN_MAIN_LOADED__) {
       prevBtn.className = "page-btn";
       prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
       prevBtn.disabled = this.currentPage === 1;
-      prevBtn.onclick = () => {
-        if (this.prevPage()) onPageChange();
-      };
+      prevBtn.onclick = () => { if (this.prevPage()) onPageChange(); };
       container.appendChild(prevBtn);
 
       if (this.totalPages <= 7) {
@@ -103,15 +133,15 @@ if (!window.__ADMIN_MAIN_LOADED__) {
         }
       } else {
         container.appendChild(this.createPageButton(1, onPageChange));
-
         if (this.currentPage > 3) container.appendChild(this.createEllipsis());
-
-        for (let i = Math.max(2, this.currentPage - 1); i <= Math.min(this.totalPages - 1, this.currentPage + 1); i++) {
+        for (
+          let i = Math.max(2, this.currentPage - 1);
+          i <= Math.min(this.totalPages - 1, this.currentPage + 1);
+          i++
+        ) {
           container.appendChild(this.createPageButton(i, onPageChange));
         }
-
         if (this.currentPage < this.totalPages - 2) container.appendChild(this.createEllipsis());
-
         container.appendChild(this.createPageButton(this.totalPages, onPageChange));
       }
 
@@ -119,9 +149,7 @@ if (!window.__ADMIN_MAIN_LOADED__) {
       nextBtn.className = "page-btn";
       nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
       nextBtn.disabled = this.currentPage === this.totalPages || this.totalPages === 0;
-      nextBtn.onclick = () => {
-        if (this.nextPage()) onPageChange();
-      };
+      nextBtn.onclick = () => { if (this.nextPage()) onPageChange(); };
       container.appendChild(nextBtn);
     }
 
@@ -136,18 +164,15 @@ if (!window.__ADMIN_MAIN_LOADED__) {
       const btn = document.createElement("button");
       btn.className = "page-btn" + (pageNum === this.currentPage ? " active" : "");
       btn.textContent = pageNum;
-      btn.onclick = () => {
-        if (this.goToPage(pageNum)) onPageChange();
-      };
+      btn.onclick = () => { if (this.goToPage(pageNum)) onPageChange(); };
       return btn;
     }
   };
 
-  // Image Preview (GLOBAL)
+  // ─── Image Preview (GLOBAL) ────────────────────────────────────────────────
   window.handleImagePreview = (input, previewId) => {
     const file = input?.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = document.getElementById(previewId);

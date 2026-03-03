@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Manager - Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* ── DARK THEME VARS ── */
+    :root {
+      --dk-bg:       #0a0a0a;
+      --dk-surface:  #111111;
+      --dk-surface2: #1a1a1a;
+      --dk-surface3: #222222;
+      --dk-border:   #2a2a2a;
+      --dk-border2:  #333333;
+      --dk-text:     #e8e8e8;
+      --dk-text2:    #a0a0a0;
+      --dk-text3:    #606060;
+      --dk-accent:   #3b82f6;
+      --dk-accent-bg:#1e3a5f;
+    }
+
+    /* Override page bg */
+    body, .admin-wrapper, .main-content, .content-wrapper {
+      background: var(--dk-bg) !important;
+      color: var(--dk-text) !important;
+    }
+
+    /* ── Layout ── */
+    .dm-wrapper {
+      display: flex;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    /* ── Model Sidebar ── */
+    .dm-sidebar {
+      width: 210px;
+      min-width: 210px;
+      background: var(--dk-surface);
+      border-right: 1px solid var(--dk-border);
+      overflow-y: auto;
+      padding: 8px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .dm-sidebar-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--dk-text3);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      padding: 10px 12px 4px;
+    }
+    .dm-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--dk-text2);
+      cursor: pointer;
+      border-radius: 0;
+      transition: background .15s, color .15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .dm-nav-item:hover { background: var(--dk-surface2); color: var(--dk-text); }
+    .dm-nav-item.active {
+      background: var(--dk-accent-bg);
+      color: #60a5fa;
+      font-weight: 600;
+      border-left: 2px solid var(--dk-accent);
+    }
+    .dm-nav-item .model-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      flex-shrink: 0;
+      color: white;
+    }
+    .dm-nav-item .count-badge {
+      margin-left: auto;
+      background: var(--dk-surface3);
+      color: var(--dk-text3);
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 10px;
+    }
+
+    /* ── Main Area ── */
+    .dm-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--dk-bg);
+    }
+
+    /* ── Toolbar ── */
+    .dm-toolbar {
+      background: var(--dk-surface);
+      border-bottom: 1px solid var(--dk-border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .dm-model-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dk-text);
+      margin-right: 4px;
+    }
+    .dm-total-badge {
+      background: var(--dk-surface3);
+      color: var(--dk-text2);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .dm-spacer { flex: 1; }
+    .dm-search { position: relative; }
+    .dm-search input {
+      padding: 5px 10px 5px 28px;
+      border: 1px solid var(--dk-border2);
+      border-radius: 6px;
+      font-size: 12px;
+      width: 200px;
+      outline: none;
+      background: var(--dk-surface2);
+      color: var(--dk-text);
+    }
+    .dm-search input::placeholder { color: var(--dk-text3); }
+    .dm-search input:focus { border-color: var(--dk-accent); }
+    .dm-search i {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dk-text3);
+      font-size: 11px;
+    }
+
+    /* ── Table ── */
+    .dm-table-wrap {
+      flex: 1;
+      overflow: auto;
+      padding: 10px 14px;
+      background: var(--dk-bg);
+    }
+    .dm-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: var(--dk-surface);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--dk-border);
+    }
+    .dm-table thead th {
+      background: var(--dk-surface2);
+      border-bottom: 2px solid var(--dk-border2);
+      padding: 7px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--dk-text3);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      white-space: nowrap;
+    }
+    .dm-table tbody tr {
+      border-bottom: 1px solid var(--dk-border);
+      transition: background .1s;
+    }
+    .dm-table tbody tr:hover { background: var(--dk-surface2); }
+    .dm-table tbody tr:last-child { border-bottom: none; }
+    .dm-table td {
+      padding: 6px 10px;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--dk-text2);
+    }
+    .dm-table td.actions {
+      white-space: nowrap;
+      text-align: right;
+      min-width: 80px;
+    }
+    .dm-table .id-cell {
+      color: var(--dk-text3);
+      font-size: 11px;
+      font-family: monospace;
+    }
+    .dm-table .bool-yes {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: #4ade80;
+      font-size: 11px;
+    }
+    .dm-table .bool-no {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      color: var(--dk-text3);
+      font-size: 11px;
+    }
+    .dm-table .status-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+    .dm-table .null-val {
+      color: var(--dk-text3);
+      font-style: italic;
+      font-size: 11px;
+    }
+
+    /* ── Pagination ── */
+    .dm-pagination {
+      background: var(--dk-surface);
+      border-top: 1px solid var(--dk-border);
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .dm-pagination .pg-info {
+      color: var(--dk-text3);
+      font-size: 11px;
+    }
+    .dm-pagination .pg-btn {
+      padding: 3px 9px;
+      border: 1px solid var(--dk-border2);
+      border-radius: 5px;
+      background: var(--dk-surface2);
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--dk-text2);
+      transition: all .15s;
+    }
+    .dm-pagination .pg-btn:hover:not(:disabled) {
+      background: var(--dk-surface3);
+      border-color: var(--dk-accent);
+      color: #60a5fa;
+    }
+    .dm-pagination .pg-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .dm-pagination .pg-btn.active {
+      background: var(--dk-accent);
+      color: white;
+      border-color: var(--dk-accent);
+    }
+    .dm-pagination select {
+      background: var(--dk-surface2);
+      color: var(--dk-text2);
+      border: 1px solid var(--dk-border2);
+    }
+
+    /* ── Modal ── */
+    .dm-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .dm-modal {
+      background: var(--dk-surface);
+      border: 1px solid var(--dk-border2);
+      border-radius: 10px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .dm-modal-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--dk-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dm-modal-header h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0;
+      flex: 1;
+      color: var(--dk-text);
+    }
+    .dm-modal-body {
+      padding: 14px 18px;
+      overflow-y: auto;
+      flex: 1;
+      background: var(--dk-surface);
+    }
+    .dm-modal-footer {
+      padding: 10px 18px;
+      border-top: 1px solid var(--dk-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--dk-surface2);
+      border-radius: 0 0 10px 10px;
+    }
+
+    /* ── Form ── */
+    .dm-form-group { margin-bottom: 10px; }
+    .dm-form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dk-text3);
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .dm-form-group label .req { color: #f87171; margin-left: 2px; }
+    .dm-form-group input,
+    .dm-form-group select,
+    .dm-form-group textarea {
+      width: 100%;
+      padding: 6px 9px;
+      border: 1px solid var(--dk-border2);
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      transition: border-color .15s;
+      background: var(--dk-surface2);
+      color: var(--dk-text);
+    }
+    .dm-form-group input::placeholder,
+    .dm-form-group textarea::placeholder { color: var(--dk-text3); }
+    .dm-form-group input:focus,
+    .dm-form-group select:focus,
+    .dm-form-group textarea:focus { border-color: var(--dk-accent); }
+    .dm-form-group textarea { resize: vertical; min-height: 70px; }
+    .dm-form-group .field-hint { font-size: 10px; color: var(--dk-text3); margin-top: 2px; }
+
+    /* 2-col form grid */
+    .dm-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 10px;
+    }
+
+    /* ── Confirm modal ── */
+    .dm-confirm { max-width: 380px; text-align: center; }
+    .dm-confirm .icon-wrap {
+      width: 52px;
+      height: 52px;
+      background: rgba(239,68,68,.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .dm-confirm .icon-wrap i { font-size: 22px; color: #f87171; }
+    .dm-confirm h3 { font-size: 15px; margin: 0 0 6px; color: var(--dk-text); }
+    .dm-confirm p { font-size: 12px; color: var(--dk-text2); margin: 0 0 4px; }
+
+    /* ── Empty / Loading ── */
+    .dm-empty {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--dk-text3);
+    }
+    .dm-empty i { font-size: 36px; margin-bottom: 10px; display: block; }
+    .dm-empty p { font-size: 13px; margin: 0; }
+    .dm-loading { text-align: center; padding: 48px 20px; }
+    .dm-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--dk-border2);
+      border-top-color: var(--dk-accent);
+      border-radius: 50%;
+      animation: dmSpin .7s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes dmSpin { to { transform: rotate(360deg); } }
+
+    /* ── Toast ── */
+    #dmToast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      pointer-events: none;
+    }
+    .dm-toast-item {
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      animation: dmToastIn .25s ease;
+      min-width: 220px;
+      pointer-events: auto;
+    }
+    .dm-toast-item.success { background: #166534; color: #bbf7d0; border: 1px solid #16a34a; }
+    .dm-toast-item.error   { background: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+    .dm-toast-item.info    { background: #1e3a5f; color: #bfdbfe; border: 1px solid #3b82f6; }
+    @keyframes dmToastIn { from { opacity: 0; transform: translateX(20px); } to { opacity:1; transform: none; } }
+
+    /* ── Btn tweaks ── */
+    .btn-xs { padding: 3px 7px !important; font-size: 10px !important; }
+
+    /* Override btn secondary for dark */
+    .dm-toolbar .btn-secondary,
+    .dm-modal-footer .btn-secondary,
+    .dm-confirm .btn-secondary {
+      background: var(--dk-surface2) !important;
+      border-color: var(--dk-border2) !important;
+      color: var(--dk-text2) !important;
+    }
+    .dm-toolbar .btn-secondary:hover,
+    .dm-modal-footer .btn-secondary:hover {
+      background: var(--dk-surface3) !important;
+      color: var(--dk-text) !important;
+    }
+
+    /* readonly note */
+    .dm-readonly-note {
+      background: #1c1a07;
+      border-bottom: 1px solid #3d3600;
+      padding: 6px 14px;
+      font-size: 11px;
+      color: #ca8a04;
+    }
+
+    /* ── No model selected ── */
+    .dm-welcome {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      color: var(--dk-text3);
+      background: var(--dk-bg);
+    }
+    .dm-welcome i { font-size: 48px; }
+    .dm-welcome h3 { font-size: 16px; font-weight: 600; margin: 0; color: var(--dk-text2); }
+    .dm-welcome p { font-size: 13px; margin: 0; }
+
+    /* scrollbar dark */
+    .dm-sidebar::-webkit-scrollbar,
+    .dm-table-wrap::-webkit-scrollbar,
+    .dm-modal-body::-webkit-scrollbar { width: 5px; }
+    .dm-sidebar::-webkit-scrollbar-track,
+    .dm-table-wrap::-webkit-scrollbar-track,
+    .dm-modal-body::-webkit-scrollbar-track { background: var(--dk-surface); }
+    .dm-sidebar::-webkit-scrollbar-thumb,
+    .dm-table-wrap::-webkit-scrollbar-thumb,
+    .dm-modal-body::-webkit-scrollbar-thumb { background: var(--dk-border2); border-radius: 3px; }
+
+    /* ── Varian Detail Modal ── */
+    .dm-modal-wide { max-width: 780px; }
+
+    .vd-info-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .vd-info-card {
+      background: var(--dk-surface2);
+      border: 1px solid var(--dk-border);
+      border-radius: 7px;
+      padding: 10px 12px;
+    }
+    .vd-info-card .vd-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--dk-text3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 3px;
+    }
+    .vd-info-card .vd-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dk-text);
+      font-family: monospace;
+    }
+
+    .vd-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--dk-text3);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .vd-attr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .vd-attr-table thead th {
+      background: var(--dk-surface3);
+      border-bottom: 2px solid var(--dk-border2);
+      padding: 6px 10px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--dk-text3);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .vd-attr-table tbody tr {
+      border-bottom: 1px solid var(--dk-border);
+      transition: background .1s;
+    }
+    .vd-attr-table tbody tr:hover { background: var(--dk-surface2); }
+    .vd-attr-table tbody tr:last-child { border-bottom: none; }
+    .vd-attr-table td {
+      padding: 7px 10px;
+      color: var(--dk-text2);
+    }
+    .vd-attr-table td.mono {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--dk-text);
+    }
+    .vd-attr-table td .attr-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--dk-surface3);
+      border: 1px solid var(--dk-border2);
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--dk-text2);
+    }
+    .vd-attr-table td .attr-chip i {
+      font-size: 9px;
+      color: var(--dk-text3);
+    }
+
+    .vd-empty {
+      text-align: center;
+      padding: 28px;
+      color: var(--dk-text3);
+      font-size: 12px;
+      background: var(--dk-surface2);
+      border-radius: 7px;
+    }
+
+    /* add-attr inline form */
+    .vd-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      background: var(--dk-surface2);
+      border: 1px dashed var(--dk-border2);
+      border-radius: 7px;
+      padding: 8px 10px;
+    }
+    .vd-add-row input {
+      flex: 1;
+      padding: 5px 8px;
+      background: var(--dk-surface3);
+      border: 1px solid var(--dk-border2);
+      border-radius: 5px;
+      color: var(--dk-text);
+      font-size: 12px;
+      outline: none;
+    }
+    .vd-add-row input:focus { border-color: var(--dk-accent); }
+    .vd-add-row input::placeholder { color: var(--dk-text3); }
+    .vd-add-row label {
+      font-size: 10px;
+      color: var(--dk-text3);
+      white-space: nowrap;
+    }
+
+    /* row clickable hint for varianProduk */
+    .vr-row-clickable {
+      cursor: pointer;
+    }
+    .vr-row-clickable:hover td:first-child::after {
+      content: " ↗";
+      color: #60a5fa;
+      font-size: 10px;
+    }
+    .btn-detail {
+      background: var(--dk-accent-bg) !important;
+      border-color: var(--dk-accent) !important;
+      color: #60a5fa !important;
+    }
+    .btn-detail:hover {
+      background: #1d4ed8 !important;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-wrapper">
+  <!-- Sidebar -->
+  <div id="sidebar-container"></div>
+
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div id="header-container"></div>
+
+    <!-- Content -->
+    <div class="content-wrapper" style="padding:0; height:calc(100vh - 60px); overflow:hidden;">
+      <div class="dm-wrapper">
+
+        <!-- ── Model Navigation Sidebar ── -->
+        <nav class="dm-sidebar" id="modelNav"></nav>
+
+        <!-- ── Main Panel ── -->
+        <div class="dm-main" id="dmMain">
+          <div class="dm-welcome">
+            <i class="fas fa-database"></i>
+            <h3>Data Manager</h3>
+            <p>Pilih model dari sidebar untuk melihat & mengelola data</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast Container ── -->
+<div id="dmToast"></div>
+
+<!-- ── Modal Container ── -->
+<div id="dmModalContainer"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/helpers.js"></script>
+<script>
+// ╔══════════════════════════════════════════════════════════╗
+// ║           DATA MANAGER — Model Config                    ║
+// ╚══════════════════════════════════════════════════════════╝
+
+const MODEL_GROUPS = [
+  {
+    group: "👤 Pengguna",
+    color: "#3b82f6",
+    models: [
+      {
+        key: "pengguna",
+        label: "Pengguna",
+        icon: "fa-users",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "email", label: "Email" },
+          { key: "peran", label: "Peran", badge: true },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "email", label: "Email", type: "email", required: true },
+          { key: "password", label: "Password", type: "password", hint: "Kosongkan jika tidak ingin ubah password" },
+          { key: "peran", label: "Peran", type: "select", options: ["ADMIN","USER"], required: true },
+        ],
+      },
+      {
+        key: "profilPengguna",
+        label: "Profil Pengguna",
+        icon: "fa-id-card",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "penggunaId", label: "User ID" },
+          { key: "namaDepan", label: "Nama Depan" },
+          { key: "namaBelakang", label: "Nama Belakang" },
+          { key: "nomorTelepon", label: "Telepon" },
+          { key: "jenisKelamin", label: "Gender", badge: true },
+          { key: "newsletter", label: "Newsletter", bool: true },
+        ],
+        fields: [
+          { key: "penggunaId", label: "Pengguna ID", type: "number", required: true, half: true },
+          { key: "jenisKelamin", label: "Jenis Kelamin", type: "select", options: ["LAKI_LAKI","PEREMPUAN"], required: true, half: true },
+          { key: "namaDepan", label: "Nama Depan", required: true, half: true },
+          { key: "namaBelakang", label: "Nama Belakang", required: true, half: true },
+          { key: "nomorTelepon", label: "Nomor Telepon", required: true },
+          { key: "newsletter", label: "Newsletter", type: "checkbox" },
+        ],
+      },
+      {
+        key: "alamatPengguna",
+        label: "Alamat Pengguna",
+        icon: "fa-map-marker-alt",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "penggunaId", label: "User ID" },
+          { key: "label", label: "Label" },
+          { key: "namaPenerima", label: "Nama" },
+          { key: "noTelp", label: "Telepon" },
+          { key: "kota", label: "Kota" },
+          { key: "isUtama", label: "Utama", bool: true },
+        ],
+        fields: [
+          { key: "penggunaId", label: "Pengguna ID", type: "number", required: true, half: true },
+          { key: "label", label: "Label (Rumah/Kantor)", required: true, half: true },
+          { key: "namaPenerima", label: "Nama Penerima", required: true, half: true },
+          { key: "noTelp", label: "No. Telepon", required: true, half: true },
+          { key: "provinsi", label: "Provinsi", required: true, half: true },
+          { key: "kota", label: "Kota", required: true, half: true },
+          { key: "kecamatan", label: "Kecamatan", required: true, half: true },
+          { key: "kelurahan", label: "Kelurahan", required: true, half: true },
+          { key: "kodePos", label: "Kode Pos", required: true, half: true },
+          { key: "isUtama", label: "Alamat Utama", type: "checkbox", half: true },
+          { key: "alamat", label: "Alamat Lengkap", type: "textarea", required: true },
+          { key: "mapsUrl", label: "Google Maps URL" },
+        ],
+      },
+    ],
+  },
+  {
+    group: "🛍️ Katalog",
+    color: "#8b5cf6",
+    models: [
+      {
+        key: "kategori",
+        label: "Kategori",
+        icon: "fa-tags",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "nama", label: "Nama" },
+          { key: "header", label: "Header", bool: true },
+          { key: "body", label: "Body", bool: true },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "nama", label: "Nama Kategori", required: true, half: true },
+          { key: "logo", label: "URL Logo", half: true },
+          { key: "header", label: "Tampil di Header", type: "checkbox", half: true },
+          { key: "body", label: "Tampil di Body", type: "checkbox", half: true },
+        ],
+      },
+      {
+        key: "varianProduk",
+        label: "Varian Produk",
+        icon: "fa-layer-group",
+        readonlyNote: "Varian dikelola via halaman Edit Produk. Di sini hanya update stok/harga.",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "produkId", label: "Produk ID" },
+          { key: "sku", label: "SKU" },
+          { key: "stok", label: "Stok" },
+          { key: "harga", label: "Harga", currency: true },
+        ],
+        fields: [
+          { key: "sku", label: "SKU", half: true },
+          { key: "stok", label: "Stok", type: "number", half: true },
+          { key: "harga", label: "Harga (Rp)", type: "number", half: true },
+          { key: "produkId", label: "Produk ID", type: "number", half: true },
+        ],
+      },
+      {
+        key: "varianProdukAtribut",
+        label: "Varian ↔ Atribut",
+        icon: "fa-link",
+        readonlyNote: "⚠️ Tabel mapping varian ke nilai atribut. Hapus di sini jika varian perlu dilepas dari atribut tertentu.",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "varianId", label: "Varian ID" },
+          { key: "nilaiId", label: "Nilai Atribut ID" },
+        ],
+        fields: [
+          { key: "varianId", label: "Varian ID", type: "number", required: true, half: true },
+          { key: "nilaiId", label: "Nilai Atribut ID", type: "number", required: true, half: true },
+        ],
+      },
+      {
+        key: "atributProduk",
+        label: "Atribut Produk",
+        icon: "fa-sliders-h",
+        readonlyNote: "Atribut (Warna, Ukuran, dll) per produk. Hapus hanya jika tidak ada varian yang memakai.",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "produkId", label: "Produk ID" },
+          { key: "nama", label: "Nama Atribut" },
+          { key: "urutan", label: "Urutan" },
+        ],
+        fields: [
+          { key: "produkId", label: "Produk ID", type: "number", required: true, half: true },
+          { key: "nama", label: "Nama Atribut", required: true, half: true },
+          { key: "urutan", label: "Urutan", type: "number", half: true },
+        ],
+      },
+      {
+        key: "nilaiAtributProduk",
+        label: "Nilai Atribut",
+        icon: "fa-list-ol",
+        readonlyNote: "Nilai atribut (Merah, XL, 128GB, dll). Hapus hanya jika tidak dipakai varian manapun.",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "atributId", label: "Atribut ID" },
+          { key: "nilai", label: "Nilai" },
+          { key: "urutan", label: "Urutan" },
+        ],
+        fields: [
+          { key: "atributId", label: "Atribut ID", type: "number", required: true, half: true },
+          { key: "nilai", label: "Nilai", required: true, half: true },
+          { key: "urutan", label: "Urutan", type: "number", half: true },
+        ],
+      },
+    ],
+  },
+  {
+    group: "🚚 Pengiriman",
+    color: "#f59e0b",
+    models: [
+      {
+        key: "kurir",
+        label: "Kurir",
+        icon: "fa-truck",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "kode", label: "Kode" },
+          { key: "nama", label: "Nama" },
+          { key: "aktif", label: "Aktif", bool: true },
+        ],
+        fields: [
+          { key: "kode", label: "Kode (JNE, SICEPAT, dll)", required: true, half: true },
+          { key: "nama", label: "Nama Kurir", required: true, half: true },
+          { key: "logo", label: "URL Logo" },
+          { key: "aktif", label: "Aktif", type: "checkbox" },
+        ],
+      },
+      {
+        key: "layananPengiriman",
+        label: "Layanan Pengiriman",
+        icon: "fa-shipping-fast",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "kurirId", label: "Kurir ID" },
+          { key: "kode", label: "Kode" },
+          { key: "nama", label: "Nama Layanan" },
+          { key: "estimasiHari", label: "Estimasi" },
+          { key: "harga", label: "Harga", currency: true },
+          { key: "gratis", label: "Gratis", bool: true },
+          { key: "aktif", label: "Aktif", bool: true },
+        ],
+        fields: [
+          { key: "kurirId", label: "Kurir ID", type: "number", required: true, half: true },
+          { key: "kode", label: "Kode (REG, EXPRESS)", required: true, half: true },
+          { key: "nama", label: "Nama Layanan", required: true, half: true },
+          { key: "estimasiHari", label: "Estimasi (1-2 hari)", required: true, half: true },
+          { key: "harga", label: "Harga (Rp)", type: "number", required: true, half: true },
+          { key: "gratis", label: "Gratis Ongkir", type: "checkbox", half: true },
+          { key: "aktif", label: "Aktif", type: "checkbox", half: true },
+        ],
+      },
+      {
+        key: "pengiriman",
+        label: "Pengiriman Pesanan",
+        icon: "fa-box",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "pesananId", label: "Pesanan ID" },
+          { key: "layananId", label: "Layanan ID" },
+          { key: "biaya", label: "Biaya", currency: true },
+          { key: "resi", label: "No. Resi" },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "pesananId", label: "Pesanan ID", type: "number", required: true, half: true },
+          { key: "layananId", label: "Layanan ID", type: "number", required: true, half: true },
+          { key: "biaya", label: "Biaya (Rp)", type: "number", required: true, half: true },
+          { key: "resi", label: "No. Resi", half: true },
+        ],
+      },
+    ],
+  },
+  {
+    group: "📦 Pesanan",
+    color: "#10b981",
+    models: [
+      {
+        key: "pesanan",
+        label: "Pesanan",
+        icon: "fa-receipt",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "penggunaId", label: "User ID" },
+          { key: "totalAkhir", label: "Total", currency: true },
+          { key: "status", label: "Status", badge: true },
+          { key: "namaPenerima", label: "Penerima" },
+          { key: "kota", label: "Kota" },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "status", label: "Status", type: "select", options: [
+            "MENUNGGU_PEMBAYARAN","MENUNGGU_KONFIRMASI","MENUNGGU_PEMBATALAN",
+            "DIPROSES","DIKIRIM","SELESAI","DIBATALKAN"
+          ], required: true, half: true },
+          { key: "alasanBatal", label: "Alasan Batal", half: true },
+          { key: "keterangan", label: "Keterangan", type: "textarea" },
+        ],
+        editOnly: true,
+      },
+      {
+        key: "itemPesanan",
+        label: "Item Pesanan",
+        icon: "fa-list-ul",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "pesananId", label: "Pesanan ID" },
+          { key: "produkId", label: "Produk ID" },
+          { key: "varianId", label: "Varian ID" },
+          { key: "jumlah", label: "Jumlah" },
+          { key: "harga", label: "Harga", currency: true },
+        ],
+        fields: [
+          { key: "pesananId", label: "Pesanan ID", type: "number", required: true, half: true },
+          { key: "produkId", label: "Produk ID", type: "number", required: true, half: true },
+          { key: "varianId", label: "Varian ID", type: "number", half: true },
+          { key: "jumlah", label: "Jumlah", type: "number", required: true, half: true },
+          { key: "harga", label: "Harga (Rp)", type: "number", required: true, half: true },
+        ],
+      },
+      {
+        key: "pembayaran",
+        label: "Pembayaran",
+        icon: "fa-credit-card",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "pesananId", label: "Pesanan ID" },
+          { key: "metode", label: "Metode", badge: true },
+          { key: "provider", label: "Provider" },
+          { key: "status", label: "Status", badge: true },
+          { key: "amount", label: "Amount", currency: true },
+          { key: "paidAt", label: "Dibayar", date: true },
+        ],
+        fields: [
+          { key: "status", label: "Status", type: "select", options: [
+            "MENUNGGU","BERHASIL","GAGAL","KADALUARSA","DIBATALKAN"
+          ], required: true, half: true },
+          { key: "vaNumber", label: "VA Number", half: true },
+          { key: "paidAt", label: "Paid At (ISO)", half: true, hint: "Format: 2024-01-01T00:00:00Z" },
+        ],
+        editOnly: true,
+      },
+      {
+        key: "pengembalian",
+        label: "Pengembalian",
+        icon: "fa-undo",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "pesananId", label: "Pesanan ID" },
+          { key: "jenis", label: "Jenis", badge: true },
+          { key: "alasan", label: "Alasan" },
+          { key: "status", label: "Status", badge: true },
+          { key: "dibuatPada", label: "Diajukan", date: true },
+        ],
+        fields: [
+          { key: "status", label: "Status", type: "select", options: [
+            "DIAJUKAN","DISETUJUI","DITOLAK","BARANG_DIKIRIM_BALIK","SELESAI"
+          ], required: true, half: true },
+          { key: "resiKembali", label: "Resi Kembali", half: true },
+          { key: "catatanAdmin", label: "Catatan Admin", type: "textarea" },
+        ],
+        editOnly: true,
+      },
+    ],
+  },
+  {
+    group: "🛒 Keranjang",
+    color: "#ef4444",
+    models: [
+      {
+        key: "keranjang",
+        label: "Keranjang",
+        icon: "fa-shopping-cart",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "penggunaId", label: "User ID" },
+          { key: "aktif", label: "Aktif", bool: true },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "penggunaId", label: "Pengguna ID", type: "number", required: true, half: true },
+          { key: "aktif", label: "Aktif", type: "checkbox", half: true },
+        ],
+      },
+      {
+        key: "itemKeranjang",
+        label: "Item Keranjang",
+        icon: "fa-shopping-basket",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "keranjangId", label: "Keranjang ID" },
+          { key: "produkId", label: "Produk ID" },
+          { key: "varianId", label: "Varian ID" },
+          { key: "jumlah", label: "Jumlah" },
+        ],
+        fields: [
+          { key: "keranjangId", label: "Keranjang ID", type: "number", required: true, half: true },
+          { key: "produkId", label: "Produk ID", type: "number", required: true, half: true },
+          { key: "varianId", label: "Varian ID", type: "number", half: true },
+          { key: "jumlah", label: "Jumlah", type: "number", required: true, half: true },
+        ],
+      },
+    ],
+  },
+  {
+    group: "⭐ Ulasan",
+    color: "#f59e0b",
+    models: [
+      {
+        key: "ulasan",
+        label: "Ulasan",
+        icon: "fa-star",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "produkId", label: "Produk ID" },
+          { key: "nama", label: "Nama" },
+          { key: "email", label: "Email" },
+          { key: "rating", label: "Rating" },
+          { key: "komentar", label: "Komentar" },
+          { key: "dibuatPada", label: "Dibuat", date: true },
+        ],
+        fields: [
+          { key: "produkId", label: "Produk ID", type: "number", required: true, half: true },
+          { key: "rating", label: "Rating (1-5)", type: "number", required: true, half: true },
+          { key: "nama", label: "Nama", half: true },
+          { key: "email", label: "Email", half: true },
+          { key: "komentar", label: "Komentar", type: "textarea" },
+        ],
+      },
+    ],
+  },
+  {
+    group: "🗺️ Wilayah",
+    color: "#6b7280",
+    models: [
+      {
+        key: "provinsi",
+        label: "Provinsi",
+        icon: "fa-map",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "nama", label: "Nama" },
+        ],
+        fields: [
+          { key: "id", label: "ID Provinsi", required: true, hint: "Contoh: 11", half: true },
+          { key: "nama", label: "Nama Provinsi", required: true, half: true },
+        ],
+      },
+      {
+        key: "kabupaten",
+        label: "Kabupaten",
+        icon: "fa-map-pin",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "nama", label: "Nama" },
+          { key: "provinsiId", label: "Provinsi ID" },
+        ],
+        fields: [
+          { key: "id", label: "ID Kabupaten", required: true, hint: "Contoh: 1101", half: true },
+          { key: "nama", label: "Nama Kabupaten", required: true, half: true },
+          { key: "provinsiId", label: "Provinsi ID", required: true },
+        ],
+      },
+      {
+        key: "kecamatan",
+        label: "Kecamatan",
+        icon: "fa-location-arrow",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "nama", label: "Nama" },
+          { key: "kabupatenId", label: "Kabupaten ID" },
+        ],
+        fields: [
+          { key: "id", label: "ID Kecamatan", required: true, hint: "Contoh: 1101010", half: true },
+          { key: "nama", label: "Nama Kecamatan", required: true, half: true },
+          { key: "kabupatenId", label: "Kabupaten ID", required: true },
+        ],
+      },
+      {
+        key: "kelurahan",
+        label: "Kelurahan",
+        icon: "fa-home",
+        columns: [
+          { key: "id", label: "ID" },
+          { key: "nama", label: "Nama" },
+          { key: "kecamatanId", label: "Kecamatan ID" },
+        ],
+        fields: [
+          { key: "id", label: "ID Kelurahan", required: true, hint: "Contoh: 1101010001", half: true },
+          { key: "nama", label: "Nama Kelurahan", required: true, half: true },
+          { key: "kecamatanId", label: "Kecamatan ID", required: true },
+        ],
+      },
+    ],
+  },
+];
+
+// Flatten all models
+const ALL_MODELS = {};
+MODEL_GROUPS.forEach(g => {
+  g.models.forEach(m => {
+    ALL_MODELS[m.key] = { ...m, groupColor: g.color };
+  });
+});
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           STATE                                          ║
+// ╚══════════════════════════════════════════════════════════╝
+let state = {
+  activeModel: null,
+  data: [],
+  total: 0,
+  page: 1,
+  limit: 20,
+  totalPages: 1,
+  search: "",
+  loading: false,
+  modelCounts: {},
+};
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           INIT                                           ║
+// ╚══════════════════════════════════════════════════════════╝
+document.addEventListener("DOMContentLoaded", () => {
+  renderNav();
+
+  // Check URL param
+  const params = new URLSearchParams(window.location.search);
+  const m = params.get("m");
+  if (m && ALL_MODELS[m]) {
+    selectModel(m);
+  }
+});
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           NAVIGATION                                     ║
+// ╚══════════════════════════════════════════════════════════╝
+function renderNav() {
+  const nav = document.getElementById("modelNav");
+  nav.innerHTML = "";
+
+  MODEL_GROUPS.forEach(group => {
+    const header = document.createElement("div");
+    header.className = "dm-sidebar-title";
+    header.textContent = group.group;
+    nav.appendChild(header);
+
+    group.models.forEach(model => {
+      const btn = document.createElement("button");
+      btn.className = "dm-nav-item";
+      btn.id = `nav_${model.key}`;
+      btn.onclick = () => selectModel(model.key);
+      btn.innerHTML = `
+        <span class="model-icon" style="background:${group.color}">
+          <i class="fas ${model.icon}"></i>
+        </span>
+        <span>${model.label}</span>
+        <span class="count-badge" id="cnt_${model.key}">—</span>
+      `;
+      nav.appendChild(btn);
+    });
+  });
+}
+
+function selectModel(key) {
+  if (state.activeModel === key) return;
+
+  // Update nav
+  document.querySelectorAll(".dm-nav-item").forEach(b => b.classList.remove("active"));
+  const navItem = document.getElementById(`nav_${key}`);
+  if (navItem) navItem.classList.add("active");
+
+  state.activeModel = key;
+  state.page = 1;
+  state.search = "";
+
+  // Update URL
+  const url = new URL(window.location.href);
+  url.searchParams.set("m", key);
+  window.history.replaceState({}, "", url.toString());
+
+  renderMain();
+  loadData();
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           RENDER MAIN                                    ║
+// ╚══════════════════════════════════════════════════════════╝
+function renderMain() {
+  const model = ALL_MODELS[state.activeModel];
+  if (!model) return;
+
+  const main = document.getElementById("dmMain");
+  main.innerHTML = `
+    <!-- Toolbar -->
+    <div class="dm-toolbar">
+      <span class="model-icon" style="background:${model.groupColor};border-radius:6px;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;">
+        <i class="fas ${model.icon}" style="font-size:11px;color:white;"></i>
+      </span>
+      <span class="dm-model-title">${model.label}</span>
+      <span class="dm-total-badge" id="totalBadge">...</span>
+      <div class="dm-spacer"></div>
+      <div class="dm-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Cari..." id="searchInput"
+               value="${state.search}"
+               oninput="debounceSearch(this.value)">
+      </div>
+      <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px;" onclick="loadData()">
+        <i class="fas fa-sync-alt"></i> Refresh
+      </button>
+      ${model.editOnly ? "" : `
+      <button class="btn btn-primary" style="font-size:11px;padding:5px 10px;" onclick="openCreateModal()">
+        <i class="fas fa-plus"></i> Tambah
+      </button>`}
+    </div>
+
+    ${model.readonlyNote ? `
+    <div class="dm-readonly-note">
+      <i class="fas fa-info-circle"></i> ${model.readonlyNote}
+    </div>` : ""}
+
+    <!-- Table Wrapper -->
+    <div class="dm-table-wrap" id="tableWrap">
+      <div class="dm-loading"><div class="dm-spinner"></div><p style="font-size:12px;color:var(--gray-400)">Memuat data...</p></div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="dm-pagination" id="paginationBar" style="display:none;"></div>
+  `;
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           LOAD DATA                                      ║
+// ╚══════════════════════════════════════════════════════════╝
+let _searchTimer = null;
+function debounceSearch(val) {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    state.search = val;
+    state.page = 1;
+    loadData();
+  }, 350);
+}
+
+async function loadData() {
+  if (!state.activeModel) return;
+  state.loading = true;
+
+  const wrap = document.getElementById("tableWrap");
+  if (wrap) wrap.innerHTML = `<div class="dm-loading"><div class="dm-spinner"></div><p style="font-size:12px;color:var(--gray-400)">Memuat data...</p></div>`;
+
+  try {
+    const params = new URLSearchParams({
+      page: state.page,
+      limit: state.limit,
+    });
+    if (state.search) params.set("search", state.search);
+
+    const res = await apiRequest(`/api/admin/data/${state.activeModel}?${params.toString()}`);
+
+    state.data = res.data || [];
+    state.total = res.total || 0;
+    state.totalPages = res.totalPages || 1;
+
+    renderTable();
+    renderPagination();
+
+    // Update badge
+    const badge = document.getElementById("totalBadge");
+    if (badge) badge.textContent = `${state.total} data`;
+
+    const cntEl = document.getElementById(`cnt_${state.activeModel}`);
+    if (cntEl) cntEl.textContent = state.total;
+
+  } catch (e) {
+    if (wrap) wrap.innerHTML = `<div class="dm-empty"><i class="fas fa-exclamation-triangle" style="color:var(--danger)"></i><p>${e.message || "Gagal memuat data"}</p></div>`;
+  } finally {
+    state.loading = false;
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           RENDER TABLE                                   ║
+// ╚══════════════════════════════════════════════════════════╝
+const STATUS_COLORS = {
+  BERHASIL: "#16a34a", SELESAI: "#16a34a", DISETUJUI: "#16a34a",
+  AKTIF: "#16a34a", DIKIRIM: "#3b82f6", DIPROSES: "#8b5cf6",
+  MENUNGGU: "#f59e0b", MENUNGGU_PEMBAYARAN: "#f59e0b", MENUNGGU_KONFIRMASI: "#f59e0b",
+  MENUNGGU_PEMBATALAN: "#f97316", DIAJUKAN: "#f59e0b",
+  GAGAL: "#ef4444", DIBATALKAN: "#ef4444", DITOLAK: "#ef4444",
+  KADALUARSA: "#6b7280", ADMIN: "#8b5cf6", USER: "#3b82f6",
+  LAKI_LAKI: "#3b82f6", PEREMPUAN: "#ec4899",
+  VA: "#6b7280", EWALLET: "#10b981", COD: "#f59e0b", ONLINE: "#8b5cf6",
+  REFUND: "#ef4444", TUKAR: "#f59e0b",
+  BARANG_DIKIRIM_BALIK: "#f97316",
+};
+
+function formatCellValue(col, row) {
+  const val = row[col.key];
+
+  if (val === null || val === undefined) {
+    return `<span class="null-val">—</span>`;
+  }
+
+  if (col.bool) {
+    return val
+      ? `<span class="bool-yes"><i class="fas fa-check-circle"></i> Ya</span>`
+      : `<span class="bool-no"><i class="fas fa-times-circle"></i> Tidak</span>`;
+  }
+
+  if (col.badge) {
+    const color = STATUS_COLORS[val] || "#6b7280";
+    return `<span class="status-badge" style="background:${color}20;color:${color}">${val}</span>`;
+  }
+
+  if (col.date) {
+    if (!val) return `<span class="null-val">—</span>`;
+    const d = new Date(val);
+    return `<span style="font-size:11px;color:var(--gray-500)">${d.toLocaleDateString("id-ID")} ${d.toLocaleTimeString("id-ID",{hour:'2-digit',minute:'2-digit'})}</span>`;
+  }
+
+  if (col.currency) {
+    return `<span style="font-family:monospace;font-size:11px;">Rp ${Number(val).toLocaleString("id-ID")}</span>`;
+  }
+
+  if (col.key === "id") {
+    return `<span class="id-cell">${val}</span>`;
+  }
+
+  const str = String(val);
+  return str.length > 50 ? str.slice(0, 50) + "…" : str;
+}
+
+function renderTable() {
+  const model = ALL_MODELS[state.activeModel];
+  const wrap = document.getElementById("tableWrap");
+  if (!wrap || !model) return;
+
+  if (state.data.length === 0) {
+    wrap.innerHTML = `<div class="dm-empty"><i class="fas fa-inbox"></i><p>Tidak ada data${state.search ? ` untuk "${state.search}"` : ""}</p></div>`;
+    return;
+  }
+
+  const isVarian = state.activeModel === "varianProduk";
+  const headers = model.columns.map(c => `<th>${c.label}</th>`).join("")
+    + (isVarian ? `<th>Atribut</th>` : "")
+    + `<th style="text-align:right">Aksi</th>`;
+
+  const rows = state.data.map((row) => {
+    const cells = model.columns.map(c => `<td>${formatCellValue(c, row)}</td>`).join("");
+    const rowId = row.id;
+
+    // Special "Lihat Atribut" column for varianProduk
+    const attrCell = isVarian
+      ? `<td><button class="btn btn-detail btn-xs" onclick="openVarianDetail(${JSON.stringify(row).replace(/"/g,'&quot;')})">
+           <i class="fas fa-sitemap"></i> Lihat Atribut
+         </button></td>`
+      : "";
+
+    const actions = `
+      <td class="actions">
+        <button class="btn btn-secondary btn-xs" onclick="openEditModal('${rowId}')" title="Edit">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDelete('${rowId}')" title="Hapus" style="margin-left:3px;">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>`;
+    return `<tr class="${isVarian ? 'vr-row-clickable' : ''}">${cells}${attrCell}${actions}</tr>`;
+  }).join("");
+
+  wrap.innerHTML = `
+    <table class="dm-table">
+      <thead><tr>${headers}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           PAGINATION                                     ║
+// ╚══════════════════════════════════════════════════════════╝
+function renderPagination() {
+  const bar = document.getElementById("paginationBar");
+  if (!bar) return;
+
+  if (state.totalPages <= 1) {
+    bar.style.display = "none";
+    return;
+  }
+
+  bar.style.display = "flex";
+
+  const from = (state.page - 1) * state.limit + 1;
+  const to = Math.min(state.page * state.limit, state.total);
+
+  // Page numbers to show
+  let pages = [];
+  const p = state.page, tp = state.totalPages;
+  if (tp <= 7) {
+    pages = Array.from({ length: tp }, (_, i) => i + 1);
+  } else {
+    pages = [1];
+    if (p > 3) pages.push("...");
+    for (let i = Math.max(2, p - 1); i <= Math.min(tp - 1, p + 1); i++) pages.push(i);
+    if (p < tp - 2) pages.push("...");
+    pages.push(tp);
+  }
+
+  bar.innerHTML = `
+    <span class="pg-info">${from}–${to} dari ${state.total}</span>
+    <div style="flex:1"></div>
+    <button class="pg-btn" onclick="goPage(${p-1})" ${p===1?"disabled":""}>
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    ${pages.map(pg => pg === "..."
+      ? `<span style="padding:3px 4px;font-size:11px;color:var(--gray-400)">…</span>`
+      : `<button class="pg-btn ${pg===p?"active":""}" onclick="goPage(${pg})">${pg}</button>`
+    ).join("")}
+    <button class="pg-btn" onclick="goPage(${p+1})" ${p===tp?"disabled":""}>
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <select style="padding:3px 6px;font-size:11px;border:1px solid var(--gray-300);border-radius:5px;margin-left:6px;"
+            onchange="changeLimit(this.value)">
+      ${[10,20,50,100].map(l => `<option value="${l}" ${l===state.limit?"selected":""}>${l}/halaman</option>`).join("")}
+    </select>
+  `;
+}
+
+function goPage(p) {
+  if (p < 1 || p > state.totalPages || p === state.page) return;
+  state.page = p;
+  loadData();
+}
+
+function changeLimit(val) {
+  state.limit = parseInt(val, 10);
+  state.page = 1;
+  loadData();
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           MODAL HELPERS                                  ║
+// ╚══════════════════════════════════════════════════════════╝
+function openModal(html) {
+  const container = document.getElementById("dmModalContainer");
+  container.innerHTML = `<div class="dm-modal-overlay" onclick="closeModalOnOverlay(event)">${html}</div>`;
+}
+
+function closeModal() {
+  document.getElementById("dmModalContainer").innerHTML = "";
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target.classList.contains("dm-modal-overlay")) closeModal();
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           FORM BUILDER                                   ║
+// ╚══════════════════════════════════════════════════════════╝
+function buildFormHTML(fields, existingData = {}) {
+  // Group half fields in pairs
+  let html = "";
+  let i = 0;
+
+  while (i < fields.length) {
+    const f = fields[i];
+
+    if (f.half && i + 1 < fields.length && fields[i + 1].half) {
+      // pair
+      html += `<div class="dm-form-grid">
+        ${buildFieldHTML(f, existingData)}
+        ${buildFieldHTML(fields[i + 1], existingData)}
+      </div>`;
+      i += 2;
+    } else {
+      html += buildFieldHTML(f, existingData);
+      i++;
+    }
+  }
+
+  return html;
+}
+
+function buildFieldHTML(f, data) {
+  const val = data[f.key] !== undefined ? data[f.key] : "";
+  const reqMark = f.required ? `<span class="req">*</span>` : "";
+  const hint = f.hint ? `<div class="field-hint">${f.hint}</div>` : "";
+
+  let input = "";
+
+  if (f.type === "select") {
+    const opts = f.options.map(o =>
+      `<option value="${o}" ${String(val) === String(o) ? "selected" : ""}>${o}</option>`
+    ).join("");
+    input = `<select id="f_${f.key}" name="${f.key}">${opts}</select>`;
+  } else if (f.type === "checkbox") {
+    const checked = val === true || val === "true" ? "checked" : "";
+    input = `<label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:12px;cursor:pointer;">
+      <input type="checkbox" id="f_${f.key}" name="${f.key}" ${checked} style="width:auto;"> Aktifkan
+    </label>`;
+  } else if (f.type === "textarea") {
+    input = `<textarea id="f_${f.key}" name="${f.key}" rows="3">${val}</textarea>`;
+  } else if (f.type === "password") {
+    input = `<input type="password" id="f_${f.key}" name="${f.key}" placeholder="••••••••" value="">`;
+  } else {
+    input = `<input type="${f.type || "text"}" id="f_${f.key}" name="${f.key}" 
+             value="${escHtml(String(val))}"
+             ${f.required ? "required" : ""}
+             placeholder="${f.hint || ""}">`;
+  }
+
+  return `<div class="dm-form-group">
+    <label for="f_${f.key}">${f.label}${reqMark}</label>
+    ${input}
+    ${hint}
+  </div>`;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function collectFormData(fields) {
+  const data = {};
+  for (const f of fields) {
+    const el = document.getElementById(`f_${f.key}`);
+    if (!el) continue;
+
+    if (f.type === "checkbox") {
+      data[f.key] = el.checked;
+    } else if (f.type === "number") {
+      const v = el.value.trim();
+      data[f.key] = v === "" ? null : Number(v);
+    } else if (f.type === "password") {
+      if (el.value) data[f.key] = el.value;
+    } else {
+      const v = el.value.trim();
+      data[f.key] = v === "" ? null : v;
+    }
+  }
+  return data;
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           CREATE MODAL                                   ║
+// ╚══════════════════════════════════════════════════════════╝
+function openCreateModal() {
+  const model = ALL_MODELS[state.activeModel];
+  if (!model) return;
+
+  openModal(`
+    <div class="dm-modal">
+      <div class="dm-modal-header">
+        <span class="model-icon" style="background:${model.groupColor};width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;">
+          <i class="fas ${model.icon}" style="font-size:11px;color:white;"></i>
+        </span>
+        <h3>Tambah ${model.label}</h3>
+        <button class="btn btn-secondary" style="padding:3px 8px;font-size:11px;" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="dm-modal-body">
+        ${buildFormHTML(model.fields)}
+      </div>
+      <div class="dm-modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="submitCreate()">
+          <i class="fas fa-save"></i> Simpan
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+async function submitCreate() {
+  const model = ALL_MODELS[state.activeModel];
+  const data = collectFormData(model.fields);
+
+  // Remove null values for non-nullable required fields
+  try {
+    await apiRequest(`/api/admin/data/${state.activeModel}`, {
+      method: "POST",
+      body: data,
+    });
+    closeModal();
+    toast("Data berhasil ditambahkan!", "success");
+    loadData();
+  } catch (e) {
+    toast(e.message || "Gagal menyimpan", "error");
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           EDIT MODAL                                     ║
+// ╚══════════════════════════════════════════════════════════╝
+async function openEditModal(id) {
+  const model = ALL_MODELS[state.activeModel];
+  if (!model) return;
+
+  // Find in current data or fetch
+  let row = state.data.find(d => String(d.id) === String(id));
+  if (!row) {
+    try {
+      row = await apiRequest(`/api/admin/data/${state.activeModel}/${id}`);
+    } catch (e) {
+      toast("Gagal memuat data", "error");
+      return;
+    }
+  }
+
+  openModal(`
+    <div class="dm-modal">
+      <div class="dm-modal-header">
+        <span class="model-icon" style="background:${model.groupColor};width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;">
+          <i class="fas ${model.icon}" style="font-size:11px;color:white;"></i>
+        </span>
+        <h3>Edit ${model.label} #${id}</h3>
+        <button class="btn btn-secondary" style="padding:3px 8px;font-size:11px;" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="dm-modal-body">
+        <input type="hidden" id="f_editId" value="${id}">
+        ${buildFormHTML(model.fields, row)}
+      </div>
+      <div class="dm-modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="submitEdit('${id}')">
+          <i class="fas fa-save"></i> Simpan Perubahan
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+async function submitEdit(id) {
+  const model = ALL_MODELS[state.activeModel];
+  const data = collectFormData(model.fields);
+
+  try {
+    await apiRequest(`/api/admin/data/${state.activeModel}/${id}`, {
+      method: "PUT",
+      body: data,
+    });
+    closeModal();
+    toast("Data berhasil diperbarui!", "success");
+    loadData();
+  } catch (e) {
+    toast(e.message || "Gagal menyimpan perubahan", "error");
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           DELETE                                         ║
+// ╚══════════════════════════════════════════════════════════╝
+function confirmDelete(id) {
+  const model = ALL_MODELS[state.activeModel];
+  const row = state.data.find(d => String(d.id) === String(id));
+  const desc = row ? Object.values(row).slice(0, 3).filter(v => v !== null && v !== undefined).join(" · ") : id;
+
+  openModal(`
+    <div class="dm-modal dm-confirm">
+      <div class="dm-modal-body" style="padding:28px 24px;">
+        <div class="icon-wrap">
+          <i class="fas fa-trash-alt"></i>
+        </div>
+        <h3>Hapus Data?</h3>
+        <p>Anda akan menghapus data dari <strong style="color:var(--dk-text)">${model.label}</strong>:</p>
+        <p style="font-family:monospace;background:var(--dk-surface2);border:1px solid var(--dk-border);padding:6px 10px;border-radius:5px;margin-top:6px;color:var(--dk-text2)">${escHtml(String(desc))}</p>
+        <p style="margin-top:8px;color:#f87171;font-size:11px;">
+          <i class="fas fa-exclamation-triangle"></i> Tindakan ini tidak bisa dibatalkan
+        </p>
+      </div>
+      <div class="dm-modal-footer" style="justify-content:center;gap:12px;">
+        <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        <button class="btn btn-danger" onclick="executeDelete('${id}')">
+          <i class="fas fa-trash"></i> Ya, Hapus
+        </button>
+      </div>
+    </div>
+  `);
+}
+
+async function executeDelete(id) {
+  try {
+    await apiRequest(`/api/admin/data/${state.activeModel}/${id}`, { method: "DELETE" });
+    closeModal();
+    toast("Data berhasil dihapus", "success");
+    if (state.data.length === 1 && state.page > 1) state.page--;
+    loadData();
+  } catch (e) {
+    toast(e.message || "Gagal menghapus data", "error");
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║      VARIAN PRODUK — DETAIL ATRIBUT DRILL-DOWN           ║
+// ╚══════════════════════════════════════════════════════════╝
+
+// Cache nilaiAtribut & atributProduk untuk label lookup
+let _nilaiCache = {};  // nilaiId → { nilai, atributId }
+let _attrCache  = {};  // atributId → nama
+
+async function warmCache() {
+  // Fetch all nilaiAtributProduk & atributProduk for label display
+  // Hanya fetch sekali dan simpan di cache
+  if (Object.keys(_nilaiCache).length > 0) return;
+  try {
+    const [nilaiRes, attrRes] = await Promise.all([
+      apiRequest("/api/admin/data/nilaiAtributProduk?limit=200"),
+      apiRequest("/api/admin/data/atributProduk?limit=200"),
+    ]);
+    (nilaiRes.data || []).forEach(v => { _nilaiCache[v.id] = v; });
+    (attrRes.data || []).forEach(a => { _attrCache[a.id] = a; });
+  } catch (_) { /* silent */ }
+}
+
+async function openVarianDetail(row) {
+  // Show modal skeleton immediately
+  openModal(`
+    <div class="dm-modal dm-modal-wide">
+      <div class="dm-modal-header">
+        <span style="background:#8b5cf6;width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;">
+          <i class="fas fa-sitemap" style="font-size:11px;color:white;"></i>
+        </span>
+        <h3>Detail Varian #${row.id} — Atribut</h3>
+        <button class="btn btn-secondary" style="padding:3px 8px;font-size:11px;" onclick="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="dm-modal-body" id="varianDetailBody">
+        <div class="dm-loading"><div class="dm-spinner"></div></div>
+      </div>
+      <div class="dm-modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+      </div>
+    </div>
+  `);
+
+  await warmCache();
+  await renderVarianDetailBody(row);
+}
+
+async function renderVarianDetailBody(row) {
+  const body = document.getElementById("varianDetailBody");
+  if (!body) return;
+
+  // Fetch varianProdukAtribut filtered by varianId
+  let attrRows = [];
+  try {
+    const res = await apiRequest(`/api/admin/data/varianProdukAtribut?limit=100&varianId=${row.id}`);
+    attrRows = res.data || [];
+  } catch (e) {
+    body.innerHTML = `<div class="vd-empty"><i class="fas fa-exclamation-triangle"></i> Gagal memuat: ${e.message}</div>`;
+    return;
+  }
+
+  // Info cards
+  const hargaFmt = row.harga != null ? "Rp " + Number(row.harga).toLocaleString("id-ID") : "—";
+  const infoHTML = `
+    <div class="vd-info-grid">
+      <div class="vd-info-card">
+        <div class="vd-label">Varian ID</div>
+        <div class="vd-value">#${row.id}</div>
+      </div>
+      <div class="vd-info-card">
+        <div class="vd-label">SKU</div>
+        <div class="vd-value" style="font-size:11px;word-break:break-all">${row.sku || "—"}</div>
+      </div>
+      <div class="vd-info-card">
+        <div class="vd-label">Stok</div>
+        <div class="vd-value">${row.stok ?? 0}</div>
+      </div>
+      <div class="vd-info-card">
+        <div class="vd-label">Harga</div>
+        <div class="vd-value" style="font-size:11px">${hargaFmt}</div>
+      </div>
+    </div>`;
+
+  // Attr table rows
+  let tableBody = "";
+  if (attrRows.length === 0) {
+    tableBody = `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--dk-text3);">
+      <i class="fas fa-unlink"></i> Tidak ada mapping atribut untuk varian ini
+    </td></tr>`;
+  } else {
+    tableBody = attrRows.map(a => {
+      const nilaiData = _nilaiCache[a.nilaiId];
+      const nilaiLabel = nilaiData ? nilaiData.nilai : `ID ${a.nilaiId}`;
+      const attrData = nilaiData ? _attrCache[nilaiData.atributId] : null;
+      const attrLabel = attrData ? attrData.nama : (nilaiData ? `Attr #${nilaiData.atributId}` : "—");
+
+      return `<tr>
+        <td class="mono">${a.id}</td>
+        <td class="mono">${a.varianId}</td>
+        <td class="mono">${a.nilaiId}</td>
+        <td>
+          <span class="attr-chip">
+            <i class="fas fa-tag"></i>
+            <span style="color:var(--dk-text3);margin-right:3px">${attrLabel}:</span>
+            <strong style="color:var(--dk-text)">${nilaiLabel}</strong>
+          </span>
+        </td>
+        <td style="text-align:right">
+          <button class="btn btn-danger btn-xs" onclick="confirmDeleteVarianAttr(${a.id}, ${row.id}, '${escHtml(String(row))}')">
+            <i class="fas fa-unlink"></i> Hapus
+          </button>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  const tableHTML = `
+    <div class="vd-section-title">
+      <span><i class="fas fa-project-diagram" style="margin-right:5px;color:var(--dk-text3)"></i>
+        Mapping Atribut (${attrRows.length} entri)
+      </span>
+    </div>
+    <div style="background:var(--dk-surface2);border:1px solid var(--dk-border);border-radius:7px;overflow:hidden;">
+      <table class="vd-attr-table">
+        <thead>
+          <tr>
+            <th>Map ID</th>
+            <th>Varian ID</th>
+            <th>Nilai ID</th>
+            <th>Label</th>
+            <th style="text-align:right">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>${tableBody}</tbody>
+      </table>
+    </div>`;
+
+  // Add mapping inline form
+  const addHTML = `
+    <div class="vd-add-row" style="margin-top:12px;">
+      <label>Tambah Nilai ID:</label>
+      <input type="number" id="vd_newNilaiId" placeholder="Masukkan Nilai Atribut ID" min="1">
+      <button class="btn btn-primary btn-xs" style="white-space:nowrap" onclick="submitAddVarianAttr(${row.id})">
+        <i class="fas fa-link"></i> Tambah Mapping
+      </button>
+    </div>
+    <p style="font-size:10px;color:var(--dk-text3);margin-top:5px;">
+      <i class="fas fa-info-circle"></i> Lihat tabel <strong style="color:var(--dk-text2)">Nilai Atribut</strong> di sidebar untuk menemukan ID yang tepat.
+    </p>`;
+
+  body.innerHTML = infoHTML + tableHTML + addHTML;
+
+  // Store row in closure for refresh
+  body.dataset.row = JSON.stringify(row);
+}
+
+function confirmDeleteVarianAttr(mapId, varianId, _) {
+  // Open nested confirm — but we need to keep outer modal
+  // Strategy: show confirm in a second overlay on top
+  const overlay = document.createElement("div");
+  overlay.id = "vdConfirmOverlay";
+  overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:16px`;
+  overlay.innerHTML = `
+    <div class="dm-modal dm-confirm" style="z-index:10000">
+      <div class="dm-modal-body" style="padding:28px 24px;">
+        <div class="icon-wrap">
+          <i class="fas fa-unlink"></i>
+        </div>
+        <h3>Hapus Mapping?</h3>
+        <p>Hapus mapping <strong style="color:var(--dk-text)">VarianProdukAtribut #${mapId}</strong>?</p>
+        <p style="margin-top:8px;color:#f87171;font-size:11px;">
+          <i class="fas fa-exclamation-triangle"></i> Varian akan kehilangan atribut ini
+        </p>
+      </div>
+      <div class="dm-modal-footer" style="justify-content:center;gap:12px;">
+        <button class="btn btn-secondary" onclick="document.getElementById('vdConfirmOverlay').remove()">Batal</button>
+        <button class="btn btn-danger" onclick="executeDeleteVarianAttr(${mapId}, ${varianId})">
+          <i class="fas fa-unlink"></i> Ya, Hapus
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+async function executeDeleteVarianAttr(mapId, varianId) {
+  const overlay = document.getElementById("vdConfirmOverlay");
+  if (overlay) overlay.remove();
+
+  try {
+    await apiRequest(`/api/admin/data/varianProdukAtribut/${mapId}`, { method: "DELETE" });
+    toast("Mapping berhasil dihapus", "success");
+
+    // Refresh detail body — get the varian row from dataset
+    const body = document.getElementById("varianDetailBody");
+    if (body && body.dataset.row) {
+      await renderVarianDetailBody(JSON.parse(body.dataset.row));
+    }
+    // Also refresh main list in background
+    loadData();
+  } catch (e) {
+    toast(e.message || "Gagal menghapus mapping", "error");
+  }
+}
+
+async function submitAddVarianAttr(varianId) {
+  const nilaiIdEl = document.getElementById("vd_newNilaiId");
+  const nilaiId = parseInt(nilaiIdEl?.value, 10);
+  if (!nilaiId || isNaN(nilaiId)) {
+    toast("Masukkan Nilai Atribut ID yang valid", "error");
+    return;
+  }
+
+  try {
+    await apiRequest("/api/admin/data/varianProdukAtribut", {
+      method: "POST",
+      body: { varianId: Number(varianId), nilaiId },
+    });
+    toast("Mapping berhasil ditambahkan!", "success");
+    nilaiIdEl.value = "";
+    // Invalidate cache so labels refresh
+    _nilaiCache = {};
+    _attrCache = {};
+    await warmCache();
+
+    // Refresh detail body
+    const body = document.getElementById("varianDetailBody");
+    if (body && body.dataset.row) {
+      await renderVarianDetailBody(JSON.parse(body.dataset.row));
+    }
+    loadData();
+  } catch (e) {
+    toast(e.message || "Gagal menambah mapping", "error");
+  }
+}
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║           TOAST                                          ║
+// ╚══════════════════════════════════════════════════════════╝
+function toast(msg, type = "info") {
+  const container = document.getElementById("dmToast");
+  const el = document.createElement("div");
+  el.className = `dm-toast-item ${type}`;
+  el.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i> ${msg}`;
+  container.appendChild(el);
+  setTimeout(() => {
+    el.style.opacity = "0";
+    el.style.transition = "opacity .3s";
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+</script>
+</body>
+</html>

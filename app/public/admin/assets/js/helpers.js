@@ -41,6 +41,53 @@ function formatDate(dateStr) {
   });
 }
 
+// Track apakah sidebar & header sudah selesai di-load
+let _sidebarReady = false;
+let _headerReady  = false;
+
+function setupSidebarToggle() {
+  // Hanya jalankan setelah KEDUANYA (sidebar + header) selesai di-load
+  if (!_sidebarReady || !_headerReady) return;
+
+  const sidebar            = document.getElementById("sidebar");
+  const mainContent        = document.querySelector(".main-content");
+  const menuToggle         = document.getElementById("menuToggle");         // buka sidebar (mobile) — di header
+  const sidebarToggle      = document.getElementById("sidebarToggle");      // tutup sidebar (mobile) — di sidebar
+  const sidebarCollapseBtn = document.getElementById("sidebarCollapseBtn"); // collapse desktop — di header
+
+  if (!sidebar) return;
+
+  // Mobile: buka sidebar
+  if (menuToggle) {
+    menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle("active");
+    });
+  }
+
+  // Mobile: tutup sidebar (tombol X)
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener("click", () => sidebar.classList.remove("active"));
+  }
+
+  // Desktop: collapse / expand sidebar
+  if (sidebarCollapseBtn) {
+    sidebarCollapseBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      if (mainContent) mainContent.classList.toggle("sidebar-collapsed");
+    });
+  }
+
+  // Klik di luar sidebar → tutup (mobile only)
+  document.addEventListener("click", (e) => {
+    if (window.innerWidth <= 768 && sidebar) {
+      const klikDiSidebar = sidebar.contains(e.target);
+      const klikDiMenu    = menuToggle && menuToggle.contains(e.target);
+      if (!klikDiSidebar && !klikDiMenu) sidebar.classList.remove("active");
+    }
+  });
+}
+
 function loadSidebar() {
   const container = document.getElementById("sidebar-container");
   if (!container) return;
@@ -49,11 +96,15 @@ function loadSidebar() {
     .then(res => res.text())
     .then(html => {
       container.innerHTML = html;
+
+      // Tandai active nav item
       const currentPage = window.location.pathname.split("/").pop().split(".")[0];
       container.querySelectorAll(".nav-item").forEach(item => {
         if (item.dataset.page === currentPage) item.classList.add("active");
       });
-      setupSidebarToggle();
+
+      _sidebarReady = true;
+      setupSidebarToggle(); // akan jalan hanya kalau header juga sudah siap
     })
     .catch(err => console.error("Failed to load sidebar:", err));
 }
@@ -66,17 +117,11 @@ function loadHeader() {
     .then(res => res.text())
     .then(html => {
       container.innerHTML = html;
-      setupSidebarToggle();
+
+      _headerReady = true;
+      setupSidebarToggle(); // akan jalan hanya kalau sidebar juga sudah siap
     })
     .catch(err => console.error("Failed to load header:", err));
-}
-
-function setupSidebarToggle() {
-  const toggleBtn = document.querySelector("#menuToggle, #sidebarToggle");
-  const sidebar = document.querySelector("#sidebar");
-  if (toggleBtn && sidebar) {
-    toggleBtn.addEventListener("click", () => sidebar.classList.toggle("collapsed"));
-  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
