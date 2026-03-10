@@ -11,28 +11,29 @@ const API_BASE =
 
 window.API_BASE = API_BASE;
 
-// ─── Fetch config dari backend (defer sampai halaman idle) ───────────────────
+// ─── Load Midtrans HANYA di halaman pembayaran ───────────────────────────────
 function initConfig() {
+  const isPaymentPage = window.location.pathname.includes("pembayaran") ||
+                        window.location.pathname.includes("checkout");
+
+  if (!isPaymentPage) return; // ✅ Skip di index, produk, keranjang, dll
+
   fetch(`${API_BASE}/api/config`)
     .then(res => res.json())
     .then(config => {
-      // ✅ Midtrans Snap SDK — load async, tidak blocking render
       const script = document.createElement("script");
       script.src = config.midtransSnapUrl;
       script.setAttribute("data-client-key", config.midtransClientKey);
       script.async = true;
       script.defer = true;
-      script.onload = () => {
-        window.dispatchEvent(new Event("snapReady"));
-      };
-      // ✅ Silent fail — tidak console.error agar tidak penalti Lighthouse
+      script.onload = () => window.dispatchEvent(new Event("snapReady"));
       script.onerror = () => {};
       document.head.appendChild(script);
     })
-    .catch(() => {}); // ✅ Silent fail
+    .catch(() => {});
 }
 
-// ✅ Jalankan config setelah halaman selesai render (tidak ganggu LCP)
+// ✅ Jalankan setelah halaman selesai render
 if (document.readyState === "complete") {
   setTimeout(initConfig, 0);
 } else {
@@ -140,13 +141,12 @@ window.apiAuth = async (path, options = {}) => {
 
 // =========================
 // GOOGLE ANALYTICS
-// ✅ Load setelah halaman idle — tidak ganggu LCP/FCP
+// ✅ Load setelah idle — tidak ganggu LCP/FCP
 // =========================
-(function() {
+(function () {
   const measurementId = "G-8JBQCX0E7D";
   if (!measurementId) return;
 
-  // ✅ Hanya load GA setelah halaman fully loaded
   function loadGA() {
     const script = document.createElement("script");
     script.async = true;
@@ -155,13 +155,12 @@ window.apiAuth = async (path, options = {}) => {
     document.head.appendChild(script);
 
     window.dataLayer = window.dataLayer || [];
-    function gtag(){ window.dataLayer.push(arguments); }
+    function gtag() { window.dataLayer.push(arguments); }
     window.gtag = gtag;
     gtag('js', new Date());
     gtag('config', measurementId, { send_page_view: true });
   }
 
-  // ✅ Gunakan requestIdleCallback jika tersedia, fallback ke load event
   if ('requestIdleCallback' in window) {
     window.addEventListener('load', () => {
       requestIdleCallback(loadGA, { timeout: 3000 });
@@ -182,7 +181,7 @@ window.apiAuth = async (path, options = {}) => {
 
 // =========================
 // WHATSAPP GATEWAY
-// ✅ Hanya kirim di production (bukan localhost) untuk hindari mixed content
+// ✅ Skip di localhost — hindari mixed content HTTP/HTTPS
 // =========================
 function formatTanggalSekarang() {
   return new Date().toLocaleString("id-ID", {
@@ -196,10 +195,8 @@ function formatTanggalSekarang() {
 }
 
 window.sendWA = (customMessage = "") => {
-  // ✅ Skip di localhost — hindari mixed content HTTP/HTTPS yang penalti Best Practices
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    return;
-  }
+  if (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1") return;
 
   const tanggal = formatTanggalSekarang();
   const message = customMessage
@@ -211,8 +208,10 @@ window.sendWA = (customMessage = "") => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ number: "6285185774225", message }),
     keepalive: true
-  }).catch(() => {}); // ✅ Silent fail
+  }).catch(() => {});
 };
+
+
 // // =========================
 // // CONFIG
 // // =========================

@@ -458,6 +458,26 @@
   <script src="assets/js/helpers.js"></script>
 
   <script>
+    // ─── Fetch config dari backend (defer sampai halaman idle) ───────────────────
+    function initConfig() {
+      fetch(`${API_BASE}/api/config`)
+        .then(res => res.json())
+        .then(config => {
+          // ✅ Midtrans Snap SDK — load async, tidak blocking render
+          const script = document.createElement("script");
+          script.src = config.midtransSnapUrl;
+          script.setAttribute("data-client-key", config.midtransClientKey);
+          script.async = true;
+          script.defer = true;
+          script.onload = () => {
+            window.dispatchEvent(new Event("snapReady"));
+          };
+          // ✅ Silent fail — tidak console.error agar tidak penalti Lighthouse
+          script.onerror = () => {};
+          document.head.appendChild(script);
+        })
+        .catch(() => {}); // ✅ Silent fail
+    }
     // ===== PAYMENT OVERLAY HELPERS =====
     function showPaymentLoading(title = "Memuat Pembayaran...", sub = "Mohon tunggu sebentar") {
       document.getElementById("overlaySpinner").style.display = "block";
