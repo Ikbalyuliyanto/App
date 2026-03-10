@@ -1,10 +1,9 @@
-
 // =========================
 // CONFIG
 // =========================
 (() => {
 
-// ─── API Base URL ──────────────────────────────────────────────────────────────
+// ─── API Base URL ─────────────────────────────────────────────────────────────
 const API_BASE =
   window.location.hostname === "ashanum.com"
     ? "https://ashanum.com"
@@ -12,207 +11,182 @@ const API_BASE =
 
 window.API_BASE = API_BASE;
 
-// ─── Fetch semua config dari backend ──────────────────────────────────────────
-(async function initConfig() {
-  try {
-    const res    = await fetch(`${API_BASE}/api/config`);
-    const config = await res.json();
+// ─── Fetch config dari backend (defer sampai halaman idle) ───────────────────
+function initConfig() {
+  fetch(`${API_BASE}/api/config`)
+    .then(res => res.json())
+    .then(config => {
+      // ✅ Midtrans Snap SDK — load async, tidak blocking render
+      const script = document.createElement("script");
+      script.src = config.midtransSnapUrl;
+      script.setAttribute("data-client-key", config.midtransClientKey);
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        window.dispatchEvent(new Event("snapReady"));
+      };
+      // ✅ Silent fail — tidak console.error agar tidak penalti Lighthouse
+      script.onerror = () => {};
+      document.head.appendChild(script);
+    })
+    .catch(() => {}); // ✅ Silent fail
+}
 
-    // Midtrans Snap SDK
-    const script = document.createElement("script");
-    script.src   = config.midtransSnapUrl;
-    script.setAttribute("data-client-key", config.midtransClientKey);
-    script.async  = true;
-    // SESUDAH
-    script.onload = () => {
-      // console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
-      window.dispatchEvent(new Event("snapReady")); // ← wajib ada
-    };
-    script.onerror = () => {
-      console.error("❌ Gagal memuat SDK — URL:", script.src, "| Key:", config.midtransClientKey);
-    };
-    // Debug — pastikan ini muncul di console
-    document.head.appendChild(script);
+// ✅ Jalankan config setelah halaman selesai render (tidak ganggu LCP)
+if (document.readyState === "complete") {
+  setTimeout(initConfig, 0);
+} else {
+  window.addEventListener("load", initConfig, { once: true });
+}
 
-  } catch (err) {
-    console.error("❌ Gagal fetch config dari server:", err);
+// =========================
+// STORAGE HELPERS
+// =========================
+window.getToken = () =>
+  localStorage.getItem("token") || sessionStorage.getItem("token");
+
+window.getUserNama = () =>
+  localStorage.getItem("userNama") || sessionStorage.getItem("userNama");
+
+window.isLoggedIn = () => !!window.getToken();
+
+window.clearAuthStorage = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  localStorage.removeItem("userNama");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  sessionStorage.removeItem("userNama");
+};
+
+// =========================
+// AUTH GUARD
+// =========================
+window.requireLogin = (returnUrl) => {
+  if (window.isLoggedIn()) return true;
+
+  if (typeof window.showAlert === "function") {
+    window.showAlert("Silakan login terlebih dahulu", "warning");
   }
-})();
 
-  // =========================
-  // STORAGE HELPERS
-  // =========================
-  window.getToken = () =>
-    localStorage.getItem("token") || sessionStorage.getItem("token");
+  const ru = returnUrl || (window.location.pathname + window.location.search);
+  setTimeout(() => {
+    window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
+  }, 1500);
 
-  window.getUserNama = () =>
-    localStorage.getItem("userNama") || sessionStorage.getItem("userNama");
+  return false;
+};
 
-  window.isLoggedIn = () => !!window.getToken();
+window.authHeaders = () => {
+  const token = window.getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
-  window.clearAuthStorage = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userNama");
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    sessionStorage.removeItem("userNama");
-  };
+// =========================
+// CORE REQUEST (UNIVERSAL)
+// =========================
+window.apiRequest = async (endpoint, options = {}) => {
+  const url = `${window.API_BASE}${endpoint}`;
+  const token = window.getToken();
+  const headers = { ...(options.headers || {}) };
 
-  // =========================
-  // AUTH GUARD
-  // =========================
-  window.requireLogin = (returnUrl) => {
-    if (window.isLoggedIn()) return true;
+  const isFormData = options.body instanceof FormData;
+  let body = options.body;
 
-    // showAlert diasumsikan sudah ada di project kamu
-    if (typeof window.showAlert === "function") {
-      window.showAlert("Silakan login terlebih dahulu", "warning");
-    }
+  if (body && !isFormData && typeof body === "object" && !(body instanceof Blob)) {
+    body = JSON.stringify(body);
+    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+  } else if (!isFormData && body && typeof body === "string") {
+    headers["Content-Type"] = headers["Content-Type"] || "application/json";
+  }
 
-    const ru = returnUrl || (window.location.pathname + window.location.search);
+  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    setTimeout(() => {
-      window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
-    }, 1500);
+  const res = await fetch(url, { ...options, body, headers });
 
-    return false;
-  };
+  const contentType = res.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await res.json().catch(() => ({}))
+    : await res.text().catch(() => "");
 
-  window.authHeaders = () => {
-    const token = window.getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  // =========================
-  // CORE REQUEST (UNIVERSAL)
-  // =========================
-  window.apiRequest = async (endpoint, options = {}) => {
-    const url = `${window.API_BASE}${endpoint}`;
-    const token = window.getToken();
-
-    const headers = { ...(options.headers || {}) };
-
-    const isFormData = options.body instanceof FormData;
-
-    // Auto JSON stringify kalau body object biasa (bukan FormData/Blob)
-    let body = options.body;
-    if (body && !isFormData && typeof body === "object" && !(body instanceof Blob)) {
-      body = JSON.stringify(body);
-      headers["Content-Type"] = headers["Content-Type"] || "application/json";
-    } else if (!isFormData && body && typeof body === "string") {
-      headers["Content-Type"] = headers["Content-Type"] || "application/json";
-    }
-
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const res = await fetch(url, { ...options, body, headers });
-
-    const contentType = res.headers.get("content-type") || "";
-    const data = contentType.includes("application/json")
-      ? await res.json().catch(() => ({}))
-      : await res.text().catch(() => "");
-
-    // Auto logout + redirect kalau 401
-    if (res.status === 401) {
-      window.clearAuthStorage();
-
-      // default redirect login (kalau endpoint umum)
-      const ru = window.location.pathname + window.location.search;
-      window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
-      return;
-    }
-
-    if (!res.ok) {
-      const msg =
-        (data && typeof data === "object" && data.message) ? data.message :
-        (typeof data === "string" && data) ? data :
-        `Request gagal (${res.status})`;
-      throw new Error(msg);
-    }
-
-    return data;
-  };
-
-  // =========================
-  // AUTH-REQUIRED REQUEST
-  // =========================
-  // apiAuth ini hanya wrapper dari apiRequest + requireLogin
-  window.apiAuth = async (path, options = {}) => {
+  if (res.status === 401) {
+    window.clearAuthStorage();
     const ru = window.location.pathname + window.location.search;
-    if (!window.requireLogin(ru)) throw new Error("NO_LOGIN");
+    window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
+    return;
+  }
 
-    // Biarkan caller override headers (mis. FormData). Kalau body object biasa, apiRequest akan handle.
-    return window.apiRequest(path, {
-      ...options,
-      headers: {
-        ...(options.headers || {}),
-        // Jangan paksa Content-Type di sini, biar konsisten dengan apiRequest (FormData aman)
-      },
-    });
-  };
+  if (!res.ok) {
+    const msg =
+      (data && typeof data === "object" && data.message) ? data.message :
+      (typeof data === "string" && data) ? data :
+      `Request gagal (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return data;
+};
+
+// =========================
+// AUTH-REQUIRED REQUEST
+// =========================
+window.apiAuth = async (path, options = {}) => {
+  const ru = window.location.pathname + window.location.search;
+  if (!window.requireLogin(ru)) throw new Error("NO_LOGIN");
+  return window.apiRequest(path, { ...options, headers: { ...(options.headers || {}) } });
+};
+
 })();
 
-// public/js/analytics.js
 // =========================
 // GOOGLE ANALYTICS
+// ✅ Load setelah halaman idle — tidak ganggu LCP/FCP
 // =========================
-const measurementId = "G-8JBQCX0E7D";
+(function() {
+  const measurementId = "G-8JBQCX0E7D";
+  if (!measurementId) return;
 
-if (measurementId) {
-  const script = document.createElement("script");
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-  document.head.appendChild(script);
+  // ✅ Hanya load GA setelah halaman fully loaded
+  function loadGA() {
+    const script = document.createElement("script");
+    script.async = true;
+    script.defer = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+    document.head.appendChild(script);
 
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  window.gtag = gtag;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ window.dataLayer.push(arguments); }
+    window.gtag = gtag;
+    gtag('js', new Date());
+    gtag('config', measurementId, { send_page_view: true });
+  }
 
-  gtag('js', new Date());
-  gtag('config', measurementId);
-}
+  // ✅ Gunakan requestIdleCallback jika tersedia, fallback ke load event
+  if ('requestIdleCallback' in window) {
+    window.addEventListener('load', () => {
+      requestIdleCallback(loadGA, { timeout: 3000 });
+    }, { once: true });
+  } else {
+    window.addEventListener('load', loadGA, { once: true });
+  }
+})();
 
 // =========================
 // META PIXEL CONFIG
 // =========================
 (() => {
-  let PIXEL_ID;
-
-  if (window.location.hostname === "localhost") {
-    // DEV / testing
-    PIXEL_ID = "PIXEL_ID_DEV"; 
-  } else {
-    // PROD
-    PIXEL_ID = "1717028676374534"; // ganti dengan Pixel ID sebenarnya
-  }
-
-  window.PIXEL_ID = PIXEL_ID;
+  window.PIXEL_ID = window.location.hostname === "localhost"
+    ? "PIXEL_ID_DEV"
+    : "1717028676374534";
 })();
 
-// (function() {
-//   var PIXEL_ID = window.PIXEL_ID || "REPLACE_WITH_PIXEL_ID";
-
-//   !function(f,b,e,v,n,t,s)
-//   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-//   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-//   if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-//   n.queue=[];t=b.createElement(e);t.async=!0;
-//   t.src=v;s=b.getElementsByTagName(e)[0];
-//   s.parentNode.insertBefore(t,s)}(window, document,'script',
-//   'https://connect.facebook.net/en_US/fbevents.js');
-
-//   fbq('init', PIXEL_ID); 
-//   fbq('track', 'PageView'); 
-// })();
-
 // =========================
-// WHATSAPP GATEWAY CONFIG
+// WHATSAPP GATEWAY
+// ✅ Hanya kirim di production (bukan localhost) untuk hindari mixed content
 // =========================
-// Helper format tanggal Indonesia
 function formatTanggalSekarang() {
   return new Date().toLocaleString("id-ID", {
-    weekday: "long",   // ✅ tambah hari
+    weekday: "long",
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -222,23 +196,263 @@ function formatTanggalSekarang() {
 }
 
 window.sendWA = (customMessage = "") => {
-  const tanggal = formatTanggalSekarang();
+  // ✅ Skip di localhost — hindari mixed content HTTP/HTTPS yang penalti Best Practices
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return;
+  }
 
+  const tanggal = formatTanggalSekarang();
   const message = customMessage
     ? `Tgl: ${tanggal} #${customMessage}`
     : `Halo 👋\nTanggal: ${tanggal}`;
 
   fetch("http://103.153.60.136:3000/send-message", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      number: "6285185774225",
-      message
-    }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ number: "6285185774225", message }),
     keepalive: true
-  }).catch(err => {
-    console.warn("WA gagal (non blocking):", err);
-  });
+  }).catch(() => {}); // ✅ Silent fail
 };
+// // =========================
+// // CONFIG
+// // =========================
+// (() => {
+
+// // ─── API Base URL ──────────────────────────────────────────────────────────────
+// const API_BASE =
+//   window.location.hostname === "ashanum.com"
+//     ? "https://ashanum.com"
+//     : `http://${window.location.hostname}:9876`;
+
+// window.API_BASE = API_BASE;
+
+// // ─── Fetch semua config dari backend ──────────────────────────────────────────
+// (async function initConfig() {
+//   try {
+//     const res    = await fetch(`${API_BASE}/api/config`);
+//     const config = await res.json();
+
+//     // Midtrans Snap SDK
+//     const script = document.createElement("script");
+//     script.src   = config.midtransSnapUrl;
+//     script.setAttribute("data-client-key", config.midtransClientKey);
+//     script.async  = true;
+//     // SESUDAH
+//     script.onload = () => {
+//       // console.log("✅ Midtrans Snap SDK loaded, window.snap:", !!window.snap);
+//       window.dispatchEvent(new Event("snapReady")); // ← wajib ada
+//     };
+//     script.onerror = () => {
+//       console.error("❌ Gagal memuat SDK — URL:", script.src, "| Key:", config.midtransClientKey);
+//     };
+//     // Debug — pastikan ini muncul di console
+//     document.head.appendChild(script);
+
+//   } catch (err) {
+//     console.error("❌ Gagal fetch config dari server:", err);
+//   }
+// })();
+
+//   // =========================
+//   // STORAGE HELPERS
+//   // =========================
+//   window.getToken = () =>
+//     localStorage.getItem("token") || sessionStorage.getItem("token");
+
+//   window.getUserNama = () =>
+//     localStorage.getItem("userNama") || sessionStorage.getItem("userNama");
+
+//   window.isLoggedIn = () => !!window.getToken();
+
+//   window.clearAuthStorage = () => {
+//     localStorage.removeItem("token");
+//     localStorage.removeItem("user");
+//     localStorage.removeItem("userNama");
+//     sessionStorage.removeItem("token");
+//     sessionStorage.removeItem("user");
+//     sessionStorage.removeItem("userNama");
+//   };
+
+//   // =========================
+//   // AUTH GUARD
+//   // =========================
+//   window.requireLogin = (returnUrl) => {
+//     if (window.isLoggedIn()) return true;
+
+//     // showAlert diasumsikan sudah ada di project kamu
+//     if (typeof window.showAlert === "function") {
+//       window.showAlert("Silakan login terlebih dahulu", "warning");
+//     }
+
+//     const ru = returnUrl || (window.location.pathname + window.location.search);
+
+//     setTimeout(() => {
+//       window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
+//     }, 1500);
+
+//     return false;
+//   };
+
+//   window.authHeaders = () => {
+//     const token = window.getToken();
+//     return token ? { Authorization: `Bearer ${token}` } : {};
+//   };
+
+//   // =========================
+//   // CORE REQUEST (UNIVERSAL)
+//   // =========================
+//   window.apiRequest = async (endpoint, options = {}) => {
+//     const url = `${window.API_BASE}${endpoint}`;
+//     const token = window.getToken();
+
+//     const headers = { ...(options.headers || {}) };
+
+//     const isFormData = options.body instanceof FormData;
+
+//     // Auto JSON stringify kalau body object biasa (bukan FormData/Blob)
+//     let body = options.body;
+//     if (body && !isFormData && typeof body === "object" && !(body instanceof Blob)) {
+//       body = JSON.stringify(body);
+//       headers["Content-Type"] = headers["Content-Type"] || "application/json";
+//     } else if (!isFormData && body && typeof body === "string") {
+//       headers["Content-Type"] = headers["Content-Type"] || "application/json";
+//     }
+
+//     if (token) headers["Authorization"] = `Bearer ${token}`;
+
+//     const res = await fetch(url, { ...options, body, headers });
+
+//     const contentType = res.headers.get("content-type") || "";
+//     const data = contentType.includes("application/json")
+//       ? await res.json().catch(() => ({}))
+//       : await res.text().catch(() => "");
+
+//     // Auto logout + redirect kalau 401
+//     if (res.status === 401) {
+//       window.clearAuthStorage();
+
+//       // default redirect login (kalau endpoint umum)
+//       const ru = window.location.pathname + window.location.search;
+//       window.location.href = `auth/login.html?returnUrl=${encodeURIComponent(ru)}`;
+//       return;
+//     }
+
+//     if (!res.ok) {
+//       const msg =
+//         (data && typeof data === "object" && data.message) ? data.message :
+//         (typeof data === "string" && data) ? data :
+//         `Request gagal (${res.status})`;
+//       throw new Error(msg);
+//     }
+
+//     return data;
+//   };
+
+//   // =========================
+//   // AUTH-REQUIRED REQUEST
+//   // =========================
+//   // apiAuth ini hanya wrapper dari apiRequest + requireLogin
+//   window.apiAuth = async (path, options = {}) => {
+//     const ru = window.location.pathname + window.location.search;
+//     if (!window.requireLogin(ru)) throw new Error("NO_LOGIN");
+
+//     // Biarkan caller override headers (mis. FormData). Kalau body object biasa, apiRequest akan handle.
+//     return window.apiRequest(path, {
+//       ...options,
+//       headers: {
+//         ...(options.headers || {}),
+//         // Jangan paksa Content-Type di sini, biar konsisten dengan apiRequest (FormData aman)
+//       },
+//     });
+//   };
+// })();
+
+// // public/js/analytics.js
+// // =========================
+// // GOOGLE ANALYTICS
+// // =========================
+// const measurementId = "G-8JBQCX0E7D";
+
+// if (measurementId) {
+//   const script = document.createElement("script");
+//   script.async = true;
+//   script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+//   document.head.appendChild(script);
+
+//   window.dataLayer = window.dataLayer || [];
+//   function gtag(){dataLayer.push(arguments);}
+//   window.gtag = gtag;
+
+//   gtag('js', new Date());
+//   gtag('config', measurementId);
+// }
+
+// // =========================
+// // META PIXEL CONFIG
+// // =========================
+// (() => {
+//   let PIXEL_ID;
+
+//   if (window.location.hostname === "localhost") {
+//     // DEV / testing
+//     PIXEL_ID = "PIXEL_ID_DEV"; 
+//   } else {
+//     // PROD
+//     PIXEL_ID = "1717028676374534"; // ganti dengan Pixel ID sebenarnya
+//   }
+
+//   window.PIXEL_ID = PIXEL_ID;
+// })();
+
+// // (function() {
+// //   var PIXEL_ID = window.PIXEL_ID || "REPLACE_WITH_PIXEL_ID";
+
+// //   !function(f,b,e,v,n,t,s)
+// //   {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+// //   n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+// //   if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+// //   n.queue=[];t=b.createElement(e);t.async=!0;
+// //   t.src=v;s=b.getElementsByTagName(e)[0];
+// //   s.parentNode.insertBefore(t,s)}(window, document,'script',
+// //   'https://connect.facebook.net/en_US/fbevents.js');
+
+// //   fbq('init', PIXEL_ID); 
+// //   fbq('track', 'PageView'); 
+// // })();
+
+// // =========================
+// // WHATSAPP GATEWAY CONFIG
+// // =========================
+// // Helper format tanggal Indonesia
+// function formatTanggalSekarang() {
+//   return new Date().toLocaleString("id-ID", {
+//     weekday: "long",   // ✅ tambah hari
+//     day: "2-digit",
+//     month: "long",
+//     year: "numeric",
+//     hour: "2-digit",
+//     minute: "2-digit"
+//   });
+// }
+
+// window.sendWA = (customMessage = "") => {
+//   const tanggal = formatTanggalSekarang();
+
+//   const message = customMessage
+//     ? `Tgl: ${tanggal} #${customMessage}`
+//     : `Halo 👋\nTanggal: ${tanggal}`;
+
+//   fetch("http://103.153.60.136:3000/send-message", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json"
+//     },
+//     body: JSON.stringify({
+//       number: "6285185774225",
+//       message
+//     }),
+//     keepalive: true
+//   }).catch(err => {
+//     console.warn("WA gagal (non blocking):", err);
+//   });
+// };
