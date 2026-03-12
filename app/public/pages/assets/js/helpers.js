@@ -193,39 +193,53 @@
         `;
       }
     }
-
-    // ===== CART BADGE =====
+// ===== CART BADGE =====
     async function loadCartBadge() {
-      const token = getToken();
-      const badge = document.getElementById('keranjangBadge');
-      
-      if (!token) {
-        badge.style.display = 'none';
-        return;
-      }
+        const token = getToken();
+        const badge = document.getElementById('keranjangBadge');      
+        const footerBadge = document.getElementById("keranjangBadgeFooter"); // badge di footer
 
-      try {
-        const res = await fetch(`${API_BASE}/api/keranjang`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const itemCount = data.item?.length || 0;
-          
-          if (itemCount > 0) {
-            badge.textContent = itemCount > 99 ? '99+' : itemCount;
-            badge.style.display = 'block';
-          } else {
-            badge.style.display = 'none';
-          }
-        } else {
-          badge.style.display = 'none';
+        // Jika tidak ada token / user belum login
+        if (!token) {
+            if (badge) badge.style.display = 'none';
+            if (footerBadge) footerBadge.style.display = 'none';
+            return;
         }
-      } catch (err) {
-        console.error('Error loading cart badge:', err);
-        badge.style.display = 'none';
-      }
+
+        try {
+            const res = await fetch(`${API_BASE}/api/keranjang`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const itemCount = data.item?.length || 0;
+
+                if (itemCount > 0) {
+                    const displayCount = itemCount > 99 ? '99+' : itemCount;
+
+                    if (badge) {
+                        badge.textContent = displayCount;
+                        badge.style.display = 'block';
+                    }
+
+                    if (footerBadge) {
+                        footerBadge.textContent = displayCount;
+                        footerBadge.style.display = 'block';
+                    }
+                } else {
+                    if (badge) badge.style.display = 'none';
+                    if (footerBadge) footerBadge.style.display = 'none';
+                }
+            } else {
+                if (badge) badge.style.display = 'none';
+                if (footerBadge) footerBadge.style.display = 'none';
+            }
+        } catch (err) {
+            console.error('Error loading cart badge:', err);
+            if (badge) badge.style.display = 'none';
+            if (footerBadge) footerBadge.style.display = 'none';
+        }
     }
 
     // ===== CART DROPDOWN =====

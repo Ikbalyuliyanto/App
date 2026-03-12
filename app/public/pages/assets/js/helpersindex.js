@@ -189,49 +189,54 @@ function initHeaderComponent() {
       `;
     }
   }
+    // ===== CART BADGE =====
+    async function loadCartBadge() {
+        const token = getToken();
+        const badge = document.getElementById('keranjangBadge');      
+        const footerBadge = document.getElementById("keranjangBadgeFooter"); // badge di footer
 
-  // ===== CART BADGE =====
-  async function loadCartBadge() {
-    const token = getToken();
-    const badge = document.getElementById('keranjangBadge');
-    if (!badge) return; // ✅ Guard: element belum ada
-
-    if (!token) {
-      badge.style.display = 'none';
-      return; // ✅ Jangan fetch kalau tidak ada token
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/keranjang`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      // ✅ Handle 401: token expired/invalid — hapus token, jangan tampilkan error
-      if (res.status === 401) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        badge.style.display = 'none';
-        renderUserDropdown(); // update tampilan user jadi guest
-        return;
-      }
-
-      if (res.ok) {
-        const data = await res.json();
-        const itemCount = data.item?.length || 0;
-        if (itemCount > 0) {
-          badge.textContent = itemCount > 99 ? '99+' : itemCount;
-          badge.style.display = 'block';
-        } else {
-          badge.style.display = 'none';
+        // Jika tidak ada token / user belum login
+        if (!token) {
+            if (badge) badge.style.display = 'none';
+            if (footerBadge) footerBadge.style.display = 'none';
+            return;
         }
-      } else {
-        badge.style.display = 'none';
-      }
-    } catch {
-      // ✅ Silent fail — jangan console.error agar tidak penalti Lighthouse
-      badge.style.display = 'none';
+
+        try {
+            const res = await fetch(`${API_BASE}/api/keranjang`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                const itemCount = data.item?.length || 0;
+
+                if (itemCount > 0) {
+                    const displayCount = itemCount > 99 ? '99+' : itemCount;
+
+                    if (badge) {
+                        badge.textContent = displayCount;
+                        badge.style.display = 'block';
+                    }
+
+                    if (footerBadge) {
+                        footerBadge.textContent = displayCount;
+                        footerBadge.style.display = 'block';
+                    }
+                } else {
+                    if (badge) badge.style.display = 'none';
+                    if (footerBadge) footerBadge.style.display = 'none';
+                }
+            } else {
+                if (badge) badge.style.display = 'none';
+                if (footerBadge) footerBadge.style.display = 'none';
+            }
+        } catch (err) {
+            console.error('Error loading cart badge:', err);
+            if (badge) badge.style.display = 'none';
+            if (footerBadge) footerBadge.style.display = 'none';
+        }
     }
-  }
 
   // ===== CART DROPDOWN =====
   async function loadCartDropdown() {

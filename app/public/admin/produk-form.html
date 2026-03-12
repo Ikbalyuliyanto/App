@@ -308,7 +308,11 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="urlproduk" class="required">URL Produk</label>
-                                    <input type="text" id="urlproduk" required placeholder="Contoh: samsung-galaxy-s23-ultra">
+                                    <input type="text" id="urlproduk" required placeholder="Contoh: samsung-galaxy-s23-ultra">                                    
+                                    <button type="button"
+                                        onclick="window.open(document.getElementById('urlproduk').value, '_blank')">
+                                        Buka
+                                    </button>
                                 </div>
                             </div>
                         </div>
